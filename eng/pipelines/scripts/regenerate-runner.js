@@ -18,7 +18,7 @@ const skipBuild = getArg("--skipBuild", "false").toLowerCase() === "true";
 const emitterVersion = getArg("--emitterVersion", "");
 const directoryListFile = getArg("--directoryList", "");
 const resultOutputDir = getArg("--resultOutputDir", "");
-const regenTimeoutMs = Number(getArg("--regenTimeoutMs", String(10 * 60 * 1000)));
+const regenTimeoutMs = Number(getArg("--regenTimeoutMs", String(25 * 60 * 1000)));
 
 // Per-package timeout overrides (in ms) for known monster packages whose
 // tsp compile / emit takes much longer than the global default.
@@ -26,6 +26,16 @@ const PACKAGE_TIMEOUT_OVERRIDES = {
   "sdk/datafactory/arm-datafactory": 60 * 60 * 1000,
   "sdk/network/arm-network": 60 * 60 * 1000,
   "sdk/appservice/arm-appservice": 60 * 60 * 1000,
+  "sdk/apimanagement/arm-apimanagement": 45 * 60 * 1000,
+  "sdk/sql/arm-sql": 45 * 60 * 1000,
+  "sdk/containerservice/arm-containerservice": 45 * 60 * 1000,
+  "sdk/cosmosdb/arm-cosmosdb": 45 * 60 * 1000,
+  "sdk/machinelearning/arm-machinelearning": 45 * 60 * 1000,
+  "sdk/securityinsight/arm-securityinsight": 45 * 60 * 1000,
+  "sdk/recoveryservicessiterecovery/arm-recoveryservices-siterecovery": 45 * 60 * 1000,
+  "sdk/appcontainers/arm-appcontainers": 40 * 60 * 1000,
+  "sdk/cdn/arm-cdn": 40 * 60 * 1000,
+  "sdk/datamigration/arm-datamigration": 40 * 60 * 1000,
   "sdk/compute/arm-compute": 45 * 60 * 1000,
   "sdk/storage/arm-storage": 45 * 60 * 1000,
 };
@@ -248,51 +258,53 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
     let earlyExitTimer = null;
     const proc = spawn(cmd, args, { cwd, shell: true });
 
-    const timer = setTimeout(() => {
+    let timer = setTimeout(() => {
       killedByTimeout = true;
       try { proc.kill("SIGKILL"); } catch {}
     }, timeoutMs);
 
-    function maybeTriggerEarlyExit(chunk) {
+    function maybeTriggerEarlyExit() {
       if (!earlyExitOnPattern || earlyExitTriggered) return;
       if (earlyExitOnPattern.test(output)) {
         earlyExitTriggered = true;
+        // Generation has already completed successfully. Cancel the outer
+        // hard-timeout so it can't race ahead and report a false failure.
+        if (timer) { clearTimeout(timer); timer = null; }
         earlyExitTimer = setTimeout(() => {
-          // Generation already succeeded; force the process to exit so we can move on.
           killedAfterEarlyExit = true;
           try { proc.kill("SIGTERM"); } catch {}
-          // Hard-kill backup in case SIGTERM is ignored.
           setTimeout(() => { try { proc.kill("SIGKILL"); } catch {} }, 5000);
         }, earlyExitGraceMs);
       }
     }
 
     proc.stdout.on("data", (d) => {
-      const text = d.toString();
-      output += text;
+      output += d.toString();
       maybeTriggerEarlyExit();
     });
     proc.stderr.on("data", (d) => {
-      const text = d.toString();
-      output += text;
+      output += d.toString();
       maybeTriggerEarlyExit();
     });
     proc.on("close", (code) => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       if (earlyExitTimer) clearTimeout(earlyExitTimer);
-      if (killedByTimeout) {
-        output += `\n[runner] killed by timeout after ${timeoutMs}ms\n`;
-      }
-      if (killedAfterEarlyExit) {
-        output += `\n[runner] generation completed; process force-stopped after ${earlyExitGraceMs}ms cleanup grace period\n`;
-        // Treat as success regardless of exit code — generation already finished.
+      // If we ever observed "generation complete", the code was successfully
+      // generated. Treat the run as success no matter how the process exited
+      // (clean exit, our SIGTERM/SIGKILL, or even the outer timeout firing
+      // while we were waiting for the grace period).
+      if (earlyExitTriggered) {
+        output += `\n[runner] generation completed; treated as success (exit-code=${code}, killedAfterEarlyExit=${killedAfterEarlyExit}, killedByTimeout=${killedByTimeout})\n`;
         resolve({ code: 0, output, timedOut: false, earlyExited: true });
         return;
+      }
+      if (killedByTimeout) {
+        output += `\n[runner] killed by timeout after ${timeoutMs}ms\n`;
       }
       resolve({ code, output, timedOut: killedByTimeout });
     });
     proc.on("error", (err) => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       if (earlyExitTimer) clearTimeout(earlyExitTimer);
       resolve({ code: 1, output: `${output}\n${err.message}`, timedOut: false });
     });
