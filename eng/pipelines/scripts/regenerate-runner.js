@@ -13,6 +13,7 @@ function getArg(name, defaultValue = "") {
 const sdkRoot = process.cwd();
 const specRepoRoot = getArg("--specRepoRoot");
 const maxWorkers = Number(getArg("--maxWorkers", "4"));
+const buildWorkers = Number(getArg("--buildWorkers", "1"));
 const maxPackages = Number(getArg("--maxPackages", "0"));
 const skipBuild = getArg("--skipBuild", "false").toLowerCase() === "true";
 const emitterVersion = getArg("--emitterVersion", "");
@@ -880,7 +881,7 @@ async function buildAll(regenResults) {
 
   console.log("");
   console.log("===== Step 5: Build Verification (pnpm build --filter) =====");
-  console.log(`Building ${successPkgs.length} packages with ${maxWorkers} workers`);
+  console.log(`Building ${successPkgs.length} packages with ${buildWorkers} workers`);
   console.log("");
 
   // Pre-build fix 1: Clean up TempTypeSpecFiles to avoid turbo "duplicate workspace" errors
@@ -964,7 +965,7 @@ async function buildAll(regenResults) {
       activePromises = activePromises.filter((p) => p !== promise);
     });
     activePromises.push(promise);
-    if (activePromises.length >= maxWorkers) await Promise.race(activePromises);
+    if (activePromises.length >= buildWorkers) await Promise.race(activePromises);
   }
   await Promise.allSettled(activePromises);
   return { buildResults, skipped: false };
@@ -990,7 +991,8 @@ async function main() {
     }
   }
 
-  console.log(`Processing ${packages.length} packages with ${maxWorkers} workers`);
+  console.log(`Processing ${packages.length} packages with ${maxWorkers} regen workers`);
+  console.log(`Build workers: ${buildWorkers}`);
   console.log("");
 
   const regenResults = await regenerateAll(packages);

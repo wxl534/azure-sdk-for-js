@@ -52,9 +52,13 @@ parameters:
     type: number
     default: 0
   - name: MaxWorkers
-    displayName: "Concurrent workers"
+    displayName: "Regenerate concurrent workers"
     type: number
     default: 2
+  - name: BuildWorkers
+    displayName: "Build concurrent workers"
+    type: number
+    default: 1
   - name: RegenerationJobCount
     displayName: "Matrix jobs for regeneration"
     type: number
@@ -71,6 +75,25 @@ parameters:
     displayName: "azure-rest-api-specs branch to clone"
     type: string
     default: 'main'
+  - name: CreatePullRequest
+    displayName: "Create PR with generated changes"
+    type: boolean
+    default: false
+  - name: ChangePushMode
+    displayName: "Changes included in PR commit"
+    type: string
+    default: 'all'
+    values:
+      - all
+      - api-md
+  - name: PullRequestTargetBranch
+    displayName: "PR target branch"
+    type: string
+    default: 'main'
+  - name: PullRequestBranch
+    displayName: "PR source branch (empty = auto)"
+    type: string
+    default: ''
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -97,6 +120,8 @@ stages:
 
           # Step 1: Resolve emitter version
           - script: |
+              PREVIOUS_EMITTER_VERSION=$(node -e "const p=require('./eng/emitter-package.json'); console.log(p.dependencies['@azure-tools/typespec-ts'] || '')")
+              echo "Current emitter in repo: $PREVIOUS_EMITTER_VERSION"
               if [ -z "${{ parameters.EmitterVersion }}" ]; then
                 EMITTER_VERSION=$(npm view @azure-tools/typespec-ts dist-tags.dev)
                 echo "Resolved from npm dev tag: $EMITTER_VERSION"
@@ -105,6 +130,7 @@ stages:
                 echo "Using specified version: $EMITTER_VERSION"
               fi
               echo "##vso[task.setvariable variable=emitterVersion;isOutput=true]$EMITTER_VERSION"
+              echo "##vso[task.setvariable variable=previousEmitterVersion;isOutput=true]$PREVIOUS_EMITTER_VERSION"
             displayName: 'Step 1: Resolve emitter version'
             name: resolveVersion
 
@@ -173,6 +199,7 @@ stages:
           matrix: $[ dependencies.GenerateMatrix.outputs['generateMatrix.matrix'] ]
         variables:
           emitterVersion: $[ dependencies.Setup.outputs['resolveVersion.emitterVersion'] ]
+          previousEmitterVersion: $[ dependencies.Setup.outputs['resolveVersion.previousEmitterVersion'] ]
         steps:
           - task: NodeTool@0
             displayName: 'Install Node.js'
@@ -232,6 +259,7 @@ stages:
               node eng/pipelines/scripts/regenerate-runner.js \
                 --specRepoRoot "$(specRepoRoot)" \
                 --maxWorkers "${{ parameters.MaxWorkers }}" \
+                --buildWorkers "${{ parameters.BuildWorkers }}" \
                 --skipBuild "${{ parameters.SkipBuild }}" \
                 --emitterVersion "$(emitterVersion)" \
                 --directoryList "$(Pipeline.Workspace)/matrix_artifacts/$(DirectoryList)" \
@@ -243,10 +271,28 @@ stages:
               cd $(sdkRoot)
               node eng/pipelines/scripts/breaking-change-detector.js \
                 --baseline "HEAD" \
+                --previousEmitterVersion "$(previousEmitterVersion)" \
+                --currentEmitterVersion "$(emitterVersion)" \
+                --reportFile "$(Build.ArtifactStagingDirectory)/results/$(JobKey)/breaking-summary.json" \
                 --no-fail \
                 --verbose
             displayName: 'Step 6: Detect breaking changes'
             condition: succeededOrFailed()
+
+          - script: |
+              cd $(sdkRoot)
+              PATCH_FILE="$(Build.ArtifactStagingDirectory)/results/$(JobKey)/changes.patch"
+              MODE="${{ parameters.ChangePushMode }}"
+              if [ "$MODE" = "api-md" ]; then
+                git diff --binary -- ':(glob)sdk/**/review/*.api.md' > "$PATCH_FILE"
+              else
+                git diff --binary -- sdk/ > "$PATCH_FILE"
+              fi
+              echo "Patch mode: $MODE"
+              echo "Patch file: $PATCH_FILE"
+              wc -l "$PATCH_FILE" || true
+            displayName: 'Create patch for PR job'
+            condition: and(always(), ${{ parameters.CreatePullRequest }})
 
           - script: |
               cd $(sdkRoot)
@@ -281,6 +327,7 @@ stages:
 
               const root = process.env.PIPELINE_WORKSPACE;
               const resultFiles = [];
+              const breakingSummaryFiles = [];
 
               function walk(dir) {
                 if (!fs.existsSync(dir)) return;
@@ -288,6 +335,7 @@ stages:
                   const full = path.join(dir, entry.name);
                   if (entry.isDirectory()) walk(full);
                   else if (entry.name === "result.json") resultFiles.push(full);
+                  else if (entry.name === "breaking-summary.json") breakingSummaryFiles.push(full);
                 }
               }
 
@@ -303,6 +351,10 @@ stages:
                 buildFailed: 0,
                 regenFailures: [],
                 buildFailures: [],
+                breakingTotal: 0,
+                potentiallyBreakingTotal: 0,
+                additiveTotal: 0,
+                changedPackages: [],
               };
 
               for (const file of resultFiles) {
@@ -321,6 +373,14 @@ stages:
                 }
               }
 
+              for (const file of breakingSummaryFiles) {
+                const summary = JSON.parse(fs.readFileSync(file, "utf8"));
+                totals.breakingTotal += summary.totalBreaking ?? 0;
+                totals.potentiallyBreakingTotal += summary.totalPotentiallyBreaking ?? 0;
+                totals.additiveTotal += summary.totalAdditive ?? 0;
+                totals.changedPackages.push(...(summary.changedPackages ?? []));
+              }
+
               console.log("========== MATRIX SUMMARY ==========");
               console.log(`Result files: ${resultFiles.length}`);
               console.log(`Packages: ${totals.packages}`);
@@ -330,6 +390,31 @@ stages:
               console.log("--- Build ---");
               console.log(`Total: ${totals.buildTotal} | Build OK: ${totals.buildSuccess} | Build Failed: ${totals.buildFailed}`);
               console.log(`Build Pass Rate: ${totals.buildTotal === 0 ? "0.0" : ((totals.buildSuccess * 100) / totals.buildTotal).toFixed(1)}%`);
+              console.log("--- API Change Signal (current emitter vs previous emitter) ---");
+              console.log(`Breaking: ${totals.breakingTotal} | Potentially Breaking: ${totals.potentiallyBreakingTotal} | Additive: ${totals.additiveTotal}`);
+
+              if (totals.changedPackages.length > 0) {
+                const merged = new Map();
+                for (const p of totals.changedPackages) {
+                  const existing = merged.get(p.pkg) || {
+                    pkg: p.pkg,
+                    totalChanges: 0,
+                    breaking: 0,
+                    potentiallyBreaking: 0,
+                    additive: 0,
+                  };
+                  existing.totalChanges += p.totalChanges ?? 0;
+                  existing.breaking += p.breaking ?? 0;
+                  existing.potentiallyBreaking += p.potentiallyBreaking ?? 0;
+                  existing.additive += p.additive ?? 0;
+                  merged.set(p.pkg, existing);
+                }
+                const unique = [...merged.values()].sort((a, b) => (b.totalChanges ?? 0) - (a.totalChanges ?? 0));
+                console.log("Top changed packages:");
+                for (const p of unique.slice(0, 20)) {
+                  console.log(`  - ${p.pkg}: total=${p.totalChanges}, breaking=${p.breaking}, potentiallyBreaking=${p.potentiallyBreaking}, additive=${p.additive}`);
+                }
+              }
 
               if (totals.regenFailures.length > 0) {
                 console.log("");
@@ -353,3 +438,98 @@ stages:
               }
               NODE
             displayName: 'Aggregate regeneration results'
+
+      - job: CreatePR
+        displayName: 'Create PR with generated changes'
+        dependsOn:
+          - Setup
+          - Summary
+        condition: and(succeeded(), ${{ parameters.CreatePullRequest }})
+        variables:
+          emitterVersion: $[ dependencies.Setup.outputs['resolveVersion.emitterVersion'] ]
+          previousEmitterVersion: $[ dependencies.Setup.outputs['resolveVersion.previousEmitterVersion'] ]
+        steps:
+          - checkout: self
+
+          - template: /eng/common/pipelines/templates/steps/login-to-github.yml
+            parameters:
+              TokenOwners:
+                - Azure
+
+          - download: current
+            displayName: 'Download result artifacts'
+
+          - script: |
+              set -euo pipefail
+              cd $(Build.SourcesDirectory)
+
+              repoFull="$(Build.Repository.Name)"
+              if [[ "$repoFull" == */* ]]; then
+                repoOwner="${repoFull%%/*}"
+                repoName="${repoFull##*/}"
+              else
+                repoOwner="Azure"
+                repoName="$repoFull"
+              fi
+
+              branch="${{ parameters.PullRequestBranch }}"
+              if [ -z "$branch" ]; then
+                branch="typespec-break-check-$(Build.BuildId)"
+              fi
+              echo "Using PR branch: $branch"
+
+              git checkout -B "$branch"
+
+              mapfile -t patches < <(find "$(Pipeline.Workspace)" -type f -name changes.patch | sort)
+              echo "Found ${#patches[@]} patch file(s)"
+              for p in "${patches[@]}"; do
+                if [ -s "$p" ]; then
+                  echo "Applying patch: $p"
+                  if ! git apply --3way "$p"; then
+                    echo "Failed to apply patch: $p"
+                    git status --porcelain || true
+                    exit 1
+                  fi
+                fi
+              done
+
+              mode="${{ parameters.ChangePushMode }}"
+              if [ "$mode" = "api-md" ]; then
+                git add -A -- ':(glob)sdk/**/review/*.api.md'
+              else
+                git add -A sdk/
+              fi
+
+              if git diff --cached --quiet; then
+                echo "No changes selected for mode=$mode. Skipping PR creation."
+                echo "##vso[task.setvariable variable=HasPrChanges]false"
+                exit 0
+              fi
+
+              git -c user.name="azure-sdk" -c user.email="azuresdk@microsoft.com" commit -m "TypeSpec regeneration changes (${mode}) for emitter $(previousEmitterVersion) -> $(emitterVersion)"
+
+              git remote remove pr-origin 2>/dev/null || true
+              git remote add pr-origin "https://x-access-token:$(GH_TOKEN)@github.com/${repoOwner}/${repoName}.git"
+              git push pr-origin "$branch" --force
+
+              echo "##vso[task.setvariable variable=HasPrChanges]true"
+              echo "##vso[task.setvariable variable=PRBranchName]$branch"
+              echo "##vso[task.setvariable variable=RepoOwner]$repoOwner"
+              echo "##vso[task.setvariable variable=RepoNameOnly]$repoName"
+            displayName: 'Apply patches, commit and push branch'
+
+          - task: PowerShell@2
+            displayName: 'Create pull request'
+            condition: and(succeeded(), eq(variables['HasPrChanges'], 'true'))
+            inputs:
+              pwsh: true
+              filePath: ./eng/common/scripts/Submit-PullRequest.ps1
+              arguments: >
+                -RepoOwner '$(RepoOwner)'
+                -RepoName '$(RepoNameOnly)'
+                -BaseBranch '${{ parameters.PullRequestTargetBranch }}'
+                -PROwner '$(RepoOwner)'
+                -PRBranch '$(PRBranchName)'
+                -AuthToken '$(GH_TOKEN)'
+                -PRTitle 'TypeSpec emitter delta: $(previousEmitterVersion) -> $(emitterVersion) [${{ parameters.ChangePushMode }}]'
+                -PRBody 'Generated by $(Build.DefinitionName) build $(Build.BuildNumber). Compares emitter $(previousEmitterVersion) -> $(emitterVersion). Push mode: ${{ parameters.ChangePushMode }}.'

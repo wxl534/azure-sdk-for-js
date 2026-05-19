@@ -21,6 +21,9 @@ function hasFlag(name) {
 const sdkRoot = process.cwd();
 const baselineSha = getArg("--baseline", "HEAD");
 const packagesFile = getArg("--packages", "");
+const previousEmitterVersion = getArg("--previousEmitterVersion", "");
+const currentEmitterVersion = getArg("--currentEmitterVersion", "");
+const reportFile = getArg("--reportFile", "");
 const failOnBreaking = !hasFlag("--no-fail");
 const verbose = hasFlag("--verbose");
 
@@ -566,6 +569,11 @@ function processPackage(pkgDir) {
 function main() {
   console.log("===== Step 6: Breaking Change Detection =====");
   console.log(`Baseline: ${baselineSha}`);
+  if (previousEmitterVersion || currentEmitterVersion) {
+    console.log(
+      `Emitter compare: ${previousEmitterVersion || "<unknown>"} -> ${currentEmitterVersion || "<unknown>"}`
+    );
+  }
   console.log(`Fail on breaking: ${failOnBreaking}`);
   console.log("");
 
@@ -609,6 +617,7 @@ function main() {
   let packagesWithBreaking = 0;
   let packagesWithChanges = 0;
   let packagesUnchanged = 0;
+  const changedPackages = [];
 
   for (const pkg of packages) {
     const pkgDir = path.isAbsolute(pkg) ? pkg : path.join(sdkRoot, pkg);
@@ -621,6 +630,13 @@ function main() {
     if (hasBreaking) {
       packagesWithBreaking++;
       const pkgName = path.relative(sdkRoot, pkgDir).replace(/\\/g, "/");
+      changedPackages.push({
+        pkg: pkgName,
+        breaking: report.breaking.length,
+        potentiallyBreaking: report.potentiallyBreaking.length,
+        additive: report.additive.length,
+        totalChanges: report.breaking.length + report.potentiallyBreaking.length + report.additive.length,
+      });
       console.log(`  ⚠️  ${pkgName}`);
       for (const change of report.breaking) {
         console.log(`      ❌ [BREAKING] ${change.detail}`);
@@ -634,6 +650,13 @@ function main() {
       }
     } else if (hasChanges) {
       packagesWithChanges++;
+      changedPackages.push({
+        pkg: path.relative(sdkRoot, pkgDir).replace(/\\/g, "/"),
+        breaking: 0,
+        potentiallyBreaking: 0,
+        additive: report.additive.length,
+        totalChanges: report.additive.length,
+      });
       if (verbose) {
         const pkgName = path.relative(sdkRoot, pkgDir).replace(/\\/g, "/");
         console.log(`  ✅ ${pkgName} (additive only: ${report.additive.length} changes)`);
@@ -665,6 +688,17 @@ function main() {
   console.log(`Total additive      : ${totalAdditive}`);
   console.log("==============================================");
 
+  if (changedPackages.length > 0) {
+    console.log("");
+    console.log("Top changed packages (latest emitter vs previous emitter):");
+    const top = [...changedPackages].sort((a, b) => b.totalChanges - a.totalChanges).slice(0, 20);
+    for (const item of top) {
+      console.log(
+        `  - ${item.pkg}: total=${item.totalChanges}, breaking=${item.breaking}, potentiallyBreaking=${item.potentiallyBreaking}, additive=${item.additive}`
+      );
+    }
+  }
+
   // List all packages with breaking changes
   if (packagesWithBreaking > 0) {
     console.log("");
@@ -674,6 +708,28 @@ function main() {
         console.log(`  - ${r.pkg} (${r.breaking.length} breaking, ${r.potentiallyBreaking.length} potentially breaking)`);
       }
     }
+  }
+
+  if (reportFile) {
+    const reportDir = path.dirname(reportFile);
+    if (!fs.existsSync(reportDir)) {
+      fs.mkdirSync(reportDir, { recursive: true });
+    }
+    const reportSummary = {
+      baselineSha,
+      previousEmitterVersion: previousEmitterVersion || null,
+      currentEmitterVersion: currentEmitterVersion || null,
+      packagesChecked: packages.length,
+      packagesWithBreaking,
+      packagesWithAdditiveOnly: packagesWithChanges,
+      packagesUnchanged,
+      totalBreaking,
+      totalPotentiallyBreaking,
+      totalAdditive,
+      changedPackages: changedPackages.sort((a, b) => b.totalChanges - a.totalChanges),
+    };
+    fs.writeFileSync(reportFile, JSON.stringify(reportSummary, null, 2));
+    console.log(`Breaking summary written to: ${reportFile}`);
   }
 
   // Exit with error if breaking changes found
