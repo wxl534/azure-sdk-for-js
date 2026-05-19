@@ -18,7 +18,46 @@ const skipBuild = getArg("--skipBuild", "false").toLowerCase() === "true";
 const emitterVersion = getArg("--emitterVersion", "");
 const directoryListFile = getArg("--directoryList", "");
 const resultOutputDir = getArg("--resultOutputDir", "");
-const regenTimeoutMs = Number(getArg("--regenTimeoutMs", String(30 * 60 * 1000)));
+const regenTimeoutMs = Number(getArg("--regenTimeoutMs", String(10 * 60 * 1000)));
+
+// Per-package timeout overrides (in ms) for known monster packages whose
+// tsp compile / emit takes much longer than the global default.
+const PACKAGE_TIMEOUT_OVERRIDES = {
+  "sdk/datafactory/arm-datafactory": 60 * 60 * 1000,
+  "sdk/network/arm-network": 60 * 60 * 1000,
+  "sdk/appservice/arm-appservice": 60 * 60 * 1000,
+  "sdk/compute/arm-compute": 45 * 60 * 1000,
+  "sdk/storage/arm-storage": 45 * 60 * 1000,
+};
+
+function getRegenTimeoutForPackage(pkg) {
+  return PACKAGE_TIMEOUT_OVERRIDES[pkg] || regenTimeoutMs;
+}
+
+// Grace period after we observe "generation complete" before we proactively
+// kill tsp-client. tsp-client sometimes hangs in the "Cleaning up temp directory"
+// phase (or its child npm/node subprocesses never close their stdio), causing
+// the process to never exit even though all code has been generated.
+const GENERATION_COMPLETE_GRACE_MS = 60 * 1000;
+
+// Default and per-package build timeout (pnpm build --filter <pkg>).
+// Some packages (especially multi-sub-client ones like arm-apimanagement) run
+// api-extractor hundreds of times in the extract-api step and need much longer.
+const DEFAULT_BUILD_TIMEOUT_MS = 15 * 60 * 1000;
+
+const PACKAGE_BUILD_TIMEOUT_OVERRIDES = {
+  "sdk/apimanagement/arm-apimanagement": 40 * 60 * 1000,
+  "sdk/sql/arm-sql": 40 * 60 * 1000,
+  "sdk/network/arm-network": 30 * 60 * 1000,
+  "sdk/datafactory/arm-datafactory": 30 * 60 * 1000,
+  "sdk/appservice/arm-appservice": 30 * 60 * 1000,
+  "sdk/compute/arm-compute": 25 * 60 * 1000,
+  "sdk/storage/arm-storage": 25 * 60 * 1000,
+};
+
+function getBuildTimeoutForPackage(pkg) {
+  return PACKAGE_BUILD_TIMEOUT_OVERRIDES[pkg] || DEFAULT_BUILD_TIMEOUT_MS;
+}
 
 if (!specRepoRoot || !fs.existsSync(specRepoRoot)) {
   console.error(`ERROR: spec repo root not found: ${specRepoRoot}`);
@@ -199,26 +238,62 @@ function buildSpecIndex() {
   return index;
 }
 
-function runCommand(cmd, args, cwd, timeoutMs = 600000) {
+function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
+  const { earlyExitOnPattern = null, earlyExitGraceMs = GENERATION_COMPLETE_GRACE_MS } = options;
   return new Promise((resolve) => {
     let output = "";
     let killedByTimeout = false;
+    let killedAfterEarlyExit = false;
+    let earlyExitTriggered = false;
+    let earlyExitTimer = null;
     const proc = spawn(cmd, args, { cwd, shell: true });
+
     const timer = setTimeout(() => {
       killedByTimeout = true;
       try { proc.kill("SIGKILL"); } catch {}
     }, timeoutMs);
-    proc.stdout.on("data", (d) => (output += d.toString()));
-    proc.stderr.on("data", (d) => (output += d.toString()));
+
+    function maybeTriggerEarlyExit(chunk) {
+      if (!earlyExitOnPattern || earlyExitTriggered) return;
+      if (earlyExitOnPattern.test(output)) {
+        earlyExitTriggered = true;
+        earlyExitTimer = setTimeout(() => {
+          // Generation already succeeded; force the process to exit so we can move on.
+          killedAfterEarlyExit = true;
+          try { proc.kill("SIGTERM"); } catch {}
+          // Hard-kill backup in case SIGTERM is ignored.
+          setTimeout(() => { try { proc.kill("SIGKILL"); } catch {} }, 5000);
+        }, earlyExitGraceMs);
+      }
+    }
+
+    proc.stdout.on("data", (d) => {
+      const text = d.toString();
+      output += text;
+      maybeTriggerEarlyExit();
+    });
+    proc.stderr.on("data", (d) => {
+      const text = d.toString();
+      output += text;
+      maybeTriggerEarlyExit();
+    });
     proc.on("close", (code) => {
       clearTimeout(timer);
+      if (earlyExitTimer) clearTimeout(earlyExitTimer);
       if (killedByTimeout) {
         output += `\n[runner] killed by timeout after ${timeoutMs}ms\n`;
+      }
+      if (killedAfterEarlyExit) {
+        output += `\n[runner] generation completed; process force-stopped after ${earlyExitGraceMs}ms cleanup grace period\n`;
+        // Treat as success regardless of exit code — generation already finished.
+        resolve({ code: 0, output, timedOut: false, earlyExited: true });
+        return;
       }
       resolve({ code, output, timedOut: killedByTimeout });
     });
     proc.on("error", (err) => {
       clearTimeout(timer);
+      if (earlyExitTimer) clearTimeout(earlyExitTimer);
       resolve({ code: 1, output: `${output}\n${err.message}`, timedOut: false });
     });
   });
@@ -744,11 +819,13 @@ async function regenerateAll(packages) {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       if (attempt > 1) await new Promise((resolve) => setTimeout(resolve, 10000 * (attempt - 1)));
 
+      const pkgTimeoutMs = getRegenTimeoutForPackage(pkg.pkg);
       const result = await runCommand(
         "tsp-client",
         ["init", "--update-if-exists", "-c", pkg.tspConfigPath, "--local-spec-repo", pkg.localSpecPath, "--debug"],
         pkg.pkgDir,
-        regenTimeoutMs,
+        pkgTimeoutMs,
+        { earlyExitOnPattern: /generation complete/i },
       );
       output += `\n===== Attempt ${attempt}/${maxAttempts} =====\n${result.output}`;
       output += `\nExit code: ${result.code}\n`;
@@ -854,7 +931,8 @@ async function buildAll(regenResults) {
     } catch {}
 
     const start = Date.now();
-    const build = await runCommand("pnpm", ["build", "--filter", filterName], sdkRoot, 600000);
+    const buildTimeoutMs = getBuildTimeoutForPackage(pkg.pkg);
+    const build = await runCommand("pnpm", ["build", "--filter", filterName], sdkRoot, buildTimeoutMs);
     const duration = ((Date.now() - start) / 1000).toFixed(1);
     buildCompleted++;
 
