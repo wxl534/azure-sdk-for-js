@@ -439,97 +439,98 @@ stages:
               NODE
             displayName: 'Aggregate regeneration results'
 
-      - job: CreatePR
-        displayName: 'Create PR with generated changes'
-        dependsOn:
-          - Setup
-          - Summary
-        condition: and(succeeded(), ${{ parameters.CreatePullRequest }})
-        variables:
-          emitterVersion: $[ dependencies.Setup.outputs['resolveVersion.emitterVersion'] ]
-          previousEmitterVersion: $[ dependencies.Setup.outputs['resolveVersion.previousEmitterVersion'] ]
-        steps:
-          - checkout: self
+      - ${{ if parameters.CreatePullRequest }}:
+        - job: CreatePR
+          displayName: 'Create PR with generated changes'
+          dependsOn:
+            - Setup
+            - Summary
+          condition: succeeded()
+          variables:
+            emitterVersion: $[ dependencies.Setup.outputs['resolveVersion.emitterVersion'] ]
+            previousEmitterVersion: $[ dependencies.Setup.outputs['resolveVersion.previousEmitterVersion'] ]
+          steps:
+            - checkout: self
 
-          - template: /eng/common/pipelines/templates/steps/login-to-github.yml
-            parameters:
-              TokenOwners:
-                - Azure
+            - template: /eng/common/pipelines/templates/steps/login-to-github.yml
+              parameters:
+                TokenOwners:
+                  - Azure
 
-          - download: current
-            displayName: 'Download result artifacts'
+            - download: current
+              displayName: 'Download result artifacts'
 
-          - script: |
-              set -euo pipefail
-              cd $(Build.SourcesDirectory)
+            - script: |
+                set -euo pipefail
+                cd $(Build.SourcesDirectory)
 
-              repoFull="$(Build.Repository.Name)"
-              if [[ "$repoFull" == */* ]]; then
-                repoOwner="${repoFull%%/*}"
-                repoName="${repoFull##*/}"
-              else
-                repoOwner="Azure"
-                repoName="$repoFull"
-              fi
-
-              branch="${{ parameters.PullRequestBranch }}"
-              if [ -z "$branch" ]; then
-                branch="typespec-break-check-$(Build.BuildId)"
-              fi
-              echo "Using PR branch: $branch"
-
-              git checkout -B "$branch"
-
-              mapfile -t patches < <(find "$(Pipeline.Workspace)" -type f -name changes.patch | sort)
-              echo "Found ${#patches[@]} patch file(s)"
-              for p in "${patches[@]}"; do
-                if [ -s "$p" ]; then
-                  echo "Applying patch: $p"
-                  if ! git apply --3way "$p"; then
-                    echo "Failed to apply patch: $p"
-                    git status --porcelain || true
-                    exit 1
-                  fi
+                repoFull="$(Build.Repository.Name)"
+                if [[ "$repoFull" == */* ]]; then
+                  repoOwner="${repoFull%%/*}"
+                  repoName="${repoFull##*/}"
+                else
+                  repoOwner="Azure"
+                  repoName="$repoFull"
                 fi
-              done
 
-              mode="${{ parameters.ChangePushMode }}"
-              if [ "$mode" = "api-md" ]; then
-                git add -A -- ':(glob)sdk/**/review/*.api.md'
-              else
-                git add -A sdk/
-              fi
+                branch="${{ parameters.PullRequestBranch }}"
+                if [ -z "$branch" ]; then
+                  branch="typespec-break-check-$(Build.BuildId)"
+                fi
+                echo "Using PR branch: $branch"
 
-              if git diff --cached --quiet; then
-                echo "No changes selected for mode=$mode. Skipping PR creation."
-                echo "##vso[task.setvariable variable=HasPrChanges]false"
-                exit 0
-              fi
+                git checkout -B "$branch"
 
-              git -c user.name="azure-sdk" -c user.email="azuresdk@microsoft.com" commit -m "TypeSpec regeneration changes (${mode}) for emitter $(previousEmitterVersion) -> $(emitterVersion)"
+                mapfile -t patches < <(find "$(Pipeline.Workspace)" -type f -name changes.patch | sort)
+                echo "Found ${#patches[@]} patch file(s)"
+                for p in "${patches[@]}"; do
+                  if [ -s "$p" ]; then
+                    echo "Applying patch: $p"
+                    if ! git apply --3way "$p"; then
+                      echo "Failed to apply patch: $p"
+                      git status --porcelain || true
+                      exit 1
+                    fi
+                  fi
+                done
 
-              git remote remove pr-origin 2>/dev/null || true
-              git remote add pr-origin "https://x-access-token:$(GH_TOKEN)@github.com/${repoOwner}/${repoName}.git"
-              git push pr-origin "$branch" --force
+                mode="${{ parameters.ChangePushMode }}"
+                if [ "$mode" = "api-md" ]; then
+                  git add -A -- ':(glob)sdk/**/review/*.api.md'
+                else
+                  git add -A sdk/
+                fi
 
-              echo "##vso[task.setvariable variable=HasPrChanges]true"
-              echo "##vso[task.setvariable variable=PRBranchName]$branch"
-              echo "##vso[task.setvariable variable=RepoOwner]$repoOwner"
-              echo "##vso[task.setvariable variable=RepoNameOnly]$repoName"
-            displayName: 'Apply patches, commit and push branch'
+                if git diff --cached --quiet; then
+                  echo "No changes selected for mode=$mode. Skipping PR creation."
+                  echo "##vso[task.setvariable variable=HasPrChanges]false"
+                  exit 0
+                fi
 
-          - task: PowerShell@2
-            displayName: 'Create pull request'
-            condition: and(succeeded(), eq(variables['HasPrChanges'], 'true'))
-            inputs:
-              pwsh: true
-              filePath: ./eng/common/scripts/Submit-PullRequest.ps1
-              arguments: >
-                -RepoOwner '$(RepoOwner)'
-                -RepoName '$(RepoNameOnly)'
-                -BaseBranch '${{ parameters.PullRequestTargetBranch }}'
-                -PROwner '$(RepoOwner)'
-                -PRBranch '$(PRBranchName)'
-                -AuthToken '$(GH_TOKEN)'
-                -PRTitle 'TypeSpec emitter delta: $(previousEmitterVersion) -> $(emitterVersion) [${{ parameters.ChangePushMode }}]'
-                -PRBody 'Generated by $(Build.DefinitionName) build $(Build.BuildNumber). Compares emitter $(previousEmitterVersion) -> $(emitterVersion). Push mode: ${{ parameters.ChangePushMode }}.'
+                git -c user.name="azure-sdk" -c user.email="azuresdk@microsoft.com" commit -m "TypeSpec regeneration changes (${mode}) for emitter $(previousEmitterVersion) -> $(emitterVersion)"
+
+                git remote remove pr-origin 2>/dev/null || true
+                git remote add pr-origin "https://x-access-token:$(GH_TOKEN)@github.com/${repoOwner}/${repoName}.git"
+                git push pr-origin "$branch" --force
+
+                echo "##vso[task.setvariable variable=HasPrChanges]true"
+                echo "##vso[task.setvariable variable=PRBranchName]$branch"
+                echo "##vso[task.setvariable variable=RepoOwner]$repoOwner"
+                echo "##vso[task.setvariable variable=RepoNameOnly]$repoName"
+              displayName: 'Apply patches, commit and push branch'
+
+            - task: PowerShell@2
+              displayName: 'Create pull request'
+              condition: and(succeeded(), eq(variables['HasPrChanges'], 'true'))
+              inputs:
+                pwsh: true
+                filePath: ./eng/common/scripts/Submit-PullRequest.ps1
+                arguments: >
+                  -RepoOwner '$(RepoOwner)'
+                  -RepoName '$(RepoNameOnly)'
+                  -BaseBranch '${{ parameters.PullRequestTargetBranch }}'
+                  -PROwner '$(RepoOwner)'
+                  -PRBranch '$(PRBranchName)'
+                  -AuthToken '$(GH_TOKEN)'
+                  -PRTitle 'TypeSpec emitter delta: $(previousEmitterVersion) -> $(emitterVersion) [${{ parameters.ChangePushMode }}]'
+                  -PRBody 'Generated by $(Build.DefinitionName) build $(Build.BuildNumber). Compares emitter $(previousEmitterVersion) -> $(emitterVersion). Push mode: ${{ parameters.ChangePushMode }}.'
