@@ -94,6 +94,18 @@ parameters:
     displayName: "PR source branch (empty = auto)"
     type: string
     default: ''
+  - name: PullRequestRepoOwner
+    displayName: "PR target repo OWNER (empty = same as source repo, e.g. 'wxl534' for fork)"
+    type: string
+    default: ''
+  - name: PullRequestRepoName
+    displayName: "PR target repo NAME (empty = same as source repo name)"
+    type: string
+    default: ''
+  - name: ForkTokenVariableName
+    displayName: "ADO secret variable name holding the GitHub PAT (only needed when pushing to a fork)"
+    type: string
+    default: ''
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -488,13 +500,23 @@ stages:
           variables:
             emitterVersion: $[ dependencies.Setup.outputs['resolveVersion.emitterVersion'] ]
             previousEmitterVersion: $[ dependencies.Setup.outputs['resolveVersion.previousEmitterVersion'] ]
+            # When pushing to a fork, the user must provide a PAT through a secret variable.
+            # ForkTokenVariableName names that variable; we resolve it indirectly here.
+            ${{ if ne(parameters.ForkTokenVariableName, '') }}:
+              forkToken: $[ variables['${{ parameters.ForkTokenVariableName }}'] ]
+            ${{ else }}:
+              forkToken: ''
           steps:
             - checkout: self
 
-            - template: /eng/common/pipelines/templates/steps/login-to-github.yml
-              parameters:
-                TokenOwners:
-                  - Azure
+            # Only request the org-level GitHub App token when we're NOT pushing to a fork
+            # (otherwise the fork user's PAT is used and this template would needlessly
+            # require Azure Key Vault access).
+            - ${{ if eq(parameters.PullRequestRepoOwner, '') }}:
+              - template: /eng/common/pipelines/templates/steps/login-to-github.yml
+                parameters:
+                  TokenOwners:
+                    - Azure
 
             - download: current
               displayName: 'Download result artifacts'
@@ -503,13 +525,38 @@ stages:
                 set -euo pipefail
                 cd $(Build.SourcesDirectory)
 
-                repoFull="$(Build.Repository.Name)"
-                if [[ "$repoFull" == */* ]]; then
-                  repoOwner="${repoFull%%/*}"
-                  repoName="${repoFull##*/}"
+                # Determine target repo (defaults to the source repo when no fork override)
+                overrideOwner='${{ parameters.PullRequestRepoOwner }}'
+                overrideName='${{ parameters.PullRequestRepoName }}'
+
+                sourceRepoFull="$(Build.Repository.Name)"
+                if [[ "$sourceRepoFull" == */* ]]; then
+                  srcOwner="${sourceRepoFull%%/*}"
+                  srcName="${sourceRepoFull##*/}"
                 else
-                  repoOwner="Azure"
-                  repoName="$repoFull"
+                  srcOwner="Azure"
+                  srcName="$sourceRepoFull"
+                fi
+
+                repoOwner="${overrideOwner:-$srcOwner}"
+                repoName="${overrideName:-$srcName}"
+                isFork="false"
+                if [ "$repoOwner" != "$srcOwner" ] || [ "$repoName" != "$srcName" ]; then
+                  isFork="true"
+                fi
+
+                # Resolve the token to use for pushing
+                if [ "$isFork" = "true" ]; then
+                  pushToken='$(forkToken)'
+                  if [ -z "$pushToken" ] || [ "$pushToken" = '$(forkToken)' ]; then
+                    echo "ERROR: Pushing to fork ${repoOwner}/${repoName} but no fork PAT was provided."
+                    echo "Set parameter ForkTokenVariableName to the name of an ADO secret variable containing a GitHub PAT with repo scope."
+                    exit 1
+                  fi
+                  echo "Pushing to fork: ${repoOwner}/${repoName} (using user-provided PAT)"
+                else
+                  pushToken='$(GH_TOKEN)'
+                  echo "Pushing to source repo: ${repoOwner}/${repoName} (using GH App token)"
                 fi
 
                 branch="${{ parameters.PullRequestBranch }}"
@@ -549,13 +596,15 @@ stages:
                 git -c user.name="azure-sdk" -c user.email="azuresdk@microsoft.com" commit -m "TypeSpec regeneration changes (${mode}) for emitter $(previousEmitterVersion) -> $(emitterVersion)"
 
                 git remote remove pr-origin 2>/dev/null || true
-                git remote add pr-origin "https://x-access-token:$(GH_TOKEN)@github.com/${repoOwner}/${repoName}.git"
+                git remote add pr-origin "https://x-access-token:${pushToken}@github.com/${repoOwner}/${repoName}.git"
                 git push pr-origin "$branch" --force
 
                 echo "##vso[task.setvariable variable=HasPrChanges]true"
                 echo "##vso[task.setvariable variable=PRBranchName]$branch"
                 echo "##vso[task.setvariable variable=RepoOwner]$repoOwner"
                 echo "##vso[task.setvariable variable=RepoNameOnly]$repoName"
+                echo "##vso[task.setvariable variable=IsFork]$isFork"
+                echo "##vso[task.setvariable variable=PushToken;issecret=true]$pushToken"
               displayName: 'Apply patches, commit and push branch'
 
             - task: PowerShell@2
@@ -570,6 +619,6 @@ stages:
                   -BaseBranch '${{ parameters.PullRequestTargetBranch }}'
                   -PROwner '$(RepoOwner)'
                   -PRBranch '$(PRBranchName)'
-                  -AuthToken '$(GH_TOKEN)'
+                  -AuthToken '$(PushToken)'
                   -PRTitle 'TypeSpec emitter delta: $(previousEmitterVersion) -> $(emitterVersion) [${{ parameters.ChangePushMode }}]'
                   -PRBody 'Generated by $(Build.DefinitionName) build $(Build.BuildNumber). Compares emitter $(previousEmitterVersion) -> $(emitterVersion). Push mode: ${{ parameters.ChangePushMode }}.'
