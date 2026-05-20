@@ -320,7 +320,11 @@ function parseMembers(body, parentKind) {
 function getBaselineFile(filePath, sha) {
   const relative = path.relative(sdkRoot, filePath).replace(/\\/g, "/");
   try {
-    return execSync(`git show ${sha}:${relative}`, { encoding: "utf8", cwd: sdkRoot });
+    return execSync(`git show ${sha}:${relative}`, {
+      encoding: "utf8",
+      cwd: sdkRoot,
+      stdio: ["pipe", "pipe", "ignore"],
+    });
   } catch {
     return null; // File doesn't exist in baseline
   }
@@ -332,6 +336,7 @@ function listBaselineApiMdFiles(pkgDir, sha) {
     const output = execSync(`git ls-tree --name-only ${sha} ${relative}/review/`, {
       encoding: "utf8",
       cwd: sdkRoot,
+      stdio: ["pipe", "pipe", "ignore"],
     });
     return output
       .trim()
@@ -514,7 +519,42 @@ function processPackage(pkgDir) {
     ...baselineFiles.map((f) => path.basename(f)),
   ]);
 
-  const report = { breaking: [], additive: [], potentiallyBreaking: [] };
+  // === Pass 1: build per-side global symbol indexes across ALL api.md files. ===
+  // We use these to detect "moved" symbols (same name lives in a different
+  // api.md file on the other side), which the emitter often produces when it
+  // restructures a flat client into sub-clients or splits a big api.md into
+  // many smaller per-sub-resource files. Without this, those moves all show
+  // up as huge "removed/added" lists and dominate the breaking/additive count.
+  const baselineGlobal = new Map(); // name -> { kind, file }
+  const currentGlobal = new Map();
+
+  for (const fileName of allFiles) {
+    const currentPath = path.join(pkgDir, "review", fileName);
+    const currentContent = fs.existsSync(currentPath) ? fs.readFileSync(currentPath, "utf8") : null;
+    const baselineContent = getBaselineFile(currentPath, baselineSha);
+
+    if (baselineContent) {
+      const api = parseApiSurface(extractCodeFromApiMd(baselineContent));
+      for (const [name, sym] of api) {
+        if (!baselineGlobal.has(name)) baselineGlobal.set(name, { kind: sym.kind, file: fileName });
+      }
+    }
+    if (currentContent) {
+      const api = parseApiSurface(extractCodeFromApiMd(currentContent));
+      for (const [name, sym] of api) {
+        if (!currentGlobal.has(name)) currentGlobal.set(name, { kind: sym.kind, file: fileName });
+      }
+    }
+  }
+
+  const report = { breaking: [], additive: [], potentiallyBreaking: [], moved: [] };
+
+  function isMovedToCurrent(name) {
+    return currentGlobal.has(name);
+  }
+  function isMovedFromBaseline(name) {
+    return baselineGlobal.has(name);
+  }
 
   for (const fileName of allFiles) {
     const currentPath = path.join(pkgDir, "review", fileName);
@@ -522,29 +562,47 @@ function processPackage(pkgDir) {
     const baselineContent = getBaselineFile(currentPath, baselineSha);
 
     if (!baselineContent && currentContent) {
-      // New api.md file — all additive
+      // New api.md file — symbols are either truly new or moved-in from another file
       const api = parseApiSurface(extractCodeFromApiMd(currentContent));
       for (const [name, sym] of api) {
-        report.additive.push({
-          type: "added-export",
-          symbol: name,
-          kind: sym.kind,
-          detail: `Added ${sym.kind} "${name}" (new API file: ${fileName})`,
-        });
+        if (isMovedFromBaseline(name)) {
+          report.moved.push({
+            type: "moved-export",
+            symbol: name,
+            kind: sym.kind,
+            detail: `Moved ${sym.kind} "${name}" from ${baselineGlobal.get(name).file} to ${fileName}`,
+          });
+        } else {
+          report.additive.push({
+            type: "added-export",
+            symbol: name,
+            kind: sym.kind,
+            detail: `Added ${sym.kind} "${name}" (new API file: ${fileName})`,
+          });
+        }
       }
       continue;
     }
 
     if (baselineContent && !currentContent) {
-      // Deleted api.md file — all breaking
+      // Deleted api.md file — symbols are either truly removed or moved-out to another file
       const api = parseApiSurface(extractCodeFromApiMd(baselineContent));
       for (const [name, sym] of api) {
-        report.breaking.push({
-          type: "removed-export",
-          symbol: name,
-          kind: sym.kind,
-          detail: `Removed ${sym.kind} "${name}" (API file deleted: ${fileName})`,
-        });
+        if (isMovedToCurrent(name)) {
+          report.moved.push({
+            type: "moved-export",
+            symbol: name,
+            kind: sym.kind,
+            detail: `Moved ${sym.kind} "${name}" from ${fileName} to ${currentGlobal.get(name).file}`,
+          });
+        } else {
+          report.breaking.push({
+            type: "removed-export",
+            symbol: name,
+            kind: sym.kind,
+            detail: `Removed ${sym.kind} "${name}" (API file deleted: ${fileName})`,
+          });
+        }
       }
       continue;
     }
@@ -556,8 +614,27 @@ function processPackage(pkgDir) {
     const newApi = parseApiSurface(extractCodeFromApiMd(currentContent));
     const changes = compareApiSurfaces(oldApi, newApi);
 
-    report.breaking.push(...changes.breaking);
-    report.additive.push(...changes.additive);
+    // Reclassify removed-export / added-export against the cross-file index
+    // so that "moved to another file" is not double-counted as breaking+additive.
+    for (const change of changes.breaking) {
+      if (change.type === "removed-export" && isMovedToCurrent(change.symbol)) {
+        report.moved.push({
+          type: "moved-export",
+          symbol: change.symbol,
+          kind: change.kind,
+          detail: `Moved ${change.kind} "${change.symbol}" from ${fileName} to ${currentGlobal.get(change.symbol).file}`,
+        });
+      } else {
+        report.breaking.push(change);
+      }
+    }
+    for (const change of changes.additive) {
+      if (change.type === "added-export" && isMovedFromBaseline(change.symbol)) {
+        // Already accounted for on the removal side; just skip to avoid double counting.
+        continue;
+      }
+      report.additive.push(change);
+    }
     report.potentiallyBreaking.push(...changes.potentiallyBreaking);
   }
 
@@ -614,6 +691,7 @@ function main() {
   let totalBreaking = 0;
   let totalPotentiallyBreaking = 0;
   let totalAdditive = 0;
+  let totalMoved = 0;
   let packagesWithBreaking = 0;
   let packagesWithChanges = 0;
   let packagesUnchanged = 0;
@@ -624,8 +702,9 @@ function main() {
     if (!fs.existsSync(pkgDir)) continue;
 
     const report = processPackage(pkgDir);
+    const movedCount = (report.moved || []).length;
     const hasBreaking = report.breaking.length > 0 || report.potentiallyBreaking.length > 0;
-    const hasChanges = hasBreaking || report.additive.length > 0;
+    const hasChanges = hasBreaking || report.additive.length > 0 || movedCount > 0;
 
     if (hasBreaking) {
       packagesWithBreaking++;
@@ -635,7 +714,8 @@ function main() {
         breaking: report.breaking.length,
         potentiallyBreaking: report.potentiallyBreaking.length,
         additive: report.additive.length,
-        totalChanges: report.breaking.length + report.potentiallyBreaking.length + report.additive.length,
+        moved: movedCount,
+        totalChanges: report.breaking.length + report.potentiallyBreaking.length + report.additive.length + movedCount,
       });
       console.log(`  ⚠️  ${pkgName}`);
       for (const change of report.breaking) {
@@ -648,6 +728,9 @@ function main() {
           console.log(`         new: ${change.new}`);
         }
       }
+      if (verbose && movedCount > 0) {
+        console.log(`      ↪️  ${movedCount} moved (cross-file rename/restructure, not breaking)`);
+      }
     } else if (hasChanges) {
       packagesWithChanges++;
       changedPackages.push({
@@ -655,11 +738,12 @@ function main() {
         breaking: 0,
         potentiallyBreaking: 0,
         additive: report.additive.length,
-        totalChanges: report.additive.length,
+        moved: movedCount,
+        totalChanges: report.additive.length + movedCount,
       });
       if (verbose) {
         const pkgName = path.relative(sdkRoot, pkgDir).replace(/\\/g, "/");
-        console.log(`  ✅ ${pkgName} (additive only: ${report.additive.length} changes)`);
+        console.log(`  ✅ ${pkgName} (additive: ${report.additive.length}, moved: ${movedCount})`);
       }
     } else {
       packagesUnchanged++;
@@ -668,6 +752,7 @@ function main() {
     totalBreaking += report.breaking.length;
     totalPotentiallyBreaking += report.potentiallyBreaking.length;
     totalAdditive += report.additive.length;
+    totalMoved += movedCount;
 
     results.push({
       pkg: path.relative(sdkRoot, pkgDir).replace(/\\/g, "/"),
@@ -686,6 +771,7 @@ function main() {
   console.log(`Total breaking      : ${totalBreaking}`);
   console.log(`Total potentially breaking: ${totalPotentiallyBreaking}`);
   console.log(`Total additive      : ${totalAdditive}`);
+  console.log(`Total moved (cross-file restructure, not breaking): ${totalMoved}`);
   console.log("==============================================");
 
   if (changedPackages.length > 0) {
@@ -694,7 +780,7 @@ function main() {
     const top = [...changedPackages].sort((a, b) => b.totalChanges - a.totalChanges).slice(0, 20);
     for (const item of top) {
       console.log(
-        `  - ${item.pkg}: total=${item.totalChanges}, breaking=${item.breaking}, potentiallyBreaking=${item.potentiallyBreaking}, additive=${item.additive}`
+        `  - ${item.pkg}: total=${item.totalChanges}, breaking=${item.breaking}, potentiallyBreaking=${item.potentiallyBreaking}, additive=${item.additive}, moved=${item.moved || 0}`
       );
     }
   }
@@ -726,6 +812,7 @@ function main() {
       totalBreaking,
       totalPotentiallyBreaking,
       totalAdditive,
+      totalMoved,
       changedPackages: changedPackages.sort((a, b) => b.totalChanges - a.totalChanges),
     };
     fs.writeFileSync(reportFile, JSON.stringify(reportSummary, null, 2));
