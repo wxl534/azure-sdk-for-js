@@ -645,12 +645,21 @@ function processPackage(pkgDir) {
 
 function main() {
   console.log("===== Step 6: Breaking Change Detection =====");
-  console.log(`Baseline: ${baselineSha}`);
-  if (previousEmitterVersion || currentEmitterVersion) {
-    console.log(
-      `Emitter compare: ${previousEmitterVersion || "<unknown>"} -> ${currentEmitterVersion || "<unknown>"}`
-    );
+  console.log("");
+  console.log("--- API Comparison Setup ---");
+  console.log(`API baseline source : git ${baselineSha} (api.md files currently committed in repo)`);
+  console.log(`API "new" source    : api.md just regenerated from current spec with emitter under test`);
+  if (currentEmitterVersion) {
+    console.log(`Emitter under test  : ${currentEmitterVersion}`);
   }
+  if (previousEmitterVersion) {
+    console.log(`Previous emitter on npm (for context only, NOT used as baseline): ${previousEmitterVersion}`);
+  }
+  console.log("");
+  console.log("Note: per .NET/Go convention, the breaking-change baseline is the");
+  console.log("api.md files committed in HEAD. The previous emitter version is shown");
+  console.log("only as a label and is NOT actually re-run against the spec.");
+  console.log("");
   console.log(`Fail on breaking: ${failOnBreaking}`);
   console.log("");
 
