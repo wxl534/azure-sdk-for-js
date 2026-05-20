@@ -44,9 +44,9 @@ schedules:
 
 parameters:
   - name: EmitterVersion
-    displayName: "Emitter version to test (empty = latest from npm dev tag)"
+    displayName: "Emitter version to test (use 'empty' or leave default for latest dev tag)"
     type: string
-    default: ''
+    default: 'empty'
   - name: MaxPackages
     displayName: "Max ARM packages to process (0 = all)"
     type: number
@@ -122,11 +122,17 @@ stages:
           - script: |
               PREVIOUS_EMITTER_VERSION=$(node -e "const p=require('./eng/emitter-package.json'); console.log(p.dependencies['@azure-tools/typespec-ts'] || '')")
               echo "Current emitter in repo: $PREVIOUS_EMITTER_VERSION"
-              if [ -z "${{ parameters.EmitterVersion }}" ]; then
+
+              # Treat empty / common sentinel values ('empty', 'latest', 'auto', 'dev')
+              # as "use the latest dev tag from npm", because the ADO manual-run UI
+              # forces string params to be non-empty.
+              RAW_INPUT='${{ parameters.EmitterVersion }}'
+              NORMALIZED=$(echo "$RAW_INPUT" | tr '[:upper:]' '[:lower:]' | xargs)
+              if [ -z "$NORMALIZED" ] || [ "$NORMALIZED" = "empty" ] || [ "$NORMALIZED" = "latest" ] || [ "$NORMALIZED" = "auto" ] || [ "$NORMALIZED" = "dev" ]; then
                 EMITTER_VERSION=$(npm view @azure-tools/typespec-ts dist-tags.dev)
                 echo "Resolved from npm dev tag: $EMITTER_VERSION"
               else
-                EMITTER_VERSION="${{ parameters.EmitterVersion }}"
+                EMITTER_VERSION="$RAW_INPUT"
                 echo "Using specified version: $EMITTER_VERSION"
               fi
               echo "##vso[task.setvariable variable=emitterVersion;isOutput=true]$EMITTER_VERSION"
