@@ -500,12 +500,6 @@ stages:
           variables:
             emitterVersion: $[ dependencies.Setup.outputs['resolveVersion.emitterVersion'] ]
             previousEmitterVersion: $[ dependencies.Setup.outputs['resolveVersion.previousEmitterVersion'] ]
-            # When pushing to a fork, the user must provide a PAT through a secret variable.
-            # ForkTokenVariableName names that variable; we resolve it indirectly here.
-            ${{ if ne(parameters.ForkTokenVariableName, '') }}:
-              forkToken: $[ variables['${{ parameters.ForkTokenVariableName }}'] ]
-            ${{ else }}:
-              forkToken: ''
           steps:
             - checkout: self
 
@@ -545,17 +539,20 @@ stages:
                   isFork="true"
                 fi
 
-                # Resolve the token to use for pushing
+                # Resolve the token to use for pushing.
+                # FORK_TOKEN / GH_TOKEN_VAL are injected via the env: block below so
+                # that ADO can correctly substitute secret variables at runtime.
                 if [ "$isFork" = "true" ]; then
-                  pushToken='$(forkToken)'
-                  if [ -z "$pushToken" ] || [ "$pushToken" = '$(forkToken)' ]; then
+                  pushToken="${FORK_TOKEN:-}"
+                  if [ -z "$pushToken" ]; then
                     echo "ERROR: Pushing to fork ${repoOwner}/${repoName} but no fork PAT was provided."
-                    echo "Set parameter ForkTokenVariableName to the name of an ADO secret variable containing a GitHub PAT with repo scope."
+                    echo "Set parameter ForkTokenVariableName to the name of an ADO secret variable containing a GitHub PAT with repo scope,"
+                    echo "and make sure that secret variable actually exists in this pipeline."
                     exit 1
                   fi
                   echo "Pushing to fork: ${repoOwner}/${repoName} (using user-provided PAT)"
                 else
-                  pushToken='$(GH_TOKEN)'
+                  pushToken="${GH_TOKEN_VAL:-}"
                   echo "Pushing to source repo: ${repoOwner}/${repoName} (using GH App token)"
                 fi
 
@@ -606,6 +603,15 @@ stages:
                 echo "##vso[task.setvariable variable=IsFork]$isFork"
                 echo "##vso[task.setvariable variable=PushToken;issecret=true]$pushToken"
               displayName: 'Apply patches, commit and push branch'
+              env:
+                # Map secret variables into the script via env. This is the only
+                # reliable way for ADO to inject secret variables — `$(name)` direct
+                # substitution and `$[ variables[...] ]` indirect lookup do NOT work
+                # reliably for secret variables.
+                ${{ if ne(parameters.ForkTokenVariableName, '') }}:
+                  FORK_TOKEN: $(${{ parameters.ForkTokenVariableName }})
+                ${{ if eq(parameters.PullRequestRepoOwner, '') }}:
+                  GH_TOKEN_VAL: $(GH_TOKEN)
 
             - task: PowerShell@2
               displayName: 'Create pull request'
