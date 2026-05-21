@@ -297,9 +297,10 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
     let killedAfterEarlyExit = false;
     let earlyExitTriggered = false;
     let earlyExitTimer = null;
+    let lastOutputMs = Date.now();
     const proc = spawn(cmd, args, { cwd, shell: true });
 
-    const appendLine = (line) => { output += line; };
+    const appendLine = (line) => { output += line; lastOutputMs = Date.now(); };
     const stdoutStamper = makeLineStamper(startMs, appendLine);
     const stderrStamper = makeLineStamper(startMs, appendLine);
 
@@ -310,6 +311,60 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
       killedByTimeout = true;
       try { proc.kill("SIGKILL"); } catch {}
     }, timeoutMs);
+
+    // Heartbeat: while the child is alive, every HEARTBEAT_INTERVAL_MS print a
+    // timestamped progress line showing how long it's been silent and the
+    // child process's current CPU / RSS. This makes tsp-compile's silent
+    // multi-minute compile phase observable in the log instead of looking
+    // like a hang. We deliberately do NOT touch lastOutputMs here — heartbeats
+    // are runner-side metadata, not real child output.
+    const HEARTBEAT_INTERVAL_MS = 30 * 1000;
+    let lastResourceSnapshot = null;
+    function readProcSnapshot(pid) {
+      // /proc-based snapshot (Linux only). Returns { cpuPct, rssMB } or null.
+      try {
+        const statPath = `/proc/${pid}/stat`;
+        const statusPath = `/proc/${pid}/status`;
+        if (!fs.existsSync(statPath)) return null;
+        const stat = fs.readFileSync(statPath, "utf8");
+        // stat fields: pid (comm) state ppid ... utime(14) stime(15) ... vsize(23) rss(24)
+        const rparen = stat.lastIndexOf(")");
+        const tail = stat.slice(rparen + 2).split(" ");
+        // tail[0] = state, so utime is tail[11], stime is tail[12]
+        const utime = Number(tail[11]);
+        const stime = Number(tail[12]);
+        const totalJiffies = utime + stime;
+        const nowMs = Date.now();
+        let cpuPct = null;
+        if (lastResourceSnapshot) {
+          const dJiffies = totalJiffies - lastResourceSnapshot.totalJiffies;
+          const dMs = nowMs - lastResourceSnapshot.nowMs;
+          const clkTck = 100; // standard on Linux
+          if (dMs > 0) cpuPct = Math.round((dJiffies * 1000) / (clkTck * dMs) * 100);
+        }
+        lastResourceSnapshot = { totalJiffies, nowMs };
+        // RSS from /proc/<pid>/status (VmRSS line, in kB)
+        let rssMB = null;
+        if (fs.existsSync(statusPath)) {
+          const status = fs.readFileSync(statusPath, "utf8");
+          const m = status.match(/VmRSS:\s*(\d+)\s*kB/);
+          if (m) rssMB = Math.round(Number(m[1]) / 1024);
+        }
+        return { cpuPct, rssMB };
+      } catch {
+        return null;
+      }
+    }
+    const heartbeatTimer = setInterval(() => {
+      const silentSec = Math.round((Date.now() - lastOutputMs) / 1000);
+      const snap = readProcSnapshot(proc.pid);
+      const parts = [`silent ${silentSec}s`];
+      if (snap) {
+        if (snap.cpuPct !== null) parts.push(`CPU ${snap.cpuPct}%`);
+        if (snap.rssMB !== null) parts.push(`RSS ${snap.rssMB}MB`);
+      }
+      output += `${tsPrefix(startMs)}[heartbeat] still running (${parts.join(", ")})\n`;
+    }, HEARTBEAT_INTERVAL_MS);
 
     function maybeTriggerEarlyExit() {
       if (!earlyExitOnPattern || earlyExitTriggered) return;
@@ -337,6 +392,7 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
     proc.on("close", (code) => {
       stdoutStamper.end();
       stderrStamper.end();
+      clearInterval(heartbeatTimer);
       if (timer) clearTimeout(timer);
       if (earlyExitTimer) clearTimeout(earlyExitTimer);
       // If we ever observed "generation complete", the code was successfully
@@ -356,6 +412,7 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
     proc.on("error", (err) => {
       stdoutStamper.end();
       stderrStamper.end();
+      clearInterval(heartbeatTimer);
       if (timer) clearTimeout(timer);
       if (earlyExitTimer) clearTimeout(earlyExitTimer);
       output += `${tsPrefix(startMs)}[runner] spawn error: ${err.message}\n`;
@@ -410,11 +467,10 @@ function safeLogName(pkg) {
 }
 
 // Write the full log for a single package to <resultOutputDir>/logs/<phase>/<pkg>.log,
-// and ALWAYS emit an ADO-collapsible group with the full log so developers can
-// inspect every package's run (including successful ones) right from the
-// pipeline UI without downloading artifacts. Successful packages are emitted
-// under ##[group] (folded by default in ADO) and failures under ##[warning]
-// (expanded by default) so failures still stand out.
+// and ALWAYS emit an ADO-collapsible group (##[group]) with the full log so
+// every package's run — success or failure — is folded by default and can be
+// expanded on demand from the ADO UI. Failures are still easy to find via the
+// inline "❌ [N/M] FAILED" lines and the SUMMARY section at the end.
 function recordPackageLog(phase, pkg, success, output) {
   if (resultOutputDir) {
     try {
@@ -427,8 +483,7 @@ function recordPackageLog(phase, pkg, success, output) {
     }
   }
   const status = success ? "OK" : "FAILED";
-  const marker = success ? "##[group]" : "##[warning]";
-  console.log(`${marker}${phase} log [${status}]: ${pkg}`);
+  console.log(`##[group]${phase} log [${status}]: ${pkg}`);
   console.log(output);
   console.log("##[endgroup]");
 }

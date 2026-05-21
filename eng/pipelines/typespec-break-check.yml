@@ -47,6 +47,10 @@ parameters:
     displayName: "Emitter version to test (use 'empty' or leave default for latest dev tag)"
     type: string
     default: 'empty'
+  - name: OnlyPackages
+    displayName: "Only run specific packages (comma-separated, e.g. 'arm-datafactory' or 'arm-data*'; empty = all arm-*)"
+    type: string
+    default: ''
   - name: MaxPackages
     displayName: "Max ARM packages to process (0 = all)"
     type: number
@@ -211,21 +215,38 @@ stages:
         displayName: 'Generate package matrix'
         dependsOn: Setup
         steps:
-          - task: PowerShell@2
-            displayName: 'Split ARM packages into matrix batches'
-            name: generateMatrix
-            inputs:
-              pwsh: true
-              filePath: ./eng/common/scripts/New-RegenerateMatrix.ps1
-              arguments: >
-                -OutputDirectory "$(Build.ArtifactStagingDirectory)/matrix"
-                -OutputVariableName matrix
-                -JobCount ${{ parameters.RegenerationJobCount }}
-                -MinimumPerJob ${{ parameters.MinimumPerJob }}
-                -MaxPackages ${{ parameters.MaxPackages }}
-                -OnlyTypeSpec false
-                -DirectoryFilterPattern 'arm-*'
-              workingDirectory: $(Build.SourcesDirectory)
+          - ${{ if ne(parameters.OnlyPackages, '') }}:
+            - task: PowerShell@2
+              displayName: 'Split ARM packages into matrix batches (filtered)'
+              name: generateMatrix
+              inputs:
+                pwsh: true
+                filePath: ./eng/common/scripts/New-RegenerateMatrix.ps1
+                arguments: >
+                  -OutputDirectory "$(Build.ArtifactStagingDirectory)/matrix"
+                  -OutputVariableName matrix
+                  -JobCount ${{ parameters.RegenerationJobCount }}
+                  -MinimumPerJob ${{ parameters.MinimumPerJob }}
+                  -MaxPackages ${{ parameters.MaxPackages }}
+                  -OnlyTypeSpec false
+                  -DirectoryFilterPattern '${{ parameters.OnlyPackages }}'
+                workingDirectory: $(Build.SourcesDirectory)
+          - ${{ else }}:
+            - task: PowerShell@2
+              displayName: 'Split ARM packages into matrix batches'
+              name: generateMatrix
+              inputs:
+                pwsh: true
+                filePath: ./eng/common/scripts/New-RegenerateMatrix.ps1
+                arguments: >
+                  -OutputDirectory "$(Build.ArtifactStagingDirectory)/matrix"
+                  -OutputVariableName matrix
+                  -JobCount ${{ parameters.RegenerationJobCount }}
+                  -MinimumPerJob ${{ parameters.MinimumPerJob }}
+                  -MaxPackages ${{ parameters.MaxPackages }}
+                  -OnlyTypeSpec false
+                  -DirectoryFilterPattern 'arm-*'
+                workingDirectory: $(Build.SourcesDirectory)
 
           - task: PublishPipelineArtifact@1
             displayName: 'Publish matrix artifacts'
