@@ -577,6 +577,12 @@ stages:
                   fi
                 done
 
+                # Restore emitter-package.json / lock file so the PR only
+                # contains real SDK code diffs (these were temporarily bumped
+                # by the pipeline to the version under test and are not meant
+                # to be part of the PR).
+                git checkout -- eng/emitter-package.json eng/emitter-package-lock.json 2>/dev/null || true
+
                 mode="${{ parameters.ChangePushMode }}"
                 if [ "$mode" = "api-md" ]; then
                   git add -A -- ':(glob)sdk/**/review/*.api.md'
