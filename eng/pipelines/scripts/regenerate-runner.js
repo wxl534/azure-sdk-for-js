@@ -320,20 +320,67 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
     // are runner-side metadata, not real child output.
     const HEARTBEAT_INTERVAL_MS = 30 * 1000;
     let lastResourceSnapshot = null;
-    function readProcSnapshot(pid) {
-      // /proc-based snapshot (Linux only). Returns { cpuPct, rssMB } or null.
+    // Walk the process tree rooted at `rootPid` (the shell wrapper spawned by
+     // shell:true), summing CPU jiffies and RSS across all descendants. We have
+     // to do this because spawn(..., { shell: true }) makes proc.pid point to
+     // /bin/sh, not the actual tsp / node / npx worker that's doing the work —
+     // so reading just proc.pid yields CPU 0% / RSS 2MB even when tsp compile
+     // is burning a CPU core. We use /proc/<pid>/task/<tid>/children (a
+     // space-separated list of direct child pids) to walk recursively.
+    function collectDescendants(rootPid) {
+      const all = new Set();
+      const stack = [rootPid];
+      while (stack.length) {
+        const pid = stack.pop();
+        if (all.has(pid)) continue;
+        all.add(pid);
+        let taskDir;
+        try {
+          taskDir = fs.readdirSync(`/proc/${pid}/task`);
+        } catch { continue; }
+        for (const tid of taskDir) {
+          let childrenStr;
+          try {
+            childrenStr = fs.readFileSync(`/proc/${pid}/task/${tid}/children`, "utf8");
+          } catch { continue; }
+          for (const c of childrenStr.split(/\s+/)) {
+            const n = Number(c);
+            if (Number.isInteger(n) && n > 0 && !all.has(n)) stack.push(n);
+          }
+        }
+      }
+      return [...all];
+    }
+
+    function readPidStat(pid) {
       try {
-        const statPath = `/proc/${pid}/stat`;
-        const statusPath = `/proc/${pid}/status`;
-        if (!fs.existsSync(statPath)) return null;
-        const stat = fs.readFileSync(statPath, "utf8");
-        // stat fields: pid (comm) state ppid ... utime(14) stime(15) ... vsize(23) rss(24)
+        const stat = fs.readFileSync(`/proc/${pid}/stat`, "utf8");
         const rparen = stat.lastIndexOf(")");
         const tail = stat.slice(rparen + 2).split(" ");
-        // tail[0] = state, so utime is tail[11], stime is tail[12]
         const utime = Number(tail[11]);
         const stime = Number(tail[12]);
-        const totalJiffies = utime + stime;
+        return utime + stime;
+      } catch { return 0; }
+    }
+
+    function readPidRssKb(pid) {
+      try {
+        const status = fs.readFileSync(`/proc/${pid}/status`, "utf8");
+        const m = status.match(/VmRSS:\s*(\d+)\s*kB/);
+        return m ? Number(m[1]) : 0;
+      } catch { return 0; }
+    }
+
+    function readProcSnapshot(rootPid) {
+      // Sum CPU jiffies + RSS over the whole process tree rooted at rootPid.
+      try {
+        const pids = collectDescendants(rootPid);
+        let totalJiffies = 0;
+        let totalRssKb = 0;
+        for (const pid of pids) {
+          totalJiffies += readPidStat(pid);
+          totalRssKb += readPidRssKb(pid);
+        }
         const nowMs = Date.now();
         let cpuPct = null;
         if (lastResourceSnapshot) {
@@ -343,14 +390,11 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
           if (dMs > 0) cpuPct = Math.round((dJiffies * 1000) / (clkTck * dMs) * 100);
         }
         lastResourceSnapshot = { totalJiffies, nowMs };
-        // RSS from /proc/<pid>/status (VmRSS line, in kB)
-        let rssMB = null;
-        if (fs.existsSync(statusPath)) {
-          const status = fs.readFileSync(statusPath, "utf8");
-          const m = status.match(/VmRSS:\s*(\d+)\s*kB/);
-          if (m) rssMB = Math.round(Number(m[1]) / 1024);
-        }
-        return { cpuPct, rssMB };
+        return {
+          cpuPct,
+          rssMB: Math.round(totalRssKb / 1024),
+          procCount: pids.length,
+        };
       } catch {
         return null;
       }
@@ -361,7 +405,8 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
       const parts = [`silent ${silentSec}s`];
       if (snap) {
         if (snap.cpuPct !== null) parts.push(`CPU ${snap.cpuPct}%`);
-        if (snap.rssMB !== null) parts.push(`RSS ${snap.rssMB}MB`);
+        parts.push(`RSS ${snap.rssMB}MB`);
+        parts.push(`procs ${snap.procCount}`);
       }
       output += `${tsPrefix(startMs)}[heartbeat] still running (${parts.join(", ")})\n`;
     }, HEARTBEAT_INTERVAL_MS);
@@ -1083,7 +1128,7 @@ async function buildAll(regenResults) {
 async function main() {
   detectNestedDuplicateWorkspaces();
 
-  console.log("===== Step 3: Find & filter ARM packages =====");
+  console.log("===== Step 3: Resolve spec paths for assigned packages =====");
   const specIndex = buildSpecIndex();
   let packages;
 
