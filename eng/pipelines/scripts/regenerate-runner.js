@@ -249,15 +249,62 @@ function buildSpecIndex() {
   return index;
 }
 
+function tsPrefix(startMs) {
+  const now = new Date();
+  const hh = String(now.getUTCHours()).padStart(2, "0");
+  const mm = String(now.getUTCMinutes()).padStart(2, "0");
+  const ss = String(now.getUTCSeconds()).padStart(2, "0");
+  const ms = String(now.getUTCMilliseconds()).padStart(3, "0");
+  const elapsedSec = ((Date.now() - startMs) / 1000).toFixed(1).padStart(6, " ");
+  return `[${hh}:${mm}:${ss}.${ms}Z +${elapsedSec}s] `;
+}
+
+// Wrap a streaming chunk handler so every completed line is prefixed with a
+// real timestamp + elapsed-seconds marker. Partial lines (no trailing newline)
+// are buffered until the next chunk so we never break mid-line. This makes
+// downloaded per-package logs actually useful for diagnosing slow phases —
+// instead of relying on ADO's coarse, flush-time stamps.
+function makeLineStamper(startMs, onLine) {
+  let buf = "";
+  function flushLine(line) {
+    onLine(tsPrefix(startMs) + line + "\n");
+  }
+  return {
+    push(chunk) {
+      buf += chunk;
+      let idx;
+      while ((idx = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, idx).replace(/\r$/, "");
+        buf = buf.slice(idx + 1);
+        flushLine(line);
+      }
+    },
+    end() {
+      if (buf.length > 0) {
+        flushLine(buf);
+        buf = "";
+      }
+    },
+  };
+}
+
 function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
   const { earlyExitOnPattern = null, earlyExitGraceMs = GENERATION_COMPLETE_GRACE_MS } = options;
   return new Promise((resolve) => {
+    const startMs = Date.now();
     let output = "";
     let killedByTimeout = false;
     let killedAfterEarlyExit = false;
     let earlyExitTriggered = false;
     let earlyExitTimer = null;
     const proc = spawn(cmd, args, { cwd, shell: true });
+
+    const appendLine = (line) => { output += line; };
+    const stdoutStamper = makeLineStamper(startMs, appendLine);
+    const stderrStamper = makeLineStamper(startMs, appendLine);
+
+    // Header line so the log shows exactly when the command was launched.
+    output += `${tsPrefix(startMs)}$ ${cmd} ${args.join(" ")}  (cwd=${cwd}, timeout=${timeoutMs}ms)\n`;
 
     let timer = setTimeout(() => {
       killedByTimeout = true;
@@ -280,14 +327,16 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
     }
 
     proc.stdout.on("data", (d) => {
-      output += d.toString();
+      stdoutStamper.push(d.toString());
       maybeTriggerEarlyExit();
     });
     proc.stderr.on("data", (d) => {
-      output += d.toString();
+      stderrStamper.push(d.toString());
       maybeTriggerEarlyExit();
     });
     proc.on("close", (code) => {
+      stdoutStamper.end();
+      stderrStamper.end();
       if (timer) clearTimeout(timer);
       if (earlyExitTimer) clearTimeout(earlyExitTimer);
       // If we ever observed "generation complete", the code was successfully
@@ -295,19 +344,22 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
       // (clean exit, our SIGTERM/SIGKILL, or even the outer timeout firing
       // while we were waiting for the grace period).
       if (earlyExitTriggered) {
-        output += `\n[runner] generation completed; treated as success (exit-code=${code}, killedAfterEarlyExit=${killedAfterEarlyExit}, killedByTimeout=${killedByTimeout})\n`;
+        output += `${tsPrefix(startMs)}[runner] generation completed; treated as success (exit-code=${code}, killedAfterEarlyExit=${killedAfterEarlyExit}, killedByTimeout=${killedByTimeout})\n`;
         resolve({ code: 0, output, timedOut: false, earlyExited: true });
         return;
       }
       if (killedByTimeout) {
-        output += `\n[runner] killed by timeout after ${timeoutMs}ms\n`;
+        output += `${tsPrefix(startMs)}[runner] killed by timeout after ${timeoutMs}ms\n`;
       }
       resolve({ code, output, timedOut: killedByTimeout });
     });
     proc.on("error", (err) => {
+      stdoutStamper.end();
+      stderrStamper.end();
       if (timer) clearTimeout(timer);
       if (earlyExitTimer) clearTimeout(earlyExitTimer);
-      resolve({ code: 1, output: `${output}\n${err.message}`, timedOut: false });
+      output += `${tsPrefix(startMs)}[runner] spawn error: ${err.message}\n`;
+      resolve({ code: 1, output, timedOut: false });
     });
   });
 }
@@ -358,8 +410,11 @@ function safeLogName(pkg) {
 }
 
 // Write the full log for a single package to <resultOutputDir>/logs/<phase>/<pkg>.log,
-// and also print an ADO-collapsible group with the full log for failed runs so
-// developers can read it directly in the pipeline UI without downloading artifacts.
+// and ALWAYS emit an ADO-collapsible group with the full log so developers can
+// inspect every package's run (including successful ones) right from the
+// pipeline UI without downloading artifacts. Successful packages are emitted
+// under ##[group] (folded by default in ADO) and failures under ##[warning]
+// (expanded by default) so failures still stand out.
 function recordPackageLog(phase, pkg, success, output) {
   if (resultOutputDir) {
     try {
@@ -371,12 +426,11 @@ function recordPackageLog(phase, pkg, success, output) {
       console.log(`  Warning: failed to write log for ${pkg}: ${err.message}`);
     }
   }
-  if (!success) {
-    // Azure DevOps collapsible group — folded by default.
-    console.log(`##[group]${phase} log: ${pkg}`);
-    console.log(output);
-    console.log("##[endgroup]");
-  }
+  const status = success ? "OK" : "FAILED";
+  const marker = success ? "##[group]" : "##[warning]";
+  console.log(`${marker}${phase} log [${status}]: ${pkg}`);
+  console.log(output);
+  console.log("##[endgroup]");
 }
 
 // Recursively delete nested duplicate workspace directories of the form
