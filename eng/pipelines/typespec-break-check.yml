@@ -51,6 +51,10 @@ parameters:
     displayName: "Only run specific packages (comma-separated, e.g. 'arm-datafactory' or 'arm-data*'; empty = all arm-*)"
     type: string
     default: ''
+  - name: SkipPackages
+    displayName: "Skip specific packages (comma-separated, e.g. 'arm-datafactory,arm-network'; supports wildcards like 'arm-data*')"
+    type: string
+    default: ''
   - name: MaxPackages
     displayName: "Max ARM packages to process (0 = all)"
     type: number
@@ -120,22 +124,23 @@ variables:
   nodeVersion: '22.x'
 
 stages:
-  - stage: Regenerate
-    displayName: 'Regenerate & Build SDK packages'
+  - stage: BreakCheck
+    displayName: 'TypeSpec emitter breaking-change check'
     jobs:
       - job: Setup
-        displayName: 'Resolve emitter version & prepare'
+        #Resolve emitter version to test, update emitter-package.json and lock file accordingly, and expose the resolved versions as pipeline variables for downstream jobs.
+        displayName: 'Initialize'
         steps:
+          # Step 1: Install Node.js
           - task: NodeTool@0
-            displayName: 'Install Node.js'
+            displayName: 'Step 1: Install Node.js'
             inputs:
               versionSpec: $(nodeVersion)
 
-          - script: npm install -g @azure-tools/typespec-client-generator-cli
-            displayName: 'Install tsp-client'
-
-          # Step 1: Resolve emitter version
+          # Step 2: Resolve emitter version
           - script: |
+              set -euo pipefail
+
               REPO_EMITTER_VERSION=$(node -e "const p=require('./eng/emitter-package.json'); console.log(p.dependencies['@azure-tools/typespec-ts'] || '')")
               echo "Emitter currently committed in repo: $REPO_EMITTER_VERSION"
 
@@ -146,6 +151,14 @@ stages:
               NORMALIZED=$(echo "$RAW_INPUT" | tr '[:upper:]' '[:lower:]' | xargs)
               if [ -z "$NORMALIZED" ] || [ "$NORMALIZED" = "empty" ] || [ "$NORMALIZED" = "latest" ] || [ "$NORMALIZED" = "auto" ] || [ "$NORMALIZED" = "dev" ]; then
                 EMITTER_VERSION=$(npm view @azure-tools/typespec-ts dist-tags.dev)
+                # `npm view <pkg> dist-tags.<missing>` exits 0 with empty stdout
+                # when the tag does not exist. Without this guard, the pipeline
+                # would silently fall through with an empty EMITTER_VERSION and
+                # produce confusing downstream failures.
+                if [ -z "$EMITTER_VERSION" ]; then
+                  echo "##[error]npm view returned empty dev tag for @azure-tools/typespec-ts"
+                  exit 1
+                fi
                 echo "Resolved from npm dev tag: $EMITTER_VERSION"
               else
                 EMITTER_VERSION="$RAW_INPUT"
@@ -178,38 +191,8 @@ stages:
 
               echo "##vso[task.setvariable variable=emitterVersion;isOutput=true]$EMITTER_VERSION"
               echo "##vso[task.setvariable variable=previousEmitterVersion;isOutput=true]$PREVIOUS_EMITTER_VERSION"
-              echo "##vso[task.setvariable variable=repoEmitterVersion;isOutput=true]$REPO_EMITTER_VERSION"
-            displayName: 'Step 1: Resolve emitter version'
+            displayName: 'Step 2: Resolve emitter version'
             name: resolveVersion
-
-          # Step 2: Update emitter-package.json + regenerate lock file
-          - script: |
-              cd $(sdkRoot)
-              EMITTER_VERSION=$(resolveVersion.emitterVersion)
-
-              # Update emitter-package.json
-              node -e "
-                const fs = require('fs');
-                const pkg = JSON.parse(fs.readFileSync('eng/emitter-package.json', 'utf8'));
-                const oldVer = pkg.dependencies['@azure-tools/typespec-ts'];
-                pkg.dependencies['@azure-tools/typespec-ts'] = '$EMITTER_VERSION';
-                fs.writeFileSync('eng/emitter-package.json', JSON.stringify(pkg, null, 2) + '\n');
-                console.log('Updated: ' + oldVer + ' -> $EMITTER_VERSION');
-              "
-
-              # Regenerate lock file to prevent npm ci mismatch
-              cd eng
-              cp emitter-package.json package.json
-              npm install --package-lock-only --ignore-scripts 2>/dev/null
-              if [ -f package-lock.json ]; then
-                cp package-lock.json emitter-package-lock.json
-                rm -f package.json package-lock.json
-                rm -rf node_modules
-                echo "Lock file regenerated ✅"
-              else
-                echo "Warning: Failed to regenerate lock file"
-              fi
-            displayName: 'Step 2: Update emitter + regenerate lock file'
 
       - job: GenerateMatrix
         displayName: 'Generate package matrix'
@@ -255,7 +238,7 @@ stages:
               artifact: matrix_artifacts
 
       - job: RegenerateAndBuild
-        displayName: 'Regenerate & build packages'
+        displayName: 'Regenerate & build & breaking check'
         dependsOn:
           - Setup
           - GenerateMatrix
@@ -281,17 +264,28 @@ stages:
             displayName: 'Download matrix artifacts'
             artifact: matrix_artifacts
 
-          # Clone azure-rest-api-specs (latest main) as a sibling directory.
+          # Clone azure-rest-api-specs (full history).
+          # We deliberately do NOT use `--depth 1` because `tsp-client update`
+          # needs to fetch the historical commit recorded in each package's
+          # tsp-location.yaml. A shallow clone would not have those commits
+          # locally and would force a per-package `git fetch` over the network.
           - script: |
-              if [ -d "$(specRepoRoot)" ]; then
+              set -euo pipefail
+              if [ -d "$(specRepoRoot)/.git" ]; then
                 echo "Spec repo already exists at $(specRepoRoot), pulling latest..."
                 cd $(specRepoRoot)
+                # Make sure it's a full clone — convert a previous shallow clone
+                # if necessary so historical commits are available.
+                if [ -f ".git/shallow" ]; then
+                  echo "Existing clone is shallow; unshallowing to get full history..."
+                  git fetch --unshallow origin || git fetch origin
+                fi
                 git fetch origin ${{ parameters.SpecRepoBranch }}
                 git checkout ${{ parameters.SpecRepoBranch }}
                 git pull --ff-only
               else
-                echo "Cloning azure-rest-api-specs (branch ${{ parameters.SpecRepoBranch }})..."
-                git clone --depth 1 --branch ${{ parameters.SpecRepoBranch }} \
+                echo "Cloning azure-rest-api-specs (branch ${{ parameters.SpecRepoBranch }}, full history)..."
+                git clone --branch ${{ parameters.SpecRepoBranch }} \
                   https://github.com/Azure/azure-rest-api-specs.git $(specRepoRoot)
               fi
               echo "Spec repo ready at $(specRepoRoot)"
@@ -328,7 +322,8 @@ stages:
                 --skipBuild "${{ parameters.SkipBuild }}" \
                 --emitterVersion "$(emitterVersion)" \
                 --directoryList "$(Pipeline.Workspace)/matrix_artifacts/$(DirectoryList)" \
-                --resultOutputDir "$(Build.ArtifactStagingDirectory)/results/$(JobKey)"
+                --resultOutputDir "$(Build.ArtifactStagingDirectory)/results/$(JobKey)" \
+                --skipPackages "${{ parameters.SkipPackages }}"
             displayName: 'Regenerate & build ARM package batch'
 
           # Step 6: Breaking Change Detection

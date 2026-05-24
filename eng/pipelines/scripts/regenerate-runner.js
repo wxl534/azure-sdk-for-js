@@ -21,6 +21,32 @@ const directoryListFile = getArg("--directoryList", "");
 const resultOutputDir = getArg("--resultOutputDir", "");
 const regenTimeoutMs = Number(getArg("--regenTimeoutMs", String(25 * 60 * 1000)));
 
+// Skip-list: comma-separated package name patterns to exclude from this run.
+// Supports * wildcards. Matched against the package directory's basename
+// (e.g. "arm-datafactory") so the user can type the package name directly
+// instead of the full "sdk/<service>/<pkg>" path.
+//   --skipPackages "arm-datafactory,arm-network"   → skip two specific packages
+//   --skipPackages "arm-data*"                     → skip all arm-data*
+const skipPackagePatterns = getArg("--skipPackages", "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+function compileWildcard(pat) {
+  // Convert a glob with * into a regex anchored end-to-end.
+  const esc = pat.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp("^" + esc + "$");
+}
+const skipPackageRegexes = skipPackagePatterns.map(compileWildcard);
+
+function shouldSkipPackage(pkgPath) {
+  // pkgPath looks like "sdk/datafactory/arm-datafactory"; we match against
+  // the last segment for user convenience.
+  if (skipPackageRegexes.length === 0) return false;
+  const basename = pkgPath.split(/[\\/]/).pop();
+  return skipPackageRegexes.some((re) => re.test(basename) || re.test(pkgPath));
+}
+
 // Per-package timeout overrides (in ms) for known monster packages whose
 // tsp compile / emit takes much longer than the global default.
 const PACKAGE_TIMEOUT_OVERRIDES = {
@@ -880,6 +906,9 @@ function classifyFromDirectoryList(directoryListPath, specIndex) {
     process.exit(1);
   }
   console.log(`  Directory list contains ${entries.length} packages`);
+  if (skipPackagePatterns.length > 0) {
+    console.log(`  Skip-list patterns: ${skipPackagePatterns.join(", ")}`);
+  }
 
   const packages = [];
   const skipped = [];
@@ -893,6 +922,13 @@ function classifyFromDirectoryList(directoryListPath, specIndex) {
 
     const dir = normalizePath(path.join("sdk", entry));
     const pkgDir = path.join(sdkRoot, "sdk", entry);
+
+    // Explicit user-requested skip (--skipPackages). Done first so users can
+    // skip a package even if it would otherwise fail later checks.
+    if (shouldSkipPackage(dir)) {
+      skipped.push({ name: dir, reason: "matched --skipPackages pattern" });
+      continue;
+    }
 
     if (!fs.existsSync(pkgDir)) {
       skipped.push({ name: dir, reason: "directory does not exist" });
@@ -983,13 +1019,26 @@ async function regenerateAll(packages) {
     }
 
     const maxAttempts = 3;
+    // Decide whether to use `tsp-client update` (preferred — locks to the
+    // commit recorded in tsp-location.yaml, so spec/API-version is identical
+    // to what's currently committed in main; the only variable is the
+    // emitter) or fall back to the old `init --local-spec-repo` flow
+    // (necessary for new packages that have no tsp-location.yaml yet, or
+    // whose tsp-location.yaml is invalid).
+    const tspLocationPath = path.join(pkg.pkgDir, "tsp-location.yaml");
+    const useUpdate = fs.existsSync(tspLocationPath);
+    const tspClientArgs = useUpdate
+      ? ["update", "--debug"]
+      : ["init", "--update-if-exists", "-c", pkg.tspConfigPath, "--local-spec-repo", pkg.localSpecPath, "--debug"];
+    output += `tsp-client    : ${useUpdate ? "update (commit-locked via tsp-location.yaml)" : "init --local-spec-repo (latest main)"}\n`;
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       if (attempt > 1) await new Promise((resolve) => setTimeout(resolve, 10000 * (attempt - 1)));
 
       const pkgTimeoutMs = getRegenTimeoutForPackage(pkg.pkg);
       const result = await runCommand(
         "tsp-client",
-        ["init", "--update-if-exists", "-c", pkg.tspConfigPath, "--local-spec-repo", pkg.localSpecPath, "--debug"],
+        tspClientArgs,
         pkg.pkgDir,
         pkgTimeoutMs,
         { earlyExitOnPattern: /generation complete/i },
