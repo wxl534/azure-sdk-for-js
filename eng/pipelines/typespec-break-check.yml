@@ -198,7 +198,11 @@ stages:
         displayName: 'Generate package matrix'
         dependsOn: Setup
         steps:
-          - ${{ if ne(parameters.OnlyPackages, '') }}:
+          # Treat the literal placeholder 'empty' as "no filter" — the ADO
+          # manual-run UI shows the default value as a hint and users
+          # commonly leave it as 'empty' meaning "use the default (all arm-*)".
+          # Same convention used by the EmitterVersion parameter.
+          - ${{ if and(ne(parameters.OnlyPackages, ''), ne(parameters.OnlyPackages, 'empty')) }}:
             - task: PowerShell@2
               displayName: 'Split ARM packages into matrix batches (filtered)'
               name: generateMatrix

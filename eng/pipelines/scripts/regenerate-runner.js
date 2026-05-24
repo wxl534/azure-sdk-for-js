@@ -27,10 +27,18 @@ const regenTimeoutMs = Number(getArg("--regenTimeoutMs", String(25 * 60 * 1000))
 // instead of the full "sdk/<service>/<pkg>" path.
 //   --skipPackages "arm-datafactory,arm-network"   → skip two specific packages
 //   --skipPackages "arm-data*"                     → skip all arm-data*
-const skipPackagePatterns = getArg("--skipPackages", "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+//
+// The literal value "empty" is treated the same as an empty string: it's the
+// placeholder text used in the ADO UI hint, and users frequently leave it in
+// by accident. Same convention as the EmitterVersion parameter.
+const rawSkipArg = getArg("--skipPackages", "");
+const skipPackagePatterns =
+  rawSkipArg.trim().toLowerCase() === "empty"
+    ? []
+    : rawSkipArg
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
 
 function compileWildcard(pat) {
   // Convert a glob with * into a regex anchored end-to-end.
