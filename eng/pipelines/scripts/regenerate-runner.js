@@ -21,40 +21,6 @@ const directoryListFile = getArg("--directoryList", "");
 const resultOutputDir = getArg("--resultOutputDir", "");
 const regenTimeoutMs = Number(getArg("--regenTimeoutMs", String(25 * 60 * 1000)));
 
-// Skip-list: comma-separated package name patterns to exclude from this run.
-// Supports * wildcards. Matched against the package directory's basename
-// (e.g. "arm-datafactory") so the user can type the package name directly
-// instead of the full "sdk/<service>/<pkg>" path.
-//   --skipPackages "arm-datafactory,arm-network"   → skip two specific packages
-//   --skipPackages "arm-data*"                     → skip all arm-data*
-//
-// The literal value "empty" is treated the same as an empty string: it's the
-// placeholder text used in the ADO UI hint, and users frequently leave it in
-// by accident. Same convention as the EmitterVersion parameter.
-const rawSkipArg = getArg("--skipPackages", "");
-const skipPackagePatterns =
-  rawSkipArg.trim().toLowerCase() === "empty"
-    ? []
-    : rawSkipArg
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-
-function compileWildcard(pat) {
-  // Convert a glob with * into a regex anchored end-to-end.
-  const esc = pat.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
-  return new RegExp("^" + esc + "$");
-}
-const skipPackageRegexes = skipPackagePatterns.map(compileWildcard);
-
-function shouldSkipPackage(pkgPath) {
-  // pkgPath looks like "sdk/datafactory/arm-datafactory"; we match against
-  // the last segment for user convenience.
-  if (skipPackageRegexes.length === 0) return false;
-  const basename = pkgPath.split(/[\\/]/).pop();
-  return skipPackageRegexes.some((re) => re.test(basename) || re.test(pkgPath));
-}
-
 // Per-package timeout overrides (in ms) for known monster packages whose
 // tsp compile / emit takes much longer than the global default.
 const PACKAGE_TIMEOUT_OVERRIDES = {
@@ -914,9 +880,6 @@ function classifyFromDirectoryList(directoryListPath, specIndex) {
     process.exit(1);
   }
   console.log(`  Directory list contains ${entries.length} packages`);
-  if (skipPackagePatterns.length > 0) {
-    console.log(`  Skip-list patterns: ${skipPackagePatterns.join(", ")}`);
-  }
 
   const packages = [];
   const skipped = [];
@@ -930,13 +893,6 @@ function classifyFromDirectoryList(directoryListPath, specIndex) {
 
     const dir = normalizePath(path.join("sdk", entry));
     const pkgDir = path.join(sdkRoot, "sdk", entry);
-
-    // Explicit user-requested skip (--skipPackages). Done first so users can
-    // skip a package even if it would otherwise fail later checks.
-    if (shouldSkipPackage(dir)) {
-      skipped.push({ name: dir, reason: "matched --skipPackages pattern" });
-      continue;
-    }
 
     if (!fs.existsSync(pkgDir)) {
       skipped.push({ name: dir, reason: "directory does not exist" });
@@ -1108,6 +1064,14 @@ async function regenerateAll(packages) {
     if (activePromises.length >= maxWorkers) await Promise.race(activePromises);
   }
   await Promise.allSettled(activePromises);
+
+  // Same ADO group-collapse sentinel as in buildAll. Most of the time the
+  // next phase's banner "===== Step 5 =====" already triggers ADO to close
+  // the last regenerate group, but when build is skipped (--skipBuild, or
+  // all regens failed) the last regenerate group would otherwise be stuck
+  // in "open / not collapsible" state.
+  console.log("##[section]All per-package regenerate logs complete");
+
   return results;
 }
 
@@ -1207,6 +1171,14 @@ async function buildAll(regenResults) {
     if (activePromises.length >= buildWorkers) await Promise.race(activePromises);
   }
   await Promise.allSettled(activePromises);
+
+  // ADO logging quirk: a ##[group] only renders as a collapsible block when
+  // there is following non-group content as an anchor. Without this sentinel
+  // the very last build package's group stays in "open" state and the user
+  // cannot collapse it. Emitting a ##[section] line acts as a hard boundary
+  // and forces ADO to close (and thus make collapsible) all preceding groups.
+  console.log("##[section]All per-package build logs complete");
+
   return { buildResults, skipped: false };
 }
 

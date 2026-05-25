@@ -47,14 +47,6 @@ parameters:
     displayName: "Emitter version to test (use 'empty' or leave default for latest dev tag)"
     type: string
     default: 'empty'
-  - name: OnlyPackages
-    displayName: "Only run specific packages (comma-separated, e.g. 'arm-datafactory' or 'arm-data*'; empty = all arm-*)"
-    type: string
-    default: ''
-  - name: SkipPackages
-    displayName: "Skip specific packages (comma-separated, e.g. 'arm-datafactory,arm-network'; supports wildcards like 'arm-data*')"
-    type: string
-    default: ''
   - name: MaxPackages
     displayName: "Max ARM packages to process (0 = all)"
     type: number
@@ -128,8 +120,7 @@ stages:
     displayName: 'TypeSpec emitter breaking-change check'
     jobs:
       - job: Setup
-        #Resolve emitter version to test, update emitter-package.json and lock file accordingly, and expose the resolved versions as pipeline variables for downstream jobs.
-        displayName: 'Initialize'
+        displayName: 'Setup'
         steps:
           # Step 1: Install Node.js
           - task: NodeTool@0
@@ -198,42 +189,21 @@ stages:
         displayName: 'Generate package matrix'
         dependsOn: Setup
         steps:
-          # Treat the literal placeholder 'empty' as "no filter" — the ADO
-          # manual-run UI shows the default value as a hint and users
-          # commonly leave it as 'empty' meaning "use the default (all arm-*)".
-          # Same convention used by the EmitterVersion parameter.
-          - ${{ if and(ne(parameters.OnlyPackages, ''), ne(parameters.OnlyPackages, 'empty')) }}:
-            - task: PowerShell@2
-              displayName: 'Split ARM packages into matrix batches (filtered)'
-              name: generateMatrix
-              inputs:
-                pwsh: true
-                filePath: ./eng/common/scripts/New-RegenerateMatrix.ps1
-                arguments: >
-                  -OutputDirectory "$(Build.ArtifactStagingDirectory)/matrix"
-                  -OutputVariableName matrix
-                  -JobCount ${{ parameters.RegenerationJobCount }}
-                  -MinimumPerJob ${{ parameters.MinimumPerJob }}
-                  -MaxPackages ${{ parameters.MaxPackages }}
-                  -OnlyTypeSpec false
-                  -DirectoryFilterPattern '${{ parameters.OnlyPackages }}'
-                workingDirectory: $(Build.SourcesDirectory)
-          - ${{ else }}:
-            - task: PowerShell@2
-              displayName: 'Split ARM packages into matrix batches'
-              name: generateMatrix
-              inputs:
-                pwsh: true
-                filePath: ./eng/common/scripts/New-RegenerateMatrix.ps1
-                arguments: >
-                  -OutputDirectory "$(Build.ArtifactStagingDirectory)/matrix"
-                  -OutputVariableName matrix
-                  -JobCount ${{ parameters.RegenerationJobCount }}
-                  -MinimumPerJob ${{ parameters.MinimumPerJob }}
-                  -MaxPackages ${{ parameters.MaxPackages }}
-                  -OnlyTypeSpec false
-                  -DirectoryFilterPattern 'arm-*'
-                workingDirectory: $(Build.SourcesDirectory)
+          - task: PowerShell@2
+            displayName: 'Split ARM packages into matrix batches'
+            name: generateMatrix
+            inputs:
+              pwsh: true
+              filePath: ./eng/common/scripts/New-RegenerateMatrix.ps1
+              arguments: >
+                -OutputDirectory "$(Build.ArtifactStagingDirectory)/matrix"
+                -OutputVariableName matrix
+                -JobCount ${{ parameters.RegenerationJobCount }}
+                -MinimumPerJob ${{ parameters.MinimumPerJob }}
+                -MaxPackages ${{ parameters.MaxPackages }}
+                -OnlyTypeSpec false
+                -DirectoryFilterPattern 'arm-*'
+              workingDirectory: $(Build.SourcesDirectory)
 
           - task: PublishPipelineArtifact@1
             displayName: 'Publish matrix artifacts'
@@ -242,7 +212,7 @@ stages:
               artifact: matrix_artifacts
 
       - job: RegenerateAndBuild
-        displayName: 'Regenerate & build & breaking check'
+        displayName: 'RegenerateAndBuild'
         dependsOn:
           - Setup
           - GenerateMatrix
@@ -326,8 +296,7 @@ stages:
                 --skipBuild "${{ parameters.SkipBuild }}" \
                 --emitterVersion "$(emitterVersion)" \
                 --directoryList "$(Pipeline.Workspace)/matrix_artifacts/$(DirectoryList)" \
-                --resultOutputDir "$(Build.ArtifactStagingDirectory)/results/$(JobKey)" \
-                --skipPackages "${{ parameters.SkipPackages }}"
+                --resultOutputDir "$(Build.ArtifactStagingDirectory)/results/$(JobKey)"
             displayName: 'Regenerate & build ARM package batch'
 
           # Step 6: Breaking Change Detection
