@@ -511,6 +511,78 @@ function safeLogName(pkg) {
   return pkg.replace(/[\\/]/g, "__");
 }
 
+// Patch a tspconfig.yaml content string to pin `api-version` inside the
+// `@azure-tools/typespec-ts` emitter options block.
+//
+// We intentionally do a minimal string-level edit instead of a real YAML
+// parse+serialize round-trip, because YAML libraries reformat the file
+// (comments lost, key ordering shuffled, anchors mangled) and we want to
+// touch the file as little as possible so the rest of the spec config is
+// unaffected.
+//
+// Strategy:
+//   1. Locate the "@azure-tools/typespec-ts:" key inside the options block.
+//   2. If it has an existing `api-version: <something>` child, replace its value.
+//   3. Otherwise, insert a new `api-version: <pin>` line as the first child
+//      of that emitter, preserving the indentation level of its other children.
+// Returns the patched content; returns original if the emitter block can't
+// be located (caller treats that as a no-op + warning).
+function patchTspConfigApiVersion(content, apiVersion) {
+  const lines = content.split(/\r?\n/);
+
+  // Find the emitter options line. Two common shapes:
+  //   options:
+  //     "@azure-tools/typespec-ts":
+  //   options:
+  //     '@azure-tools/typespec-ts':
+  //   options:
+  //     @azure-tools/typespec-ts:
+  let emitterIdx = -1;
+  let emitterIndent = "";
+  const emitterRegex = /^(\s*)["']?@azure-tools\/typespec-ts["']?\s*:\s*$/;
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(emitterRegex);
+    if (m) {
+      emitterIdx = i;
+      emitterIndent = m[1];
+      break;
+    }
+  }
+  if (emitterIdx < 0) return content;
+
+  // Determine child indentation by looking at the first non-empty child line.
+  let childIndent = emitterIndent + "  ";
+  for (let i = emitterIdx + 1; i < lines.length; i++) {
+    if (lines[i].trim() === "") continue;
+    const cIndent = lines[i].match(/^(\s*)/)[1];
+    if (cIndent.length > emitterIndent.length) {
+      childIndent = cIndent;
+      break;
+    } else {
+      // Sibling or dedent — block had no children at all.
+      break;
+    }
+  }
+
+  // Scan children for existing api-version line. A child is anything at or
+  // deeper than childIndent; we stop when we hit a line at or shallower than
+  // emitterIndent (next sibling / parent dedent).
+  const apiVerRegex = new RegExp("^" + childIndent + "api-version\\s*:");
+  for (let i = emitterIdx + 1; i < lines.length; i++) {
+    if (lines[i].trim() === "") continue;
+    const cIndent = lines[i].match(/^(\s*)/)[1];
+    if (cIndent.length <= emitterIndent.length) break; // exited the block
+    if (apiVerRegex.test(lines[i])) {
+      lines[i] = `${childIndent}api-version: "${apiVersion}"`;
+      return lines.join("\n");
+    }
+  }
+
+  // No existing api-version — insert one right after the emitter header.
+  lines.splice(emitterIdx + 1, 0, `${childIndent}api-version: "${apiVersion}"`);
+  return lines.join("\n");
+}
+
 // Write the full log for a single package to <resultOutputDir>/logs/<phase>/<pkg>.log,
 // and ALWAYS emit an ADO-collapsible group (##[group]) with the full log so
 // every package's run — success or failure — is folded by default and can be
@@ -982,47 +1054,80 @@ async function regenerateAll(packages) {
       return;
     }
 
-    const maxAttempts = 3;
-    // Decide whether to use `tsp-client update` (preferred — locks to the
-    // commit recorded in tsp-location.yaml, so spec/API-version is identical
-    // to what's currently committed in main; the only variable is the
-    // emitter) or fall back to the old `init --local-spec-repo` flow
-    // (necessary for new packages that have no tsp-location.yaml yet, or
-    // whose tsp-location.yaml is invalid).
+    // API-version pinning: read metadata.json (written by previous emitter run)
+    // to learn which apiVersion this package is currently built against, then
+    // temporarily patch the spec's tspconfig.yaml to pin the new emitter to
+    // the same apiVersion. This isolates "pure emitter delta" without
+    // requiring commit-locked spec.
     //
-    // `tsp-location.yaml` from some packages was authored with a local-relative
-    // `repo:` path (e.g. `repo: ../azure-rest-api-specs`) instead of the proper
-    // GitHub `owner/repo` form. `tsp-client update` would then build
-    // `https://github.com/../azure-rest-api-specs.git` and fail with 404.
-    // Detect that case and fall back to the local-spec-repo flow.
-    const tspLocationPath = path.join(pkg.pkgDir, "tsp-location.yaml");
-    let useUpdate = false;
-    let updateSkipReason = "";
-    if (fs.existsSync(tspLocationPath)) {
+    // metadata.json shape:
+    //   { "apiVersions": { "Microsoft.Batch": "2025-06-01" }, ... }
+    //
+    // - 0 namespaces → no metadata / brand-new package → skip pinning
+    // - 1 namespace  → pin emitter to that single apiVersion
+    // - N namespaces (rare, e.g. arm-network) → skip pinning, log a notice;
+    //   tspconfig only takes one api-version value and we don't know which
+    //   namespace to prioritize. Diff for these packages may include spec
+    //   evolution noise.
+    let pinnedApiVersion = null;
+    let pinReason = "";
+    const metadataPath = path.join(pkg.pkgDir, "metadata.json");
+    if (fs.existsSync(metadataPath)) {
       try {
-        const content = fs.readFileSync(tspLocationPath, "utf8");
-        const repoMatch = content.match(/^\s*repo\s*:\s*(.+?)\s*$/m);
-        const repoValue = repoMatch ? repoMatch[1].trim() : "";
-        // Valid GitHub owner/repo: "owner/repo" (alphanumeric / dash / dot / underscore).
-        const validGithubRepo = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repoValue);
-        if (!repoValue) {
-          updateSkipReason = "tsp-location.yaml has no repo field";
-        } else if (!validGithubRepo) {
-          updateSkipReason = `tsp-location.yaml has non-GitHub repo value: '${repoValue}'`;
+        const meta = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+        const apiVersions = meta && meta.apiVersions;
+        if (apiVersions && typeof apiVersions === "object") {
+          const ns = Object.keys(apiVersions);
+          if (ns.length === 1) {
+            pinnedApiVersion = String(apiVersions[ns[0]]);
+            pinReason = `pinned to ${ns[0]}=${pinnedApiVersion}`;
+          } else if (ns.length > 1) {
+            pinReason = `skipped (multiple namespaces: ${ns.join(", ")})`;
+          } else {
+            pinReason = "skipped (empty apiVersions in metadata.json)";
+          }
         } else {
-          useUpdate = true;
+          pinReason = "skipped (metadata.json has no apiVersions field)";
         }
       } catch (err) {
-        updateSkipReason = `failed to read tsp-location.yaml: ${err.message}`;
+        pinReason = `skipped (failed to parse metadata.json: ${err.message})`;
       }
     } else {
-      updateSkipReason = "no tsp-location.yaml";
+      pinReason = "skipped (no metadata.json — likely a new package)";
+    }
+    output += `api-version   : ${pinReason}\n`;
+
+    // If we have a pinned apiVersion, patch the spec's tspconfig.yaml to add
+    // `options."@azure-tools/typespec-ts".api-version: <pin>`. We patch a
+    // COPY of tspconfig in-place inside the cloned spec repo (which is a
+    // throwaway sibling dir, not the SDK repo) — and restore it afterwards
+    // so subsequent packages reading the same tspconfig still see the
+    // original content. Backup is by string snapshot, simplest possible.
+    let originalTspConfig = null;
+    if (pinnedApiVersion) {
+      try {
+        originalTspConfig = fs.readFileSync(pkg.tspConfigPath, "utf8");
+        const patched = patchTspConfigApiVersion(originalTspConfig, pinnedApiVersion);
+        if (patched !== originalTspConfig) {
+          fs.writeFileSync(pkg.tspConfigPath, patched);
+        } else {
+          // Nothing changed (e.g., emitter section not found) — no need to restore later.
+          originalTspConfig = null;
+          output += `api-version   : (warning) could not find typespec-ts options block in tspconfig.yaml; emitter default will be used\n`;
+        }
+      } catch (err) {
+        output += `api-version   : (warning) failed to patch tspconfig.yaml: ${err.message}\n`;
+        originalTspConfig = null;
+      }
     }
 
-    const tspClientArgs = useUpdate
-      ? ["update", "--debug"]
-      : ["init", "--update-if-exists", "-c", pkg.tspConfigPath, "--local-spec-repo", pkg.localSpecPath, "--debug"];
-    output += `tsp-client    : ${useUpdate ? "update (commit-locked via tsp-location.yaml)" : `init --local-spec-repo (latest main; ${updateSkipReason})`}\n`;
+    const maxAttempts = 3;
+    // Use `tsp-client init --update-if-exists` with the latest main spec from
+    // the locally cloned azure-rest-api-specs repo. apiVersion pinning above
+    // ensures emitter targets the same version that's currently committed in
+    // SDK repo's metadata.json, so the diff reflects emitter delta only.
+    const tspClientArgs = ["init", "--update-if-exists", "-c", pkg.tspConfigPath, "--local-spec-repo", pkg.localSpecPath, "--debug"];
+    output += `tsp-client    : init --local-spec-repo (latest main)\n`;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       if (attempt > 1) await new Promise((resolve) => setTimeout(resolve, 10000 * (attempt - 1)));
@@ -1042,6 +1147,19 @@ async function regenerateAll(packages) {
       // Do not retry on timeout-kill — it will just waste another full timeout.
       if (success || result.timedOut) break;
       if (!isRetryableGitError(result.output)) break;
+    }
+
+    // Restore tspconfig.yaml if we patched it. Done in a finally-style block
+    // so a failing tsp-client run doesn't leave the spec repo in a modified
+    // state. (The spec repo is a throwaway sibling dir on the agent, but
+    // restoring keeps the workspace tidy and avoids confusing subsequent
+    // shards / debugging sessions that share the same agent.)
+    if (originalTspConfig !== null) {
+      try {
+        fs.writeFileSync(pkg.tspConfigPath, originalTspConfig);
+      } catch (err) {
+        output += `api-version   : (warning) failed to restore tspconfig.yaml: ${err.message}\n`;
+      }
     }
 
     const duration = ((Date.now() - start) / 1000).toFixed(1);
