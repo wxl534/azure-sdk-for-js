@@ -58,7 +58,7 @@ parameters:
   - name: BuildWorkers
     displayName: "Build concurrent workers"
     type: number
-    default: 1
+    default: 2
   - name: RegenerationJobCount
     displayName: "Matrix jobs for regeneration"
     type: number
@@ -238,28 +238,46 @@ stages:
             displayName: 'Download matrix artifacts'
             artifact: matrix_artifacts
 
-          # Clone azure-rest-api-specs (full history).
-          # We deliberately do NOT use `--depth 1` because `tsp-client update`
-          # needs to fetch the historical commit recorded in each package's
-          # tsp-location.yaml. A shallow clone would not have those commits
-          # locally and would force a per-package `git fetch` over the network.
+          # Ensure the SDK repo workspace is pristine. ADO agents are
+          # persistent and a previous failed run may have left files deleted
+          # by tsp-client (e.g. missing metadata.json), which then makes our
+          # api-version pinning skip those packages because they look like
+          # "no metadata.json — likely a new package". `git clean -fdx` plus
+          # `git reset --hard` guarantees we start from a known-clean tree.
+          - script: |
+              set -euo pipefail
+              cd $(sdkRoot)
+              echo "Resetting SDK workspace to a clean state..."
+              git reset --hard HEAD
+              # -d remove untracked dirs, -x include ignored files,
+              # exclude node_modules / pnpm-store so the agent doesn't have
+              # to re-download hundreds of MBs every run.
+              git clean -fd -e node_modules -e .pnpm-store -e '**/node_modules'
+              echo "Workspace reset. Sample metadata.json presence check:"
+              for p in sdk/agricultureplatform/arm-agricultureplatform sdk/advisor/arm-advisor sdk/applicationinsights/arm-appinsights; do
+                if [ -f "$p/metadata.json" ]; then
+                  echo "  ✅ $p/metadata.json present"
+                else
+                  echo "  ❌ $p/metadata.json MISSING after reset (unexpected)"
+                fi
+              done
+            displayName: 'Reset SDK workspace (clean stale state from previous runs)'
+
+          # Clone azure-rest-api-specs (latest main, shallow).
+          # tsp-client init --local-spec-repo only needs the current state of
+          # the spec repo, so a depth=1 shallow clone is enough and saves
+          # 5-10 minutes vs a full clone.
           - script: |
               set -euo pipefail
               if [ -d "$(specRepoRoot)/.git" ]; then
                 echo "Spec repo already exists at $(specRepoRoot), pulling latest..."
                 cd $(specRepoRoot)
-                # Make sure it's a full clone — convert a previous shallow clone
-                # if necessary so historical commits are available.
-                if [ -f ".git/shallow" ]; then
-                  echo "Existing clone is shallow; unshallowing to get full history..."
-                  git fetch --unshallow origin || git fetch origin
-                fi
-                git fetch origin ${{ parameters.SpecRepoBranch }}
+                git fetch origin ${{ parameters.SpecRepoBranch }} --depth 1
                 git checkout ${{ parameters.SpecRepoBranch }}
-                git pull --ff-only
+                git reset --hard origin/${{ parameters.SpecRepoBranch }}
               else
-                echo "Cloning azure-rest-api-specs (branch ${{ parameters.SpecRepoBranch }}, full history)..."
-                git clone --branch ${{ parameters.SpecRepoBranch }} \
+                echo "Cloning azure-rest-api-specs (branch ${{ parameters.SpecRepoBranch }}, shallow)..."
+                git clone --depth 1 --branch ${{ parameters.SpecRepoBranch }} \
                   https://github.com/Azure/azure-rest-api-specs.git $(specRepoRoot)
               fi
               echo "Spec repo ready at $(specRepoRoot)"
