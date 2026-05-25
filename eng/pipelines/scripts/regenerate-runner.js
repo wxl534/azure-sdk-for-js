@@ -1033,12 +1033,40 @@ async function regenerateAll(packages) {
     // emitter) or fall back to the old `init --local-spec-repo` flow
     // (necessary for new packages that have no tsp-location.yaml yet, or
     // whose tsp-location.yaml is invalid).
+    //
+    // `tsp-location.yaml` from some packages was authored with a local-relative
+    // `repo:` path (e.g. `repo: ../azure-rest-api-specs`) instead of the proper
+    // GitHub `owner/repo` form. `tsp-client update` would then build
+    // `https://github.com/../azure-rest-api-specs.git` and fail with 404.
+    // Detect that case and fall back to the local-spec-repo flow.
     const tspLocationPath = path.join(pkg.pkgDir, "tsp-location.yaml");
-    const useUpdate = fs.existsSync(tspLocationPath);
+    let useUpdate = false;
+    let updateSkipReason = "";
+    if (fs.existsSync(tspLocationPath)) {
+      try {
+        const content = fs.readFileSync(tspLocationPath, "utf8");
+        const repoMatch = content.match(/^\s*repo\s*:\s*(.+?)\s*$/m);
+        const repoValue = repoMatch ? repoMatch[1].trim() : "";
+        // Valid GitHub owner/repo: "owner/repo" (alphanumeric / dash / dot / underscore).
+        const validGithubRepo = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repoValue);
+        if (!repoValue) {
+          updateSkipReason = "tsp-location.yaml has no repo field";
+        } else if (!validGithubRepo) {
+          updateSkipReason = `tsp-location.yaml has non-GitHub repo value: '${repoValue}'`;
+        } else {
+          useUpdate = true;
+        }
+      } catch (err) {
+        updateSkipReason = `failed to read tsp-location.yaml: ${err.message}`;
+      }
+    } else {
+      updateSkipReason = "no tsp-location.yaml";
+    }
+
     const tspClientArgs = useUpdate
       ? ["update", "--debug"]
       : ["init", "--update-if-exists", "-c", pkg.tspConfigPath, "--local-spec-repo", pkg.localSpecPath, "--debug"];
-    output += `tsp-client    : ${useUpdate ? "update (commit-locked via tsp-location.yaml)" : "init --local-spec-repo (latest main)"}\n`;
+    output += `tsp-client    : ${useUpdate ? "update (commit-locked via tsp-location.yaml)" : `init --local-spec-repo (latest main; ${updateSkipReason})`}\n`;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       if (attempt > 1) await new Promise((resolve) => setTimeout(resolve, 10000 * (attempt - 1)));
