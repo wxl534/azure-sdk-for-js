@@ -2,7 +2,7 @@
   "apiVersions": {
     "Microsoft.DataFactory": "2018-06-01"
   },
-  "emitterVersion": "0.52.3",
+  "emitterVersion": "0.52.3-alpha.20260508.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.DataFactory",
     "CrossLanguageDefinitionId": {

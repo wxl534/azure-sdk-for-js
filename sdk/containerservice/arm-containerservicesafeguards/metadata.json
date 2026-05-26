@@ -1,4 +1,37 @@
 {
-  "apiVersion": "2025-05-02-preview",
-  "emitterVersion": "0.42.0"
+  "apiVersions": {
+    "Microsoft.ContainerService": "2025-07-01"
+  },
+  "emitterVersion": "0.52.3-alpha.20260508.1",
+  "crossLanguageDefinitions": {
+    "CrossLanguagePackageId": "Microsoft.ContainerService",
+    "CrossLanguageDefinitionId": {
+      "@azure/arm-containerservicesafeguards!OperationListResult:interface": "Azure.ResourceManager.CommonTypes.OperationListResult",
+      "@azure/arm-containerservicesafeguards!Operation:interface": "Azure.ResourceManager.CommonTypes.Operation",
+      "@azure/arm-containerservicesafeguards!OperationDisplay:interface": "Azure.ResourceManager.CommonTypes.OperationDisplay",
+      "@azure/arm-containerservicesafeguards!ErrorResponse:interface": "Azure.ResourceManager.CommonTypes.ErrorResponse",
+      "@azure/arm-containerservicesafeguards!ErrorDetail:interface": "Azure.ResourceManager.CommonTypes.ErrorDetail",
+      "@azure/arm-containerservicesafeguards!ErrorAdditionalInfo:interface": "Azure.ResourceManager.CommonTypes.ErrorAdditionalInfo",
+      "@azure/arm-containerservicesafeguards!DeploymentSafeguard:interface": "Microsoft.ContainerService.DeploymentSafeguard",
+      "@azure/arm-containerservicesafeguards!DeploymentSafeguardsProperties:interface": "Microsoft.ContainerService.DeploymentSafeguardsProperties",
+      "@azure/arm-containerservicesafeguards!ExtensionResource:interface": "Azure.ResourceManager.CommonTypes.ExtensionResource",
+      "@azure/arm-containerservicesafeguards!Resource:interface": "Azure.ResourceManager.CommonTypes.Resource",
+      "@azure/arm-containerservicesafeguards!SystemData:interface": "Azure.ResourceManager.CommonTypes.SystemData",
+      "@azure/arm-containerservicesafeguards!ArmOperationStatusResourceProvisioningState:interface": "Azure.ResourceManager.ArmOperationStatus",
+      "@azure/arm-containerservicesafeguards!DeploymentSafeguardListResult:interface": "Azure.ResourceManager.ResourceListResult",
+      "@azure/arm-containerservicesafeguards!KnownOrigin:enum": "Azure.ResourceManager.CommonTypes.Origin",
+      "@azure/arm-containerservicesafeguards!KnownActionType:enum": "Azure.ResourceManager.CommonTypes.ActionType",
+      "@azure/arm-containerservicesafeguards!KnownProvisioningState:enum": "Microsoft.ContainerService.ProvisioningState",
+      "@azure/arm-containerservicesafeguards!KnownDeploymentSafeguardsLevel:enum": "Microsoft.ContainerService.DeploymentSafeguardsLevel",
+      "@azure/arm-containerservicesafeguards!KnownPodSecurityStandardsLevel:enum": "Microsoft.ContainerService.PodSecurityStandardsLevel",
+      "@azure/arm-containerservicesafeguards!KnowncreatedByType:enum": "Azure.ResourceManager.CommonTypes.createdByType",
+      "@azure/arm-containerservicesafeguards!KnownResourceProvisioningState:enum": "Azure.ResourceManager.ResourceProvisioningState",
+      "@azure/arm-containerservicesafeguards!KnownVersions:enum": "Microsoft.ContainerService.Versions",
+      "@azure/arm-containerservicesafeguards!DeploymentSafeguardsOperations#list:member": "Microsoft.ContainerService.DeploymentSafeguards.list",
+      "@azure/arm-containerservicesafeguards!DeploymentSafeguardsOperations#delete:member": "Microsoft.ContainerService.DeploymentSafeguards.delete",
+      "@azure/arm-containerservicesafeguards!DeploymentSafeguardsOperations#create:member": "Microsoft.ContainerService.DeploymentSafeguards.create",
+      "@azure/arm-containerservicesafeguards!DeploymentSafeguardsOperations#get:member": "Microsoft.ContainerService.DeploymentSafeguards.get",
+      "@azure/arm-containerservicesafeguards!OperationsOperations#list:member": "Azure.ResourceManager.Operations.list"
+    }
+  }
 }

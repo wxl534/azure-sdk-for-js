@@ -2,7 +2,7 @@
   "apiVersions": {
     "Microsoft.Discovery": "2026-02-01-preview"
   },
-  "emitterVersion": "0.51.0",
+  "emitterVersion": "0.52.3-alpha.20260508.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.Discovery",
     "CrossLanguageDefinitionId": {
@@ -104,7 +104,7 @@
       "@azure/arm-discovery!KnownVersions:enum": "Microsoft.Discovery.Versions",
       "@azure/arm-discovery!BookshelfPropertiesWorkloadIdentity:type": "Microsoft.Discovery.BookshelfProperties.workloadIdentity.anonymous",
       "@azure/arm-discovery!SupercomputerIdentitiesWorkloadIdentity:type": "Microsoft.Discovery.SupercomputerIdentities.workloadIdentity.anonymous",
-      "@azure/arm-discovery!:type": ".anonymous",
+      "@azure/arm-discovery!SupercomputerIdentitiesUpdateWorkloadIdentity:type": "SupercomputerIdentitiesUpdate.workloadIdentity.anonymous",
       "@azure/arm-discovery!StorageContainersOperations#listBySubscription:member": "Microsoft.Discovery.StorageContainers.listBySubscription",
       "@azure/arm-discovery!StorageContainersOperations#listByResourceGroup:member": "Microsoft.Discovery.StorageContainers.listByResourceGroup",
       "@azure/arm-discovery!StorageContainersOperations#delete:member": "Microsoft.Discovery.StorageContainers.delete",

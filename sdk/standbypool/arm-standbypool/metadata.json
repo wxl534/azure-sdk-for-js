@@ -2,7 +2,7 @@
   "apiVersions": {
     "Microsoft.StandbyPool": "2025-10-01"
   },
-  "emitterVersion": "0.50.2",
+  "emitterVersion": "0.52.3-alpha.20260508.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.StandbyPool",
     "CrossLanguageDefinitionId": {

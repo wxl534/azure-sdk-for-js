@@ -1,0 +1,49 @@
+{
+  "apiVersions": {
+    "Astronomer.Astro": "2024-08-27"
+  },
+  "emitterVersion": "0.52.3-alpha.20260508.1",
+  "crossLanguageDefinitions": {
+    "CrossLanguagePackageId": "Astronomer.Astro",
+    "CrossLanguageDefinitionId": {
+      "@azure/arm-astro!OperationListResult:interface": "Azure.ResourceManager.CommonTypes.OperationListResult",
+      "@azure/arm-astro!Operation:interface": "Azure.ResourceManager.CommonTypes.Operation",
+      "@azure/arm-astro!OperationDisplay:interface": "Azure.ResourceManager.CommonTypes.OperationDisplay",
+      "@azure/arm-astro!ErrorResponse:interface": "Azure.ResourceManager.CommonTypes.ErrorResponse",
+      "@azure/arm-astro!ErrorDetail:interface": "Azure.ResourceManager.CommonTypes.ErrorDetail",
+      "@azure/arm-astro!ErrorAdditionalInfo:interface": "Azure.ResourceManager.CommonTypes.ErrorAdditionalInfo",
+      "@azure/arm-astro!OrganizationResource:interface": "Astronomer.Astro.OrganizationResource",
+      "@azure/arm-astro!OrganizationProperties:interface": "LiftrBase.Data.OrganizationProperties",
+      "@azure/arm-astro!MarketplaceDetails:interface": "LiftrBase.MarketplaceDetails",
+      "@azure/arm-astro!OfferDetails:interface": "LiftrBase.OfferDetails",
+      "@azure/arm-astro!UserDetails:interface": "LiftrBase.UserDetails",
+      "@azure/arm-astro!PartnerOrganizationProperties:interface": "LiftrBase.Data.PartnerOrganizationProperties",
+      "@azure/arm-astro!SingleSignOnProperties:interface": "LiftrBase.SingleSignOnProperties",
+      "@azure/arm-astro!ManagedServiceIdentityV4:interface": "Azure.ResourceManager.Legacy.ManagedServiceIdentityV4",
+      "@azure/arm-astro!UserAssignedIdentity:interface": "Azure.ResourceManager.CommonTypes.UserAssignedIdentity",
+      "@azure/arm-astro!TrackedResource:interface": "Azure.ResourceManager.CommonTypes.TrackedResource",
+      "@azure/arm-astro!Resource:interface": "Azure.ResourceManager.CommonTypes.Resource",
+      "@azure/arm-astro!SystemData:interface": "Azure.ResourceManager.CommonTypes.SystemData",
+      "@azure/arm-astro!OrganizationResourceUpdate:interface": "Azure.ResourceManager.Foundations.ResourceUpdateModel",
+      "@azure/arm-astro!OrganizationResourceUpdateProperties:interface": "Azure.ResourceManager.Foundations.ResourceUpdateModelProperties",
+      "@azure/arm-astro!ArmOperationStatusResourceProvisioningState:interface": "Azure.ResourceManager.ArmOperationStatus",
+      "@azure/arm-astro!OrganizationResourceListResult:interface": "Azure.ResourceManager.ResourceListResult",
+      "@azure/arm-astro!KnownOrigin:enum": "Azure.ResourceManager.CommonTypes.Origin",
+      "@azure/arm-astro!KnownActionType:enum": "Azure.ResourceManager.CommonTypes.ActionType",
+      "@azure/arm-astro!KnownMarketplaceSubscriptionStatus:enum": "LiftrBase.MarketplaceSubscriptionStatus",
+      "@azure/arm-astro!KnownRenewalMode:enum": "LiftrBase.RenewalMode",
+      "@azure/arm-astro!KnownResourceProvisioningState:enum": "Azure.ResourceManager.ResourceProvisioningState",
+      "@azure/arm-astro!KnownSingleSignOnStates:enum": "LiftrBase.SingleSignOnStates",
+      "@azure/arm-astro!KnownManagedServiceIdentityType:enum": "Azure.ResourceManager.Legacy.ManagedServiceIdentityType",
+      "@azure/arm-astro!KnowncreatedByType:enum": "Azure.ResourceManager.CommonTypes.createdByType",
+      "@azure/arm-astro!KnownVersions:enum": "Astronomer.Astro.Versions",
+      "@azure/arm-astro!OrganizationsOperations#listBySubscription:member": "Astronomer.Astro.Organizations.listBySubscription",
+      "@azure/arm-astro!OrganizationsOperations#listByResourceGroup:member": "Astronomer.Astro.Organizations.listByResourceGroup",
+      "@azure/arm-astro!OrganizationsOperations#delete:member": "Astronomer.Astro.Organizations.delete",
+      "@azure/arm-astro!OrganizationsOperations#update:member": "Astronomer.Astro.Organizations.update",
+      "@azure/arm-astro!OrganizationsOperations#createOrUpdate:member": "Astronomer.Astro.Organizations.createOrUpdate",
+      "@azure/arm-astro!OrganizationsOperations#get:member": "Astronomer.Astro.Organizations.get",
+      "@azure/arm-astro!OperationsOperations#list:member": "Azure.ResourceManager.Operations.list"
+    }
+  }
+}

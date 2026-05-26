@@ -2,7 +2,7 @@
   "apiVersions": {
     "Microsoft.ContainerRegistry": "2026-01-01-preview"
   },
-  "emitterVersion": "0.51.0",
+  "emitterVersion": "0.52.3-alpha.20260508.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.ContainerRegistry",
     "CrossLanguageDefinitionId": {
@@ -58,7 +58,7 @@
       "@azure/arm-containerregistry!TokenPassword:interface": "Microsoft.ContainerRegistry.TokenPassword",
       "@azure/arm-containerregistry!RegistryNameCheckRequest:interface": "Microsoft.ContainerRegistry.RegistryNameCheckRequest",
       "@azure/arm-containerregistry!RegistryNameStatus:interface": "Microsoft.ContainerRegistry.RegistryNameStatus",
-      "@azure/arm-containerregistry!PrivateLinkResource:interface": "Azure.ResourceManager.CommonTypes.PrivateLinkResource",
+      "@azure/arm-containerregistry!MyPrivateLinkResource:interface": "Microsoft.ContainerRegistry.MyPrivateLinkResource",
       "@azure/arm-containerregistry!PrivateLinkResourceProperties:interface": "Azure.ResourceManager.CommonTypes.PrivateLinkResourceProperties",
       "@azure/arm-containerregistry!PrivateLinkResourceListResult:interface": "Microsoft.ContainerRegistry.PrivateLinkResourceListResult",
       "@azure/arm-containerregistry!Archive:interface": "Microsoft.ContainerRegistry.Archive",

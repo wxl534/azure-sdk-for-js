@@ -1,4 +1,19 @@
 {
-  "apiVersion": "2023-11-01",
-  "emitterVersion": "0.41.1"
+  "apiVersions": {
+    "BicepClient": "2023-11-01"
+  },
+  "emitterVersion": "0.52.3-alpha.20260508.1",
+  "crossLanguageDefinitions": {
+    "CrossLanguagePackageId": "BicepClient",
+    "CrossLanguageDefinitionId": {
+      "@azure/arm-resourcesbicep!DecompileOperationRequest:interface": "BicepClient.DecompileOperationRequest",
+      "@azure/arm-resourcesbicep!DecompileOperationSuccessResponse:interface": "BicepClient.DecompileOperationSuccessResponse",
+      "@azure/arm-resourcesbicep!FileDefinition:interface": "BicepClient.FileDefinition",
+      "@azure/arm-resourcesbicep!ErrorResponse:interface": "Azure.ResourceManager.CommonTypes.ErrorResponse",
+      "@azure/arm-resourcesbicep!ErrorDetail:interface": "Azure.ResourceManager.CommonTypes.ErrorDetail",
+      "@azure/arm-resourcesbicep!ErrorAdditionalInfo:interface": "Azure.ResourceManager.CommonTypes.ErrorAdditionalInfo",
+      "@azure/arm-resourcesbicep!KnownVersions:enum": "BicepClient.Versions",
+      "@azure/arm-resourcesbicep!DecompileOperationGroupOperations#bicep:member": "BicepClient.DecompileOperationGroup.bicep"
+    }
+  }
 }

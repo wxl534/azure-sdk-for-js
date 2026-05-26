@@ -1,0 +1,43 @@
+{
+  "apiVersions": {
+    "Microsoft.Logic": "2026-04-01-preview"
+  },
+  "emitterVersion": "0.52.3-alpha.20260508.1",
+  "crossLanguageDefinitions": {
+    "CrossLanguagePackageId": "Microsoft.Logic",
+    "CrossLanguageDefinitionId": {
+      "@azure/arm-logic!OperationListResult:interface": "Azure.ResourceManager.CommonTypes.OperationListResult",
+      "@azure/arm-logic!Operation:interface": "Azure.ResourceManager.CommonTypes.Operation",
+      "@azure/arm-logic!OperationDisplay:interface": "Azure.ResourceManager.CommonTypes.OperationDisplay",
+      "@azure/arm-logic!ErrorResponse:interface": "Azure.ResourceManager.CommonTypes.ErrorResponse",
+      "@azure/arm-logic!ErrorDetail:interface": "Azure.ResourceManager.CommonTypes.ErrorDetail",
+      "@azure/arm-logic!ErrorAdditionalInfo:interface": "Azure.ResourceManager.CommonTypes.ErrorAdditionalInfo",
+      "@azure/arm-logic!AutomationProject:interface": "Microsoft.Logic.AutomationProject",
+      "@azure/arm-logic!AutomationProjectProperties:interface": "Microsoft.Logic.AutomationProjectProperties",
+      "@azure/arm-logic!ManagedServiceIdentity:interface": "Azure.ResourceManager.CommonTypes.ManagedServiceIdentity",
+      "@azure/arm-logic!UserAssignedIdentity:interface": "Azure.ResourceManager.CommonTypes.UserAssignedIdentity",
+      "@azure/arm-logic!TrackedResource:interface": "Azure.ResourceManager.CommonTypes.TrackedResource",
+      "@azure/arm-logic!Resource:interface": "Azure.ResourceManager.CommonTypes.Resource",
+      "@azure/arm-logic!SystemData:interface": "Azure.ResourceManager.CommonTypes.SystemData",
+      "@azure/arm-logic!ArmOperationStatusResourceProvisioningState:interface": "Azure.ResourceManager.ArmOperationStatus",
+      "@azure/arm-logic!AutomationProjectUpdate:interface": "Microsoft.Logic.AutomationProjectUpdate",
+      "@azure/arm-logic!AutomationProjectUpdateProperties:interface": "Microsoft.Logic.AutomationProjectUpdateProperties",
+      "@azure/arm-logic!AutomationProjectListResult:interface": "Azure.ResourceManager.ResourceListResult",
+      "@azure/arm-logic!KnownOrigin:enum": "Azure.ResourceManager.CommonTypes.Origin",
+      "@azure/arm-logic!KnownActionType:enum": "Azure.ResourceManager.CommonTypes.ActionType",
+      "@azure/arm-logic!KnownAutomationProjectProvisioningState:enum": "Microsoft.Logic.AutomationProjectProvisioningState",
+      "@azure/arm-logic!KnownManagedServiceIdentityType:enum": "Azure.ResourceManager.CommonTypes.ManagedServiceIdentityType",
+      "@azure/arm-logic!KnowncreatedByType:enum": "Azure.ResourceManager.CommonTypes.createdByType",
+      "@azure/arm-logic!KnownResourceProvisioningState:enum": "Azure.ResourceManager.ResourceProvisioningState",
+      "@azure/arm-logic!KnownVersions:enum": "Microsoft.Logic.Versions",
+      "@azure/arm-logic!ManagedServiceIdentityUserAssignedIdentity:type": "Azure.ResourceManager.CommonTypes.ManagedServiceIdentity.userAssignedIdentity.anonymous",
+      "@azure/arm-logic!AutomationProjectsOperations#listBySubscription:member": "Microsoft.Logic.AutomationProjects.listBySubscription",
+      "@azure/arm-logic!AutomationProjectsOperations#listByResourceGroup:member": "Microsoft.Logic.AutomationProjects.listByResourceGroup",
+      "@azure/arm-logic!AutomationProjectsOperations#delete:member": "Microsoft.Logic.AutomationProjects.delete",
+      "@azure/arm-logic!AutomationProjectsOperations#update:member": "Microsoft.Logic.AutomationProjects.update",
+      "@azure/arm-logic!AutomationProjectsOperations#createOrUpdate:member": "Microsoft.Logic.AutomationProjects.createOrUpdate",
+      "@azure/arm-logic!AutomationProjectsOperations#get:member": "Microsoft.Logic.AutomationProjects.get",
+      "@azure/arm-logic!OperationsOperations#list:member": "Azure.ResourceManager.Operations.list"
+    }
+  }
+}

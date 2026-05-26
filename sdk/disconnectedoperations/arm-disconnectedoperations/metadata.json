@@ -1,6 +1,8 @@
 {
-  "apiVersion": "2026-03-15",
-  "emitterVersion": "0.50.0",
+  "apiVersions": {
+    "Microsoft.Edge": "2026-03-15"
+  },
+  "emitterVersion": "0.52.3-alpha.20260508.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.Edge",
     "CrossLanguageDefinitionId": {

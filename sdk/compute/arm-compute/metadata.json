@@ -5,7 +5,7 @@
     "ComputeGallery": "2025-03-03",
     "ComputeSku": "2021-07-01"
   },
-  "emitterVersion": "0.52.2",
+  "emitterVersion": "0.52.3-alpha.20260508.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Compute",
     "CrossLanguageDefinitionId": {
@@ -978,7 +978,7 @@
       "@azure/arm-compute!VirtualMachineScaleSetsOperations#reapply:member": "Compute.VirtualMachineScaleSets.reapply",
       "@azure/arm-compute!VirtualMachineScaleSetsOperations#powerOff:member": "Compute.VirtualMachineScaleSets.powerOff",
       "@azure/arm-compute!VirtualMachineScaleSetsOperations#performMaintenance:member": "Compute.VirtualMachineScaleSets.performMaintenance",
-      "@azure/arm-compute!VirtualMachineScaleSetsOperations#listOSUpgradeHistory:member": "Compute.VirtualMachineScaleSets.getOSUpgradeHistory",
+      "@azure/arm-compute!VirtualMachineScaleSetsOperations#getOSUpgradeHistory:member": "Compute.VirtualMachineScaleSets.getOSUpgradeHistory",
       "@azure/arm-compute!VirtualMachineScaleSetsOperations#updateInstances:member": "Compute.VirtualMachineScaleSets.updateInstances",
       "@azure/arm-compute!VirtualMachineScaleSetsOperations#getInstanceView:member": "Compute.VirtualMachineScaleSets.getInstanceView",
       "@azure/arm-compute!VirtualMachineScaleSetsOperations#forceRecoveryServiceFabricPlatformUpdateDomainWalk:member": "Compute.VirtualMachineScaleSets.forceRecoveryServiceFabricPlatformUpdateDomainWalk",

@@ -1,8 +1,8 @@
 {
   "apiVersions": {
-    "Microsoft.FileShares": "2026-06-01"
+    "Microsoft.FileShares": "2025-09-01-preview"
   },
-  "emitterVersion": "0.52.3",
+  "emitterVersion": "0.52.3-alpha.20260508.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.FileShares",
     "CrossLanguageDefinitionId": {
@@ -54,7 +54,6 @@
       "@azure/arm-fileshares!KnownRedundancy:enum": "Microsoft.FileShares.Redundancy",
       "@azure/arm-fileshares!KnownProtocol:enum": "Microsoft.FileShares.Protocol",
       "@azure/arm-fileshares!KnownShareRootSquash:enum": "Microsoft.FileShares.ShareRootSquash",
-      "@azure/arm-fileshares!KnownEncryptionInTransitRequired:enum": "Microsoft.FileShares.EncryptionInTransitRequired",
       "@azure/arm-fileshares!KnownFileShareProvisioningState:enum": "Microsoft.FileShares.FileShareProvisioningState",
       "@azure/arm-fileshares!KnownPublicNetworkAccess:enum": "Microsoft.FileShares.PublicNetworkAccess",
       "@azure/arm-fileshares!KnownPrivateEndpointServiceConnectionStatus:enum": "Azure.ResourceManager.CommonTypes.PrivateEndpointServiceConnectionStatus",
