@@ -1,4 +1,4 @@
-# eng/pipelines/sdk-regenerate.yml
+# eng/pipelines/typespec-break-check.yml
 # JS SDK TypeSpec Breaking Change Check Pipeline (ARM Only)
 # Purpose: Validate that the latest emitter (@azure-tools/typespec-ts) doesn't break existing ARM SDK packages
 # Flow: Fetch latest emitter version → update emitter-package.json → regenerate lock file
@@ -16,7 +16,7 @@ trigger:
       - eng/emitter-package.json
       - eng/common/scripts/TypeSpec-*
       - eng/common/tsp-client/
-      - eng/pipelines/sdk-regenerate.yml
+      - eng/pipelines/typespec-break-check.yml
       - eng/pipelines/scripts/regenerate-runner.js
       - eng/pipelines/scripts/breaking-change-detector.js
 
@@ -31,7 +31,7 @@ pr:
       - eng/emitter-package.json
       - eng/common/scripts/TypeSpec-*
       - eng/common/tsp-client/
-      - eng/pipelines/sdk-regenerate.yml
+      - eng/pipelines/typespec-break-check.yml
       - eng/pipelines/scripts/regenerate-runner.js
       - eng/pipelines/scripts/breaking-change-detector.js
 
