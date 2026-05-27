@@ -71,6 +71,10 @@ parameters:
     displayName: "Skip build verification"
     type: boolean
     default: false
+  - name: DisableApiVersionPinning
+    displayName: "Disable api-version pinning (A/B-test mode for PR #38604 comment #4)"
+    type: boolean
+    default: false
   - name: SpecRepoBranch
     displayName: "azure-rest-api-specs branch to clone"
     type: string
@@ -316,6 +320,7 @@ stages:
                 --maxWorkers "${{ parameters.MaxWorkers }}" \
                 --buildWorkers "${{ parameters.BuildWorkers }}" \
                 --skipBuild "${{ parameters.SkipBuild }}" \
+                --disableApiVersionPinning "${{ parameters.DisableApiVersionPinning }}" \
                 --emitterVersion "$(emitterVersion)" \
                 --directoryList "$(Pipeline.Workspace)/matrix_artifacts/$(DirectoryList)" \
                 --resultOutputDir "$(Build.ArtifactStagingDirectory)/results/$(JobKey)"
@@ -404,7 +409,8 @@ stages:
                 withBreaking: 0,
                 breakingPackages: [],
                 changelogFailedPackages: [],
-                pinning: { pinned: 0, multi: 0, empty: 0, none: 0, error: 0 },
+                pinning: { pinned: 0, multi: 0, empty: 0, none: 0, error: 0, disabled: 0 },
+                pinningDisabledMode: false,
                 multiNsPackages: [],
                 // Comment #3: packages that lack a usable tsp-location.yaml.
                 // With `-OnlyTypeSpec true` in matrix gen these are already
@@ -446,6 +452,7 @@ stages:
                   for (const k of Object.keys(totals.pinning)) {
                     totals.pinning[k] += result.apiVersionPinning[k] ?? 0;
                   }
+                  if (result.apiVersionPinning.disabledMode) totals.pinningDisabledMode = true;
                   const multiList = result.apiVersionPinning.details?.multi ?? [];
                   for (const m of multiList) {
                     multiNsSet.add(m.pkg);
@@ -500,9 +507,16 @@ stages:
               const pinAll = pinCovered + (totals.pinning.multi ?? 0) + (totals.pinning.empty ?? 0) + (totals.pinning.none ?? 0) + (totals.pinning.error ?? 0);
               const pinPct = pinAll === 0 ? "0.0" : ((pinCovered * 100) / pinAll).toFixed(1);
               console.log("--- API-version pinning coverage ---");
-              console.log(`Pinned: ${totals.pinning.pinned} | Multi-namespace: ${totals.pinning.multi} | Empty: ${totals.pinning.empty} | No metadata.json: ${totals.pinning.none} | Parse error: ${totals.pinning.error}`);
-              console.log(`Coverage: ${pinPct}% (${pinCovered}/${pinAll})`);
-              if (totals.pinning.multi > 0) {
+              if (totals.pinningDisabledMode) {
+                console.log("⚠️  A/B TEST MODE: api-version pinning was DISABLED for this run (--disableApiVersionPinning=true).");
+                console.log("    Breaking-change counts below reflect (emitter + spec evolution) signal, NOT pure emitter delta.");
+                console.log("    Compare against a separate run with pinning enabled to gauge how much noise pinning removes.");
+                console.log(`Disabled: ${totals.pinning.disabled} | (other buckets are 0 by construction in this mode)`);
+              } else {
+                console.log(`Pinned: ${totals.pinning.pinned} | Multi-namespace: ${totals.pinning.multi} | Empty: ${totals.pinning.empty} | No metadata.json: ${totals.pinning.none} | Parse error: ${totals.pinning.error}`);
+                console.log(`Coverage: ${pinPct}% (${pinCovered}/${pinAll})`);
+              }
+              if (!totals.pinningDisabledMode && totals.pinning.multi > 0) {
                 console.log("⚠️  Multi-namespace packages (breaking signal may include spec-evolution noise; manual review recommended):");
                 const seen = new Set();
                 for (const m of totals.multiNsPackages) {

@@ -19,6 +19,13 @@ const skipBuild = getArg("--skipBuild", "false").toLowerCase() === "true";
 const emitterVersion = getArg("--emitterVersion", "");
 const directoryListFile = getArg("--directoryList", "");
 const resultOutputDir = getArg("--resultOutputDir", "");
+// Comment #4 A/B-test toggle. When true, skip the metadata.json-driven
+// api-version pinning entirely: emitter runs against whatever api-version
+// the spec's tspconfig.yaml declares by default, so the diff reflects
+// pure (emitter + spec-evolution) signal rather than (emitter only).
+// Run the pipeline twice (false vs true) and compare Summary breaking
+// counts to decide whether the pinning machinery actually reduces noise.
+const disableApiVersionPinning = getArg("--disableApiVersionPinning", "false").toLowerCase() === "true";
 // No per-process timeout: aligned with azure-sdk-for-net / azure-sdk-for-go
 // regeneration scripts, which rely on the ADO job-level timeout
 // (timeoutInMinutes, default 60min) and let individual tsp-client / pnpm
@@ -860,8 +867,18 @@ async function regenerateAll(packages) {
     //   "empty"       — apiVersions field present but empty / no field
     //   "none"        — no metadata.json (likely a brand-new package)
     //   "error"       — metadata.json existed but could not be parsed
+    //   "disabled"    — Comment #4 A/B-test flag: pinning intentionally
+    //                   skipped for this whole run (--disableApiVersionPinning)
     let pinClass = "none";
     const multiNamespaces = [];
+
+    // Comment #4 A/B-test short-circuit: when pinning is disabled for the
+    // entire run, skip metadata.json lookup and tspconfig patching entirely.
+    if (disableApiVersionPinning) {
+      pinClass = "disabled";
+      pinReason = "A/B test mode: pinning intentionally disabled (--disableApiVersionPinning)";
+      output += `api-version   : ${pinReason}\n`;
+    } else {
     const metadataPath = path.join(pkg.pkgDir, "metadata.json");
     if (fs.existsSync(metadataPath)) {
       try {
@@ -894,6 +911,7 @@ async function regenerateAll(packages) {
       pinClass = "none";
     }
     output += `api-version   : ${pinReason}\n`;
+    } // end of !disableApiVersionPinning block
 
     // If we have a pinned apiVersion, patch the spec's tspconfig.yaml to add
     // `options."@azure-tools/typespec-ts".api-version: <pin>`. We patch a
@@ -1168,7 +1186,7 @@ async function main() {
     // Aggregate api-version pinning classification for this shard, so the
     // Summarize stage can annotate the breaking-change report (multi-ns
     // packages produce noisier diffs and reviewers need to know).
-    const pinning = { pinned: [], multi: [], empty: [], none: [], error: [] };
+    const pinning = { pinned: [], multi: [], empty: [], none: [], error: [], disabled: [] };
     for (const r of regenResults) {
       const cls = r.pinClass || "none";
       if (!pinning[cls]) pinning[cls] = [];
@@ -1196,11 +1214,16 @@ async function main() {
         })),
       },
       apiVersionPinning: {
+        // Comment #4: when this run was invoked with --disableApiVersionPinning,
+        // the `disabled` bucket holds every package and the others are 0.
+        // Summary stage uses `disabledMode` to print a prominent A/B-test banner.
+        disabledMode: disableApiVersionPinning,
         pinned: pinning.pinned.length,
         multi: pinning.multi.length,
         empty: pinning.empty.length,
         none: pinning.none.length,
         error: pinning.error.length,
+        disabled: pinning.disabled.length,
         details: pinning,
       },
       build: buildSkipped ? null : {
