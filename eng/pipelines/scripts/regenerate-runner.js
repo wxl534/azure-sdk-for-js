@@ -34,174 +34,40 @@ function normalizePath(p) {
   return p.replace(/\\/g, "/");
 }
 
-function walk(dir, results = []) {
-  let entries = [];
+// Per-package spec lookup goes through each SDK's tsp-location.yaml only.
+// We deliberately do NOT scan the cloned spec repo to discover tspconfigs:
+// (1) the matrix-stage filter `-OnlyTypeSpec true` already keeps only packages
+//     that have tsp-location.yaml on the SDK side, so any spec-index "rescue"
+//     would never fire; (2) reviewers (mentor comment #3) want the regeneration
+//     contract to be exactly "what tsp-location.yaml points at", with the small
+//     set of packages that lack tsp-location.yaml surfaced in the PR description
+//     so the spec/SDK team can on-board them properly.
+//
+// Helper: parse `directory:` (and optionally `commit:`/`repo:`) out of a
+// tsp-location.yaml. Returns null if the file is missing the directory field
+// or has an obviously-broken value.
+function readTspLocation(tspLocationPath) {
+  let content;
   try {
-    entries = fs.readdirSync(dir, { withFileTypes: true });
+    content = fs.readFileSync(tspLocationPath, "utf8");
   } catch {
-    return results;
+    return { error: "read failed" };
   }
-
-  for (const entry of entries) {
-    if (entry.name === "node_modules" || entry.name === ".git" || entry.name.startsWith(".")) {
-      continue;
-    }
-
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      walk(fullPath, results);
-    } else if (entry.name === "tspconfig.yaml") {
-      results.push(fullPath);
-    }
+  if (/^\s*repo\s*:\s*\.\./m.test(content)) {
+    return { error: "relative repo" };
   }
-
-  return results;
-}
-
-function getIndent(line) {
-  const match = line.match(/^(\s*)/);
-  return match ? match[1].length : 0;
-}
-
-function stripYamlValue(value) {
-  return value
-    .trim()
-    .replace(/\s+#.*$/, "")
-    .replace(/^["']/, "")
-    .replace(/["']$/, "")
-    .trim();
-}
-
-function findBlock(lines, key) {
-  const keyPattern = new RegExp(`^\\s*["']?${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']?\\s*:\\s*(?:#.*)?$`);
-  const start = lines.findIndex((line) => keyPattern.test(line));
-  if (start < 0) return [];
-
-  const baseIndent = getIndent(lines[start]);
-  const block = [];
-  for (let i = start + 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (line.trim() && getIndent(line) <= baseIndent) break;
-    block.push(line);
+  const directoryMatch = content.match(/^\s*directory\s*:\s*(.+?)\s*$/m);
+  if (!directoryMatch) {
+    return { error: "missing 'directory:' field" };
   }
-  return block;
-}
-
-function findScalarInLines(lines, key) {
-  const keyPattern = new RegExp(`^\\s*["']?${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']?\\s*:\\s*(.+?)\\s*$`);
-  for (const line of lines) {
-    const match = line.match(keyPattern);
-    if (match) return stripYamlValue(match[1]);
-  }
-  return "";
-}
-
-function findNestedScalar(lines, parentKey, childKey) {
-  const parentBlock = findBlock(lines, parentKey);
-  if (parentBlock.length === 0) return "";
-  return findScalarInLines(parentBlock, childKey);
-}
-
-function findParameterDefault(lines, parameterName) {
-  const block = findBlock(lines, parameterName);
-  if (block.length === 0) return "";
-  return findScalarInLines(block, "default");
-}
-
-function expandVariables(template, vars) {
-  let output = template;
-  for (let i = 0; i < 5; i++) {
-    const before = output;
-    for (const [key, value] of Object.entries(vars)) {
-      output = output.split(`{${key}}`).join(value ?? "");
-    }
-    if (output === before) break;
-  }
-  return output;
-}
-
-function buildSpecIndex() {
-  const specDir = path.join(specRepoRoot, "specification");
-  const tspconfigs = walk(specDir);
-  const index = new Map();
-  const skipped = { noEmitter: 0, badPath: 0, parseError: 0 };
-
-  for (const tspConfigPath of tspconfigs) {
-    let content = "";
-    try {
-      content = fs.readFileSync(tspConfigPath, "utf8");
-    } catch {
-      skipped.parseError++;
-      continue;
-    }
-
-    const lines = content.split(/\r?\n/);
-    const tsBlock = findBlock(lines, "@azure-tools/typespec-ts");
-    if (tsBlock.length === 0) {
-      skipped.noEmitter++;
-      continue;
-    }
-
-    const normalizedTspConfig = normalizePath(tspConfigPath);
-    const isArm =
-      normalizedTspConfig.includes("/resource-manager/") || normalizedTspConfig.includes(".Management/");
-    if (!isArm) continue;
-
-    const localSpecPath = normalizePath(path.dirname(tspConfigPath));
-    const serviceDir =
-      findScalarInLines(tsBlock, "service-dir") || findParameterDefault(lines, "service-dir");
-    let packageDir = findScalarInLines(tsBlock, "package-dir");
-    const emitterOutputDir = findScalarInLines(tsBlock, "emitter-output-dir");
-    const packageName = findNestedScalar(tsBlock, "package-details", "name");
-
-    let sdkRelative = "";
-    if (serviceDir && packageDir) {
-      sdkRelative = normalizePath(`${serviceDir}/${packageDir}`);
-    } else if (emitterOutputDir) {
-      const expanded = expandVariables(emitterOutputDir, {
-        "service-dir": serviceDir || "",
-        "project-root": localSpecPath,
-        "output-dir": "",
-        "package-dir": packageDir || "",
-      });
-      const segments = normalizePath(expanded).replace(/^\/+/, "").split("/").filter(Boolean);
-      const sdkIndex = segments.indexOf("sdk");
-      if (sdkIndex >= 0) {
-        sdkRelative = segments.slice(sdkIndex).join("/");
-      }
-    }
-
-    if (!sdkRelative) {
-      skipped.badPath++;
-      continue;
-    }
-
-    if (!index.has(sdkRelative)) {
-      index.set(sdkRelative, {
-        tspConfigPath,
-        localSpecPath,
-        isArm,
-        packageName,
-      });
-    } else {
-      const existing = index.get(sdkRelative);
-      existing.duplicates = existing.duplicates || [];
-      existing.duplicates.push(tspConfigPath);
-    }
-  }
-
-  const armCount = [...index.values()].filter((entry) => entry.isArm).length;
-  const duplicateCount = [...index.values()].filter((entry) => entry.duplicates?.length).length;
-  console.log(`Spec index: scanned ${tspconfigs.length} tspconfig.yaml files`);
-  console.log(`  Indexed: ${index.size} JS targets (${armCount} ARM, ${index.size - armCount} data-plane)`);
-  console.log(
-    `  Skipped: ${skipped.noEmitter} no typespec-ts emitter, ${skipped.parseError} parse errors, ${skipped.badPath} unresolvable paths`,
-  );
-  if (duplicateCount > 0) {
-    console.log(`  Warning: ${duplicateCount} SDK targets are emit-targets of multiple specs`);
-  }
-
-  return index;
+  const directory = directoryMatch[1].trim();
+  const commitMatch = content.match(/^\s*commit\s*:\s*(.+?)\s*$/m);
+  const repoMatch = content.match(/^\s*repo\s*:\s*(.+?)\s*$/m);
+  return {
+    directory,
+    commit: commitMatch ? commitMatch[1].trim() : "",
+    repo: repoMatch ? repoMatch[1].trim() : "",
+  };
 }
 
 function tsPrefix(startMs) {
@@ -507,6 +373,82 @@ function recordPackageLog(phase, pkg, success, output) {
   console.log("##[endgroup]");
 }
 
+// Comment #5 (mentor): replace the custom breaking-change-detector.js with the
+// official @azure-tools/js-sdk-release-tools `update-changelog` CLI. That tool
+// uses typescript-codegen-breaking-change-detector internally and writes a
+// CHANGELOG.md section (### Breaking Changes / ### Features Added / ...). It
+// compares against the latest npm-published version, which is a better
+// regression baseline than git HEAD for "candidate emitter" runs.
+const CHANGELOG_TOOL_DIR = "eng/tools/js-sdk-release-tools";
+let changelogToolReady = false;
+
+async function installChangelogTool() {
+  if (changelogToolReady) return true;
+  const toolDirAbs = path.join(sdkRoot, CHANGELOG_TOOL_DIR);
+  if (!fs.existsSync(path.join(toolDirAbs, "package.json"))) {
+    console.log(`WARNING: ${CHANGELOG_TOOL_DIR}/package.json not found; skipping changelog generation.`);
+    return false;
+  }
+  console.log(`Installing ${CHANGELOG_TOOL_DIR} dependencies for update-changelog...`);
+  const install = await runCommand("npm", ["--prefix", CHANGELOG_TOOL_DIR, "ci"], sdkRoot);
+  if (install.code !== 0) {
+    console.log(`WARNING: npm ci for ${CHANGELOG_TOOL_DIR} failed; skipping changelog generation.`);
+    console.log(install.output.slice(-1000));
+    return false;
+  }
+  changelogToolReady = true;
+  console.log("update-changelog tool installed.");
+  return true;
+}
+
+// Run `update-changelog --sdkRepoPath <repo> --packagePath <pkg>` for a single
+// package. Returns { success, hasBreaking, hasChanges, output }. Never throws;
+// any failure is recorded and the caller decides what to do.
+async function runUpdateChangelog(packageRelPath) {
+  if (!changelogToolReady) {
+    return { success: false, hasBreaking: false, hasChanges: false, output: "(changelog tool not installed)" };
+  }
+  const result = await runCommand(
+    "npm",
+    [
+      "--prefix",
+      CHANGELOG_TOOL_DIR,
+      "exec",
+      "--no",
+      "--",
+      "update-changelog",
+      "--sdkRepoPath",
+      sdkRoot,
+      "--packagePath",
+      path.join(sdkRoot, packageRelPath),
+    ],
+    sdkRoot
+  );
+  const success = result.code === 0;
+  // Detect breaking by scanning the package's CHANGELOG.md for an unreleased
+  // "### Breaking Changes" heading. update-changelog rewrites the top section
+  // in place; we look only at the first ~200 lines to avoid matching old
+  // entries.
+  let hasBreaking = false;
+  let hasChanges = false;
+  try {
+    const changelogPath = path.join(sdkRoot, packageRelPath, "CHANGELOG.md");
+    if (fs.existsSync(changelogPath)) {
+      const head = fs.readFileSync(changelogPath, "utf8").split("\n").slice(0, 200).join("\n");
+      // Stop at the second "## " (next released version) so we only inspect
+      // the top entry.
+      const firstVersion = head.indexOf("\n## ");
+      const top = firstVersion >= 0 ? head.slice(0, head.indexOf("\n## ", firstVersion + 1) > 0 ? head.indexOf("\n## ", firstVersion + 1) : head.length) : head;
+      hasBreaking = /^###\s+Breaking Changes\b/m.test(top);
+      hasChanges = /^###\s+(Features Added|Breaking Changes|Bugs Fixed|Other Changes)\b/m.test(top);
+    }
+  } catch (err) {
+    // best-effort detection — don't fail the whole package because we couldn't
+    // parse the changelog
+  }
+  return { success, hasBreaking, hasChanges, output: result.output };
+}
+
 // Recursively delete nested duplicate workspace directories of the form
 // sdk/X/Y/sdk/X/Y created by tsp-client when emitter-output-dir is misresolved.
 // These break pnpm install because two workspaces share the same package name.
@@ -734,8 +676,44 @@ function detectNestedDuplicateWorkspaces() {
   throw new Error("Nested duplicate workspaces will make pnpm/turbo fail. Remove them before running the pipeline.");
 }
 
-function classifyPackages(specIndex) {
-  // Find all arm-* directories under sdk/
+// Resolve one SDK directory's spec location from its tsp-location.yaml.
+// Returns { ok: true, package } if the SDK has a usable tsp-location.yaml,
+// or { ok: false, reason } if it should be reported as skipped in the PR.
+function resolvePackageFromTspLocation(sdkDir) {
+  const dir = normalizePath(sdkDir);
+  const pkgDir = path.join(sdkRoot, sdkDir);
+  const tspLocationPath = path.join(pkgDir, "tsp-location.yaml");
+  if (!fs.existsSync(tspLocationPath)) {
+    return { ok: false, reason: "no tsp-location.yaml" };
+  }
+  const parsed = readTspLocation(tspLocationPath);
+  if (parsed.error) {
+    return { ok: false, reason: parsed.error };
+  }
+  const localSpecPath = normalizePath(path.join(specRepoRoot, parsed.directory));
+  const tspConfigPath = path.join(localSpecPath, "tspconfig.yaml");
+  if (!fs.existsSync(tspConfigPath)) {
+    return { ok: false, reason: `stale path: ${parsed.directory} (tspconfig.yaml not in cloned spec)` };
+  }
+  return {
+    ok: true,
+    package: {
+      pkg: dir,
+      pkgDir,
+      tspConfigPath,
+      localSpecPath,
+      source: "tsp-location",
+      tspLocationDirectory: parsed.directory,
+      tspLocationCommit: parsed.commit,
+      tspLocationRepo: parsed.repo,
+    },
+  };
+}
+
+// Single-job mode: scan sdk/ for arm-* dirs and resolve each via tsp-location.yaml.
+// Returns { packages, skippedNoTspLocation } — packages without a usable
+// tsp-location.yaml are surfaced for the PR description, not silently dropped.
+function classifyPackages() {
   function findArmDirs(dir, results) {
     let entries;
     try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return results; }
@@ -754,99 +732,35 @@ function classifyPackages(specIndex) {
   }
   const allArmDirs = findArmDirs(path.join(sdkRoot, "sdk"), []).sort();
 
-  const existingSdkDirs = new Set(allArmDirs.map((dir) => normalizePath(dir)));
   const packages = [];
-  const skipped = [];
-  const rescued = [];
+  const skippedNoTspLocation = [];
 
   for (const dir of allArmDirs) {
-    const name = normalizePath(dir);
-    const tspLocationPath = path.join(dir, "tsp-location.yaml");
-    const hasTspLocation = fs.existsSync(tspLocationPath);
-    let tspLocationProblem = "";
-
-    if (hasTspLocation) {
-      const content = fs.readFileSync(tspLocationPath, "utf8");
-      if (/^\s*repo\s*:\s*\.\./m.test(content)) {
-        tspLocationProblem = "relative repo";
-      } else {
-        const directoryMatch = content.match(/^\s*directory\s*:\s*(.+?)\s*$/m);
-        if (!directoryMatch) {
-          tspLocationProblem = "missing 'directory:' field";
-        } else {
-          const directory = directoryMatch[1].trim();
-          const tspConfigFromLocation = path.join(specRepoRoot, directory, "tspconfig.yaml");
-          if (!fs.existsSync(tspConfigFromLocation)) {
-            tspLocationProblem = `stale path: ${directory}`;
-          }
-        }
-      }
-    }
-
-    const specEntry = specIndex.get(name);
-    if (specEntry) {
-      if (tspLocationProblem) rescued.push({ name, reason: tspLocationProblem });
-      packages.push({
-        pkg: name,
-        pkgDir: path.join(sdkRoot, dir),
-        tspConfigPath: specEntry.tspConfigPath,
-        localSpecPath: specEntry.localSpecPath,
-        source: "spec-index",
-      });
-    } else if (hasTspLocation && !tspLocationProblem) {
-      const content = fs.readFileSync(tspLocationPath, "utf8");
-      const directory = content.match(/^\s*directory\s*:\s*(.+?)\s*$/m)[1].trim();
-      const localSpecPath = normalizePath(path.join(specRepoRoot, directory));
-      packages.push({
-        pkg: name,
-        pkgDir: path.join(sdkRoot, dir),
-        tspConfigPath: path.join(localSpecPath, "tspconfig.yaml"),
-        localSpecPath,
-        source: "tsp-location",
-      });
-    } else {
-      skipped.push({
-        name,
-        reason: !hasTspLocation ? "no tsp-location.yaml + not in spec index" : tspLocationProblem,
-      });
-    }
+    const r = resolvePackageFromTspLocation(dir);
+    if (r.ok) packages.push(r.package);
+    else skippedNoTspLocation.push({ name: normalizePath(dir), reason: r.reason });
   }
-
-  const newInSpec = [...specIndex.keys()].filter((sdkDir) => !existingSdkDirs.has(sdkDir)).sort();
 
   console.log("");
-  console.log(`  ✅ Will run: ${packages.length} packages`);
-  const bySource = packages.reduce((acc, pkg) => {
-    acc[pkg.source] = (acc[pkg.source] || 0) + 1;
-    return acc;
-  }, {});
-  for (const [source, count] of Object.entries(bySource)) {
-    console.log(`       via ${source}: ${count}`);
-  }
-
-  if (rescued.length > 0) {
-    console.log(`  💚 Rescued by spec index (had problematic tsp-location.yaml): ${rescued.length}`);
-    for (const item of rescued) console.log(`       [RESCUED] ${item.name} — was: ${item.reason}`);
-  }
-
-  if (skipped.length > 0) {
-    console.log(`  ❌ Skipped: ${skipped.length} packages`);
-    for (const item of skipped) console.log(`       [SKIP] ${item.name} — ${item.reason}`);
-  }
-
-  if (newInSpec.length > 0) {
-    console.log(`  ℹ️  Spec declares ${newInSpec.length} JS packages with no SDK dir yet (new/un-onboarded):`);
-    for (const item of newInSpec) console.log(`       [NEW] ${item}`);
+  console.log(`  ✅ Will run: ${packages.length} packages (resolved via tsp-location.yaml)`);
+  if (skippedNoTspLocation.length > 0) {
+    console.log(`  ⚠️  Skipped: ${skippedNoTspLocation.length} arm-* packages without a usable tsp-location.yaml`);
+    console.log(`     (these are surfaced in the PR description for follow-up on-boarding)`);
+    for (const item of skippedNoTspLocation) console.log(`       [SKIP] ${item.name} — ${item.reason}`);
   }
   console.log("");
 
-  return packages;
+  return { packages, skippedNoTspLocation };
 }
 
-// When --directoryList is provided, read the JSON file and resolve packages
-// using spec-index (preferred) or tsp-location.yaml (fallback).
-// directoryList entries are "serviceArea/packageName" (e.g. "advisor/arm-advisor").
-function classifyFromDirectoryList(directoryListPath, specIndex) {
+// Matrix mode: caller passes a directoryList JSON (entries like
+// "advisor/arm-advisor"). We resolve each entry the same way as single-job
+// mode (tsp-location.yaml only). When matrix gen runs with `-OnlyTypeSpec
+// true`, every entry in the list will already have tsp-location.yaml — the
+// skipped list normally stays empty here. The list is still computed (and
+// emitted) so an edge-case (e.g. yaml gets deleted between matrix-gen and
+// shard run) is visible in result.json.
+function classifyFromDirectoryList(directoryListPath) {
   console.log(`Reading directory list from: ${directoryListPath}`);
   const entries = JSON.parse(fs.readFileSync(directoryListPath, "utf8"));
   if (!Array.isArray(entries) || entries.length === 0) {
@@ -856,68 +770,32 @@ function classifyFromDirectoryList(directoryListPath, specIndex) {
   console.log(`  Directory list contains ${entries.length} packages`);
 
   const packages = [];
-  const skipped = [];
+  const skippedNoTspLocation = [];
 
   for (const entry of entries) {
-    // entry is "serviceArea/packageName", e.g. "advisor/arm-advisor"
     if (entry.includes("..") || path.isAbsolute(entry)) {
       console.error(`ERROR: invalid directory list entry (must be relative): ${entry}`);
       process.exit(1);
     }
 
-    const dir = normalizePath(path.join("sdk", entry));
-    const pkgDir = path.join(sdkRoot, "sdk", entry);
-
-    if (!fs.existsSync(pkgDir)) {
-      skipped.push({ name: dir, reason: "directory does not exist" });
+    const sdkDir = normalizePath(path.join("sdk", entry));
+    if (!fs.existsSync(path.join(sdkRoot, sdkDir))) {
+      skippedNoTspLocation.push({ name: sdkDir, reason: "directory does not exist" });
       continue;
     }
-
-    const specEntry = specIndex.get(dir);
-    if (specEntry) {
-      packages.push({
-        pkg: dir,
-        pkgDir,
-        tspConfigPath: specEntry.tspConfigPath,
-        localSpecPath: specEntry.localSpecPath,
-        source: "spec-index",
-      });
-      continue;
-    }
-
-    // Fallback: use tsp-location.yaml
-    const tspLocationPath = path.join(pkgDir, "tsp-location.yaml");
-    if (fs.existsSync(tspLocationPath)) {
-      const content = fs.readFileSync(tspLocationPath, "utf8");
-      const directoryMatch = content.match(/^\s*directory\s*:\s*(.+?)\s*$/m);
-      if (directoryMatch) {
-        const directory = directoryMatch[1].trim();
-        const localSpecPath = normalizePath(path.join(specRepoRoot, directory));
-        const tspConfigPath = path.join(localSpecPath, "tspconfig.yaml");
-        if (fs.existsSync(tspConfigPath)) {
-          packages.push({
-            pkg: dir,
-            pkgDir,
-            tspConfigPath,
-            localSpecPath,
-            source: "tsp-location",
-          });
-          continue;
-        }
-      }
-    }
-
-    skipped.push({ name: dir, reason: "not in spec-index and no valid tsp-location.yaml" });
+    const r = resolvePackageFromTspLocation(sdkDir);
+    if (r.ok) packages.push(r.package);
+    else skippedNoTspLocation.push({ name: sdkDir, reason: r.reason });
   }
 
   console.log(`  ✅ Will run: ${packages.length} packages`);
-  if (skipped.length > 0) {
-    console.log(`  ❌ Skipped: ${skipped.length} packages`);
-    for (const item of skipped) console.log(`       [SKIP] ${item.name} — ${item.reason}`);
+  if (skippedNoTspLocation.length > 0) {
+    console.log(`  ⚠️  Skipped: ${skippedNoTspLocation.length} packages without a usable tsp-location.yaml`);
+    for (const item of skippedNoTspLocation) console.log(`       [SKIP] ${item.name} — ${item.reason}`);
   }
   console.log("");
 
-  return packages;
+  return { packages, skippedNoTspLocation };
 }
 
 async function regenerateAll(packages) {
@@ -1140,6 +1018,10 @@ async function buildAll(regenResults) {
   }
   console.log("pnpm install completed");
 
+  // Install the official changelog tool once for the whole shard, so each
+  // successful build can immediately run update-changelog.
+  await installChangelogTool();
+
   // Pre-build fix 4: Build core dependencies first
   console.log("Pre-building core dependencies...");
   const coreFilters = [
@@ -1174,13 +1056,27 @@ async function buildAll(regenResults) {
     const duration = ((Date.now() - start) / 1000).toFixed(1);
     buildCompleted++;
 
+    let changelog = null;
     if (build.code === 0) {
       console.log(`  ✅ [BUILD ${buildCompleted}/${buildTotal}] ${pkg.pkg} - BUILD OK (${duration}s)`);
-      buildResults.push({ pkg: pkg.pkg, success: true, duration, phase: "done", output: build.output });
+      // Comment #5: run the official update-changelog for every package whose
+      // build succeeded. Changelog failures are logged but never demote the
+      // build status — the regen+build matrix is the gate, the changelog is a
+      // signal.
+      const cl = await runUpdateChangelog(pkg.pkg);
+      changelog = { success: cl.success, hasBreaking: cl.hasBreaking, hasChanges: cl.hasChanges };
+      if (cl.success) {
+        const marker = cl.hasBreaking ? "⚠️ breaking" : cl.hasChanges ? "changes" : "no changes";
+        console.log(`     changelog: ${marker}`);
+      } else {
+        console.log(`     changelog: FAILED (see log)`);
+      }
+      recordPackageLog("changelog", pkg.pkg, cl.success, cl.output);
+      buildResults.push({ pkg: pkg.pkg, success: true, duration, phase: "done", output: build.output, changelog });
     } else {
       console.log(`  ❌ [BUILD ${buildCompleted}/${buildTotal}] ${pkg.pkg} - BUILD FAILED (${duration}s)`);
       console.log(`     ${extractError(build.output)}`);
-      buildResults.push({ pkg: pkg.pkg, success: false, duration, phase: "pnpm build", output: build.output });
+      buildResults.push({ pkg: pkg.pkg, success: false, duration, phase: "pnpm build", output: build.output, changelog: null });
     }
     recordPackageLog("build", pkg.pkg, build.code === 0, build.output);
   }
@@ -1207,17 +1103,17 @@ async function buildAll(regenResults) {
 async function main() {
   detectNestedDuplicateWorkspaces();
 
-  console.log("===== Step 3: Resolve spec paths for assigned packages =====");
-  const specIndex = buildSpecIndex();
+  console.log("===== Step 3: Resolve spec paths via tsp-location.yaml =====");
   let packages;
+  let skippedNoTspLocation;
 
   if (directoryListFile) {
     // Matrix mode: package list provided by GenerateMatrix job
     console.log("(Matrix mode: using --directoryList)");
-    packages = classifyFromDirectoryList(directoryListFile, specIndex);
+    ({ packages, skippedNoTspLocation } = classifyFromDirectoryList(directoryListFile));
   } else {
     // Single-job mode: scan all ARM packages
-    packages = classifyPackages(specIndex);
+    ({ packages, skippedNoTspLocation } = classifyPackages());
     if (maxPackages > 0) {
       packages = packages.slice(0, maxPackages);
       console.log(`Limited to first ${maxPackages} packages`);
@@ -1286,6 +1182,10 @@ async function main() {
       emitterVersion,
       directoryList: directoryListFile || null,
       packages: packages.map((p) => p.pkg),
+      // Comment #3: packages without a usable tsp-location.yaml are surfaced
+      // here so the Summary stage can list them in the PR description for
+      // on-boarding follow-up by the spec/SDK team.
+      skippedNoTspLocation: skippedNoTspLocation || [],
       regeneration: {
         total: packages.length,
         success: regenSuccess,
@@ -1313,6 +1213,26 @@ async function main() {
           error: extractError(r.output),
         })),
       },
+      // Comment #5: changelog signal sourced from the official update-changelog
+      // tool. `breakingPackages` is the simple actionable list reviewers care
+      // about — they can read each package's CHANGELOG.md in the PR diff for
+      // detail.
+      changelog: buildSkipped ? null : (() => {
+        const withChangelog = buildResults.filter((r) => r.success && r.changelog);
+        const generated = withChangelog.filter((r) => r.changelog.success);
+        const breaking = generated.filter((r) => r.changelog.hasBreaking);
+        const changes = generated.filter((r) => r.changelog.hasChanges);
+        const failed = withChangelog.filter((r) => !r.changelog.success).map((r) => r.pkg);
+        return {
+          total: withChangelog.length,
+          generated: generated.length,
+          failed: failed.length,
+          withChanges: changes.length,
+          withBreaking: breaking.length,
+          breakingPackages: breaking.map((r) => r.pkg),
+          failedPackages: failed,
+        };
+      })(),
     };
 
     if (!fs.existsSync(resultOutputDir)) {

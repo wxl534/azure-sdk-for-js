@@ -201,8 +201,37 @@ stages:
                 -JobCount ${{ parameters.RegenerationJobCount }}
                 -MinimumPerJob ${{ parameters.MinimumPerJob }}
                 -MaxPackages ${{ parameters.MaxPackages }}
-                -OnlyTypeSpec false
+                -OnlyTypeSpec true
                 -DirectoryFilterPattern 'arm-*'
+              workingDirectory: $(Build.SourcesDirectory)
+
+          - task: PowerShell@2
+            displayName: 'Scan ARM packages without tsp-location.yaml (Comment #3)'
+            inputs:
+              pwsh: true
+              targetType: inline
+              # Mirror of the matrix filter (`-OnlyTypeSpec true`): the matrix
+              # step keeps only arm-* dirs that have tsp-location.yaml; here we
+              # record the ones that were filtered OUT, so the Summary stage
+              # can list them in the PR description for on-boarding follow-up.
+              script: |
+                $srcRoot = "$(Build.SourcesDirectory)"
+                $sdkDir = Join-Path $srcRoot 'sdk'
+                $missing = @()
+                if (Test-Path $sdkDir) {
+                  Get-ChildItem -Path $sdkDir -Directory -Recurse -Filter 'arm-*' -ErrorAction SilentlyContinue |
+                    ForEach-Object {
+                      $tspLoc = Join-Path $_.FullName 'tsp-location.yaml'
+                      if (-not (Test-Path $tspLoc)) {
+                        $relative = ($_.FullName.Substring($srcRoot.Length + 1)) -replace '\\','/'
+                        $missing += @{ name = $relative; reason = 'no tsp-location.yaml' }
+                      }
+                    }
+                }
+                $outPath = Join-Path "$(Build.ArtifactStagingDirectory)/matrix" 'skipped-no-tsp-location.json'
+                New-Item -ItemType Directory -Force -Path (Split-Path $outPath) | Out-Null
+                ConvertTo-Json @($missing) -Depth 3 | Out-File -FilePath $outPath -Encoding utf8
+                Write-Host "Wrote $($missing.Count) skipped packages to $outPath"
               workingDirectory: $(Build.SourcesDirectory)
 
           - task: PublishPipelineArtifact@1
@@ -292,19 +321,6 @@ stages:
                 --resultOutputDir "$(Build.ArtifactStagingDirectory)/results/$(JobKey)"
             displayName: 'Regenerate & build ARM package batch'
 
-          # Step 6: Breaking Change Detection
-          - script: |
-              cd $(sdkRoot)
-              node eng/pipelines/scripts/breaking-change-detector.js \
-                --baseline "HEAD" \
-                --previousEmitterVersion "$(previousEmitterVersion)" \
-                --currentEmitterVersion "$(emitterVersion)" \
-                --reportFile "$(Build.ArtifactStagingDirectory)/results/$(JobKey)/breaking-summary.json" \
-                --no-fail \
-                --verbose
-            displayName: 'Step 6: Detect breaking changes'
-            condition: succeededOrFailed()
-
           - script: |
               cd $(sdkRoot)
               PATCH_FILE="$(Build.ArtifactStagingDirectory)/results/$(JobKey)/changes.patch"
@@ -353,7 +369,6 @@ stages:
 
               const root = process.env.PIPELINE_WORKSPACE;
               const resultFiles = [];
-              const breakingSummaryFiles = [];
 
               function walk(dir) {
                 if (!fs.existsSync(dir)) return;
@@ -361,7 +376,6 @@ stages:
                   const full = path.join(dir, entry.name);
                   if (entry.isDirectory()) walk(full);
                   else if (entry.name === "result.json") resultFiles.push(full);
-                  else if (entry.name === "breaking-summary.json") breakingSummaryFiles.push(full);
                 }
               }
 
@@ -377,14 +391,28 @@ stages:
                 buildFailed: 0,
                 regenFailures: [],
                 buildFailures: [],
-                breakingTotal: 0,
-                potentiallyBreakingTotal: 0,
-                additiveTotal: 0,
-                changedPackages: [],
-                previousEmitterVersion: null,
-                currentEmitterVersion: null,
+                // Changelog signal sourced from update-changelog (comment #5):
+                // - changelogTotal:    packages that built successfully and ran update-changelog
+                // - changelogGenerated:packages where update-changelog finished cleanly
+                // - changelogFailed:   packages where update-changelog itself failed
+                // - withChanges:       packages whose top CHANGELOG.md entry has any section
+                // - withBreaking:      packages whose top CHANGELOG.md entry has '### Breaking Changes'
+                changelogTotal: 0,
+                changelogGenerated: 0,
+                changelogFailed: 0,
+                withChanges: 0,
+                withBreaking: 0,
+                breakingPackages: [],
+                changelogFailedPackages: [],
                 pinning: { pinned: 0, multi: 0, empty: 0, none: 0, error: 0 },
                 multiNsPackages: [],
+                // Comment #3: packages that lack a usable tsp-location.yaml.
+                // With `-OnlyTypeSpec true` in matrix gen these are already
+                // filtered out at matrix stage (so the runner never sees them
+                // and the per-shard list is empty), but Setup scans the SDK
+                // tree once and emits its own `skipped-no-tsp-location.json`
+                // so the PR description can include the full list.
+                skippedNoTspLocation: [],
               };
 
               const multiNsSet = new Set();
@@ -404,6 +432,16 @@ stages:
                   totals.buildFailures.push(...(result.build.failures ?? []));
                 }
 
+                if (result.changelog) {
+                  totals.changelogTotal += result.changelog.total ?? 0;
+                  totals.changelogGenerated += result.changelog.generated ?? 0;
+                  totals.changelogFailed += result.changelog.failed ?? 0;
+                  totals.withChanges += result.changelog.withChanges ?? 0;
+                  totals.withBreaking += result.changelog.withBreaking ?? 0;
+                  totals.breakingPackages.push(...(result.changelog.breakingPackages ?? []));
+                  totals.changelogFailedPackages.push(...(result.changelog.failedPackages ?? []));
+                }
+
                 if (result.apiVersionPinning) {
                   for (const k of Object.keys(totals.pinning)) {
                     totals.pinning[k] += result.apiVersionPinning[k] ?? 0;
@@ -414,16 +452,26 @@ stages:
                     totals.multiNsPackages.push(m);
                   }
                 }
+
+                if (Array.isArray(result.skippedNoTspLocation)) {
+                  totals.skippedNoTspLocation.push(...result.skippedNoTspLocation);
+                }
               }
 
-              for (const file of breakingSummaryFiles) {
-                const summary = JSON.parse(fs.readFileSync(file, "utf8"));
-                totals.breakingTotal += summary.totalBreaking ?? 0;
-                totals.potentiallyBreakingTotal += summary.totalPotentiallyBreaking ?? 0;
-                totals.additiveTotal += summary.totalAdditive ?? 0;
-                totals.changedPackages.push(...(summary.changedPackages ?? []));
-                if (!totals.previousEmitterVersion) totals.previousEmitterVersion = summary.previousEmitterVersion;
-                if (!totals.currentEmitterVersion) totals.currentEmitterVersion = summary.currentEmitterVersion;
+              // Also fold in the Setup-stage scan (full SDK tree). This catches
+              // arm-* dirs that were filtered out of the matrix because they
+              // have no tsp-location.yaml at all, which the per-shard
+              // result.json cannot see.
+              const setupSkippedFile = path.join(root, "matrix_artifacts", "skipped-no-tsp-location.json");
+              if (fs.existsSync(setupSkippedFile)) {
+                try {
+                  const setupSkipped = JSON.parse(fs.readFileSync(setupSkippedFile, "utf8"));
+                  if (Array.isArray(setupSkipped)) {
+                    totals.skippedNoTspLocation.push(...setupSkipped);
+                  }
+                } catch (err) {
+                  console.log(`Warning: failed to read ${setupSkippedFile}: ${err.message}`);
+                }
               }
 
               console.log("========== MATRIX SUMMARY ==========");
@@ -435,11 +483,10 @@ stages:
               console.log("--- Build ---");
               console.log(`Total: ${totals.buildTotal} | Build OK: ${totals.buildSuccess} | Build Failed: ${totals.buildFailed}`);
               console.log(`Build Pass Rate: ${totals.buildTotal === 0 ? "0.0" : ((totals.buildSuccess * 100) / totals.buildTotal).toFixed(1)}%`);
-              console.log("--- API Change Signal ---");
-              console.log(`Emitter under test : ${totals.currentEmitterVersion || "(unknown)"}`);
-              console.log(`Previous on npm    : ${totals.previousEmitterVersion || "(unknown)"} (informational; not used as baseline)`);
-              console.log(`Baseline           : api.md committed in git HEAD`);
-              console.log(`Breaking: ${totals.breakingTotal} | Potentially Breaking: ${totals.potentiallyBreakingTotal} | Additive: ${totals.additiveTotal}`);
+              console.log("--- Changelog Signal (update-changelog) ---");
+              console.log(`Total: ${totals.changelogTotal} | Generated: ${totals.changelogGenerated} | Failed: ${totals.changelogFailed}`);
+              console.log(`Packages with any change: ${totals.withChanges} | Packages with Breaking Changes: ${totals.withBreaking}`);
+              console.log(`Baseline: latest npm published version (per-package, via update-changelog)`);
 
               // --- API-version pinning coverage (informational) ---
               // Pipeline pins emitter api-version per-package using metadata.json.
@@ -456,7 +503,7 @@ stages:
               console.log(`Pinned: ${totals.pinning.pinned} | Multi-namespace: ${totals.pinning.multi} | Empty: ${totals.pinning.empty} | No metadata.json: ${totals.pinning.none} | Parse error: ${totals.pinning.error}`);
               console.log(`Coverage: ${pinPct}% (${pinCovered}/${pinAll})`);
               if (totals.pinning.multi > 0) {
-                console.log("⚠️  Multi-namespace packages (breaking count may include spec-evolution noise; manual review recommended):");
+                console.log("⚠️  Multi-namespace packages (breaking signal may include spec-evolution noise; manual review recommended):");
                 const seen = new Set();
                 for (const m of totals.multiNsPackages) {
                   if (seen.has(m.pkg)) continue;
@@ -466,28 +513,39 @@ stages:
                 }
               }
 
-              if (totals.changedPackages.length > 0) {
-                const merged = new Map();
-                for (const p of totals.changedPackages) {
-                  const existing = merged.get(p.pkg) || {
-                    pkg: p.pkg,
-                    totalChanges: 0,
-                    breaking: 0,
-                    potentiallyBreaking: 0,
-                    additive: 0,
-                  };
-                  existing.totalChanges += p.totalChanges ?? 0;
-                  existing.breaking += p.breaking ?? 0;
-                  existing.potentiallyBreaking += p.potentiallyBreaking ?? 0;
-                  existing.additive += p.additive ?? 0;
-                  merged.set(p.pkg, existing);
+              if (totals.breakingPackages.length > 0) {
+                console.log("");
+                console.log("Packages with Breaking Changes (read CHANGELOG.md in the PR diff for details):");
+                const uniqueBreaking = [...new Set(totals.breakingPackages)].sort();
+                for (const pkg of uniqueBreaking) {
+                  const marker = multiNsSet.has(pkg) ? " ⚠️ multi-ns (may include spec drift)" : "";
+                  console.log(`  - ${pkg}${marker}`);
                 }
-                const unique = [...merged.values()].sort((a, b) => (b.totalChanges ?? 0) - (a.totalChanges ?? 0));
-                console.log("Top changed packages:");
-                for (const p of unique.slice(0, 20)) {
-                  const marker = multiNsSet.has(p.pkg) ? " ⚠️ multi-ns (breaking may include spec drift)" : "";
-                  console.log(`  - ${p.pkg}: total=${p.totalChanges}, breaking=${p.breaking}, potentiallyBreaking=${p.potentiallyBreaking}, additive=${p.additive}${marker}`);
+              }
+
+              if (totals.changelogFailedPackages.length > 0) {
+                console.log("");
+                console.log("update-changelog failures (build succeeded but changelog tool errored; see logs/changelog/<pkg>.log):");
+                for (const pkg of [...new Set(totals.changelogFailedPackages)].sort()) {
+                  console.log(`  - ${pkg}`);
                 }
+              }
+
+              // Comment #3: surface ARM packages without a usable tsp-location.yaml
+              // so PR reviewers (and the spec/SDK team) know which packages were
+              // intentionally skipped and need on-boarding. Dedup by name.
+              if (totals.skippedNoTspLocation.length > 0) {
+                console.log("");
+                console.log(`Packages skipped — no usable tsp-location.yaml (${totals.skippedNoTspLocation.length}):`);
+                const seenSkip = new Map();
+                for (const item of totals.skippedNoTspLocation) {
+                  if (!seenSkip.has(item.name)) seenSkip.set(item.name, item.reason);
+                }
+                for (const [name, reason] of [...seenSkip.entries()].sort()) {
+                  console.log(`  - ${name} (${reason})`);
+                }
+                console.log("These packages were filtered out by matrix gen (-OnlyTypeSpec true).");
+                console.log("Spec/SDK team: please add tsp-location.yaml so they participate in the next regeneration run.");
               }
 
               if (totals.regenFailures.length > 0) {
