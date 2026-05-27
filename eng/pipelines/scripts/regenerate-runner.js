@@ -19,56 +19,11 @@ const skipBuild = getArg("--skipBuild", "false").toLowerCase() === "true";
 const emitterVersion = getArg("--emitterVersion", "");
 const directoryListFile = getArg("--directoryList", "");
 const resultOutputDir = getArg("--resultOutputDir", "");
-const regenTimeoutMs = Number(getArg("--regenTimeoutMs", String(25 * 60 * 1000)));
-
-// Per-package timeout overrides (in ms) for known monster packages whose
-// tsp compile / emit takes much longer than the global default.
-const PACKAGE_TIMEOUT_OVERRIDES = {
-  "sdk/datafactory/arm-datafactory": 60 * 60 * 1000,
-  "sdk/network/arm-network": 60 * 60 * 1000,
-  "sdk/appservice/arm-appservice": 60 * 60 * 1000,
-  "sdk/apimanagement/arm-apimanagement": 45 * 60 * 1000,
-  "sdk/sql/arm-sql": 45 * 60 * 1000,
-  "sdk/containerservice/arm-containerservice": 45 * 60 * 1000,
-  "sdk/cosmosdb/arm-cosmosdb": 45 * 60 * 1000,
-  "sdk/machinelearning/arm-machinelearning": 45 * 60 * 1000,
-  "sdk/securityinsight/arm-securityinsight": 45 * 60 * 1000,
-  "sdk/recoveryservicessiterecovery/arm-recoveryservices-siterecovery": 45 * 60 * 1000,
-  "sdk/appcontainers/arm-appcontainers": 40 * 60 * 1000,
-  "sdk/cdn/arm-cdn": 40 * 60 * 1000,
-  "sdk/datamigration/arm-datamigration": 40 * 60 * 1000,
-  "sdk/compute/arm-compute": 45 * 60 * 1000,
-  "sdk/storage/arm-storage": 45 * 60 * 1000,
-};
-
-function getRegenTimeoutForPackage(pkg) {
-  return PACKAGE_TIMEOUT_OVERRIDES[pkg] || regenTimeoutMs;
-}
-
-// Grace period after we observe "generation complete" before we proactively
-// kill tsp-client. tsp-client sometimes hangs in the "Cleaning up temp directory"
-// phase (or its child npm/node subprocesses never close their stdio), causing
-// the process to never exit even though all code has been generated.
-const GENERATION_COMPLETE_GRACE_MS = 60 * 1000;
-
-// Default and per-package build timeout (pnpm build --filter <pkg>).
-// Some packages (especially multi-sub-client ones like arm-apimanagement) run
-// api-extractor hundreds of times in the extract-api step and need much longer.
-const DEFAULT_BUILD_TIMEOUT_MS = 15 * 60 * 1000;
-
-const PACKAGE_BUILD_TIMEOUT_OVERRIDES = {
-  "sdk/apimanagement/arm-apimanagement": 40 * 60 * 1000,
-  "sdk/sql/arm-sql": 40 * 60 * 1000,
-  "sdk/network/arm-network": 30 * 60 * 1000,
-  "sdk/datafactory/arm-datafactory": 30 * 60 * 1000,
-  "sdk/appservice/arm-appservice": 30 * 60 * 1000,
-  "sdk/compute/arm-compute": 25 * 60 * 1000,
-  "sdk/storage/arm-storage": 25 * 60 * 1000,
-};
-
-function getBuildTimeoutForPackage(pkg) {
-  return PACKAGE_BUILD_TIMEOUT_OVERRIDES[pkg] || DEFAULT_BUILD_TIMEOUT_MS;
-}
+// No per-process timeout: aligned with azure-sdk-for-net / azure-sdk-for-go
+// regeneration scripts, which rely on the ADO job-level timeout
+// (timeoutInMinutes, default 60min) and let individual tsp-client / pnpm
+// invocations run to completion. If a single package hangs, the whole shard
+// will eventually be killed by ADO — that's the accepted trade-off.
 
 if (!specRepoRoot || !fs.existsSync(specRepoRoot)) {
   console.error(`ERROR: spec repo root not found: ${specRepoRoot}`);
@@ -288,15 +243,10 @@ function makeLineStamper(startMs, onLine) {
   };
 }
 
-function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
-  const { earlyExitOnPattern = null, earlyExitGraceMs = GENERATION_COMPLETE_GRACE_MS } = options;
+function runCommand(cmd, args, cwd) {
   return new Promise((resolve) => {
     const startMs = Date.now();
     let output = "";
-    let killedByTimeout = false;
-    let killedAfterEarlyExit = false;
-    let earlyExitTriggered = false;
-    let earlyExitTimer = null;
     let lastOutputMs = Date.now();
     const proc = spawn(cmd, args, { cwd, shell: true });
 
@@ -305,12 +255,7 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
     const stderrStamper = makeLineStamper(startMs, appendLine);
 
     // Header line so the log shows exactly when the command was launched.
-    output += `${tsPrefix(startMs)}$ ${cmd} ${args.join(" ")}  (cwd=${cwd}, timeout=${timeoutMs}ms)\n`;
-
-    let timer = setTimeout(() => {
-      killedByTimeout = true;
-      try { proc.kill("SIGKILL"); } catch {}
-    }, timeoutMs);
+    output += `${tsPrefix(startMs)}$ ${cmd} ${args.join(" ")}  (cwd=${cwd})\n`;
 
     // Heartbeat: while the child is alive, every HEARTBEAT_INTERVAL_MS print a
     // timestamped progress line showing how long it's been silent and the
@@ -411,57 +356,20 @@ function runCommand(cmd, args, cwd, timeoutMs = 600000, options = {}) {
       output += `${tsPrefix(startMs)}[heartbeat] still running (${parts.join(", ")})\n`;
     }, HEARTBEAT_INTERVAL_MS);
 
-    function maybeTriggerEarlyExit() {
-      if (!earlyExitOnPattern || earlyExitTriggered) return;
-      if (earlyExitOnPattern.test(output)) {
-        earlyExitTriggered = true;
-        // Generation has already completed successfully. Cancel the outer
-        // hard-timeout so it can't race ahead and report a false failure.
-        if (timer) { clearTimeout(timer); timer = null; }
-        earlyExitTimer = setTimeout(() => {
-          killedAfterEarlyExit = true;
-          try { proc.kill("SIGTERM"); } catch {}
-          setTimeout(() => { try { proc.kill("SIGKILL"); } catch {} }, 5000);
-        }, earlyExitGraceMs);
-      }
-    }
-
-    proc.stdout.on("data", (d) => {
-      stdoutStamper.push(d.toString());
-      maybeTriggerEarlyExit();
-    });
-    proc.stderr.on("data", (d) => {
-      stderrStamper.push(d.toString());
-      maybeTriggerEarlyExit();
-    });
+    proc.stdout.on("data", (d) => { stdoutStamper.push(d.toString()); });
+    proc.stderr.on("data", (d) => { stderrStamper.push(d.toString()); });
     proc.on("close", (code) => {
       stdoutStamper.end();
       stderrStamper.end();
       clearInterval(heartbeatTimer);
-      if (timer) clearTimeout(timer);
-      if (earlyExitTimer) clearTimeout(earlyExitTimer);
-      // If we ever observed "generation complete", the code was successfully
-      // generated. Treat the run as success no matter how the process exited
-      // (clean exit, our SIGTERM/SIGKILL, or even the outer timeout firing
-      // while we were waiting for the grace period).
-      if (earlyExitTriggered) {
-        output += `${tsPrefix(startMs)}[runner] generation completed; treated as success (exit-code=${code}, killedAfterEarlyExit=${killedAfterEarlyExit}, killedByTimeout=${killedByTimeout})\n`;
-        resolve({ code: 0, output, timedOut: false, earlyExited: true });
-        return;
-      }
-      if (killedByTimeout) {
-        output += `${tsPrefix(startMs)}[runner] killed by timeout after ${timeoutMs}ms\n`;
-      }
-      resolve({ code, output, timedOut: killedByTimeout });
+      resolve({ code, output });
     });
     proc.on("error", (err) => {
       stdoutStamper.end();
       stderrStamper.end();
       clearInterval(heartbeatTimer);
-      if (timer) clearTimeout(timer);
-      if (earlyExitTimer) clearTimeout(earlyExitTimer);
       output += `${tsPrefix(startMs)}[runner] spawn error: ${err.message}\n`;
-      resolve({ code: 1, output, timedOut: false });
+      resolve({ code: 1, output });
     });
   });
 }
@@ -498,12 +406,6 @@ function extractError(output) {
   if (lastLines.length > 0) return lastLines.map((l) => l.trim()).join(" | ");
 
   return "Unknown error";
-}
-
-function isRetryableGitError(output) {
-  return /git clone failed|fatal: early EOF|unable to access|Failed to connect|Could not connect to server|The remote end hung up unexpectedly/.test(
-    output,
-  );
 }
 
 // Sanitize a package directory like "sdk/foo/arm-foo" into a safe filename.
@@ -1071,6 +973,17 @@ async function regenerateAll(packages) {
     //   evolution noise.
     let pinnedApiVersion = null;
     let pinReason = "";
+    // Classification used by downstream Summary report:
+    //   "pinned"      — single-namespace, api-version was successfully pinned
+    //   "multi"       — package has multiple namespaces / api-versions; tspconfig
+    //                   only takes one api-version value, so pinning is skipped.
+    //                   Reviewers must treat the breaking count for these
+    //                   packages as a UPPER BOUND that may include spec-drift noise.
+    //   "empty"       — apiVersions field present but empty / no field
+    //   "none"        — no metadata.json (likely a brand-new package)
+    //   "error"       — metadata.json existed but could not be parsed
+    let pinClass = "none";
+    const multiNamespaces = [];
     const metadataPath = path.join(pkg.pkgDir, "metadata.json");
     if (fs.existsSync(metadataPath)) {
       try {
@@ -1081,19 +994,26 @@ async function regenerateAll(packages) {
           if (ns.length === 1) {
             pinnedApiVersion = String(apiVersions[ns[0]]);
             pinReason = `pinned to ${ns[0]}=${pinnedApiVersion}`;
+            pinClass = "pinned";
           } else if (ns.length > 1) {
             pinReason = `skipped (multiple namespaces: ${ns.join(", ")})`;
+            pinClass = "multi";
+            for (const n of ns) multiNamespaces.push({ namespace: n, apiVersion: String(apiVersions[n]) });
           } else {
             pinReason = "skipped (empty apiVersions in metadata.json)";
+            pinClass = "empty";
           }
         } else {
           pinReason = "skipped (metadata.json has no apiVersions field)";
+          pinClass = "empty";
         }
       } catch (err) {
         pinReason = `skipped (failed to parse metadata.json: ${err.message})`;
+        pinClass = "error";
       }
     } else {
       pinReason = "skipped (no metadata.json — likely a new package)";
+      pinClass = "none";
     }
     output += `api-version   : ${pinReason}\n`;
 
@@ -1121,33 +1041,18 @@ async function regenerateAll(packages) {
       }
     }
 
-    const maxAttempts = 3;
     // Use `tsp-client init --update-if-exists` with the latest main spec from
     // the locally cloned azure-rest-api-specs repo. apiVersion pinning above
     // ensures emitter targets the same version that's currently committed in
     // SDK repo's metadata.json, so the diff reflects emitter delta only.
+    // Single attempt, no retry — aligned with azure-sdk-for-net / azure-sdk-for-go.
     const tspClientArgs = ["init", "--update-if-exists", "-c", pkg.tspConfigPath, "--local-spec-repo", pkg.localSpecPath, "--debug"];
     output += `tsp-client    : init --local-spec-repo (latest main)\n`;
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      if (attempt > 1) await new Promise((resolve) => setTimeout(resolve, 10000 * (attempt - 1)));
-
-      const pkgTimeoutMs = getRegenTimeoutForPackage(pkg.pkg);
-      const result = await runCommand(
-        "tsp-client",
-        tspClientArgs,
-        pkg.pkgDir,
-        pkgTimeoutMs,
-        { earlyExitOnPattern: /generation complete/i },
-      );
-      output += `\n===== Attempt ${attempt}/${maxAttempts} =====\n${result.output}`;
-      output += `\nExit code: ${result.code}\n`;
-      success = result.code === 0;
-
-      // Do not retry on timeout-kill — it will just waste another full timeout.
-      if (success || result.timedOut) break;
-      if (!isRetryableGitError(result.output)) break;
-    }
+    const result = await runCommand("tsp-client", tspClientArgs, pkg.pkgDir);
+    output += `\n${result.output}`;
+    output += `\nExit code: ${result.code}\n`;
+    success = result.code === 0;
 
     // Restore tspconfig.yaml if we patched it. Done in a finally-style block
     // so a failing tsp-client run doesn't leave the spec repo in a modified
@@ -1171,7 +1076,7 @@ async function regenerateAll(packages) {
       console.log(`     ${extractError(output)}`);
     }
     recordPackageLog("regenerate", pkg.pkg, success, output);
-    results.push({ pkg: pkg.pkg, success, duration, output });
+    results.push({ pkg: pkg.pkg, success, duration, output, pinClass, pinnedApiVersion, multiNamespaces });
   }
 
   for (const pkg of packages) {
@@ -1227,7 +1132,7 @@ async function buildAll(regenResults) {
   patchMissingDependencies(sdkRoot, successPkgs);
 
   console.log("Running pnpm install at repo root...");
-  const pnpmInstall = await runCommand("pnpm", ["install", "--no-frozen-lockfile"], sdkRoot, 600000);
+  const pnpmInstall = await runCommand("pnpm", ["install", "--no-frozen-lockfile"], sdkRoot);
   if (pnpmInstall.code !== 0) {
     console.log("ERROR: pnpm install failed. Cannot proceed with build verification.");
     console.log(pnpmInstall.output.slice(-1000));
@@ -1243,7 +1148,7 @@ async function buildAll(regenResults) {
   ];
   const coreArgs = ["build"];
   for (const f of coreFilters) { coreArgs.push("--filter", f); }
-  const coreBuild = await runCommand("pnpm", coreArgs, sdkRoot, 300000);
+  const coreBuild = await runCommand("pnpm", coreArgs, sdkRoot);
   if (coreBuild.code !== 0) {
     console.log("WARNING: Core dependencies build had issues:");
     console.log(coreBuild.output.slice(-2000));
@@ -1265,8 +1170,7 @@ async function buildAll(regenResults) {
     } catch {}
 
     const start = Date.now();
-    const buildTimeoutMs = getBuildTimeoutForPackage(pkg.pkg);
-    const build = await runCommand("pnpm", ["build", "--filter", filterName], sdkRoot, buildTimeoutMs);
+    const build = await runCommand("pnpm", ["build", "--filter", filterName], sdkRoot);
     const duration = ((Date.now() - start) / 1000).toFixed(1);
     buildCompleted++;
 
@@ -1365,6 +1269,19 @@ async function main() {
 
   // Write result summary as JSON for artifact collection in matrix mode
   if (resultOutputDir) {
+    // Aggregate api-version pinning classification for this shard, so the
+    // Summarize stage can annotate the breaking-change report (multi-ns
+    // packages produce noisier diffs and reviewers need to know).
+    const pinning = { pinned: [], multi: [], empty: [], none: [], error: [] };
+    for (const r of regenResults) {
+      const cls = r.pinClass || "none";
+      if (!pinning[cls]) pinning[cls] = [];
+      const entry = { pkg: r.pkg };
+      if (cls === "pinned") entry.apiVersion = r.pinnedApiVersion;
+      if (cls === "multi") entry.namespaces = r.multiNamespaces || [];
+      pinning[cls].push(entry);
+    }
+
     const resultSummary = {
       emitterVersion,
       directoryList: directoryListFile || null,
@@ -1377,6 +1294,14 @@ async function main() {
           pkg: r.pkg,
           error: extractError(r.output),
         })),
+      },
+      apiVersionPinning: {
+        pinned: pinning.pinned.length,
+        multi: pinning.multi.length,
+        empty: pinning.empty.length,
+        none: pinning.none.length,
+        error: pinning.error.length,
+        details: pinning,
       },
       build: buildSkipped ? null : {
         total: regenSuccess,
