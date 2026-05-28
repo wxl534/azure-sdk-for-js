@@ -71,10 +71,6 @@ parameters:
     displayName: "Skip build verification"
     type: boolean
     default: false
-  - name: DisableApiVersionPinning
-    displayName: "Disable api-version pinning (A/B-test mode for PR #38604 comment #4)"
-    type: boolean
-    default: false
   - name: SpecRepoBranch
     displayName: "azure-rest-api-specs branch to clone"
     type: string
@@ -320,7 +316,6 @@ stages:
                 --maxWorkers "${{ parameters.MaxWorkers }}" \
                 --buildWorkers "${{ parameters.BuildWorkers }}" \
                 --skipBuild "${{ parameters.SkipBuild }}" \
-                --disableApiVersionPinning "${{ parameters.DisableApiVersionPinning }}" \
                 --emitterVersion "$(emitterVersion)" \
                 --directoryList "$(Pipeline.Workspace)/matrix_artifacts/$(DirectoryList)" \
                 --resultOutputDir "$(Build.ArtifactStagingDirectory)/results/$(JobKey)"
@@ -414,9 +409,6 @@ stages:
                 withBreaking: 0,
                 breakingPackages: [],
                 changelogFailedPackages: [],
-                pinning: { pinned: 0, multi: 0, empty: 0, none: 0, error: 0, disabled: 0 },
-                pinningDisabledMode: false,
-                multiNsPackages: [],
                 // Comment #3: packages that lack a usable tsp-location.yaml.
                 // With `-OnlyTypeSpec true` in matrix gen these are already
                 // filtered out at matrix stage (so the runner never sees them
@@ -425,8 +417,6 @@ stages:
                 // so the PR description can include the full list.
                 skippedNoTspLocation: [],
               };
-
-              const multiNsSet = new Set();
 
               for (const file of resultFiles) {
                 const result = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -451,18 +441,6 @@ stages:
                   totals.withBreaking += result.changelog.withBreaking ?? 0;
                   totals.breakingPackages.push(...(result.changelog.breakingPackages ?? []));
                   totals.changelogFailedPackages.push(...(result.changelog.failedPackages ?? []));
-                }
-
-                if (result.apiVersionPinning) {
-                  for (const k of Object.keys(totals.pinning)) {
-                    totals.pinning[k] += result.apiVersionPinning[k] ?? 0;
-                  }
-                  if (result.apiVersionPinning.disabledMode) totals.pinningDisabledMode = true;
-                  const multiList = result.apiVersionPinning.details?.multi ?? [];
-                  for (const m of multiList) {
-                    multiNsSet.add(m.pkg);
-                    totals.multiNsPackages.push(m);
-                  }
                 }
 
                 if (Array.isArray(result.skippedNoTspLocation)) {
@@ -500,45 +478,12 @@ stages:
               console.log(`Packages with any change: ${totals.withChanges} | Packages with Breaking Changes: ${totals.withBreaking}`);
               console.log(`Baseline: latest npm published version (per-package, via update-changelog)`);
 
-              // --- API-version pinning coverage (informational) ---
-              // Pipeline pins emitter api-version per-package using metadata.json.
-              // - pinned: emitter ran with the same api-version that's committed → diff = pure emitter delta
-              // - multi:  pkg has >1 namespace/api-version; tspconfig only accepts one
-              //           value, so pinning is skipped. Diff for these packages may
-              //           include spec-evolution noise → flagged with ⚠️ below.
-              // - empty/none: no usable apiVersions field; diff may also include
-              //           spec-evolution noise but typically smaller surface than multi.
-              const pinCovered = (totals.pinning.pinned ?? 0);
-              const pinAll = pinCovered + (totals.pinning.multi ?? 0) + (totals.pinning.empty ?? 0) + (totals.pinning.none ?? 0) + (totals.pinning.error ?? 0);
-              const pinPct = pinAll === 0 ? "0.0" : ((pinCovered * 100) / pinAll).toFixed(1);
-              console.log("--- API-version pinning coverage ---");
-              if (totals.pinningDisabledMode) {
-                console.log("⚠️  A/B TEST MODE: api-version pinning was DISABLED for this run (--disableApiVersionPinning=true).");
-                console.log("    Breaking-change counts below reflect (emitter + spec evolution) signal, NOT pure emitter delta.");
-                console.log("    Compare against a separate run with pinning enabled to gauge how much noise pinning removes.");
-                console.log(`Disabled: ${totals.pinning.disabled} | (other buckets are 0 by construction in this mode)`);
-              } else {
-                console.log(`Pinned: ${totals.pinning.pinned} | Multi-namespace: ${totals.pinning.multi} | Empty: ${totals.pinning.empty} | No metadata.json: ${totals.pinning.none} | Parse error: ${totals.pinning.error}`);
-                console.log(`Coverage: ${pinPct}% (${pinCovered}/${pinAll})`);
-              }
-              if (!totals.pinningDisabledMode && totals.pinning.multi > 0) {
-                console.log("⚠️  Multi-namespace packages (breaking signal may include spec-evolution noise; manual review recommended):");
-                const seen = new Set();
-                for (const m of totals.multiNsPackages) {
-                  if (seen.has(m.pkg)) continue;
-                  seen.add(m.pkg);
-                  const nsList = (m.namespaces || []).map((n) => `${n.namespace}=${n.apiVersion}`).join(", ");
-                  console.log(`  - ${m.pkg} (${m.namespaces?.length ?? 0} namespaces: ${nsList})`);
-                }
-              }
-
               if (totals.breakingPackages.length > 0) {
                 console.log("");
                 console.log("Packages with Breaking Changes (read CHANGELOG.md in the PR diff for details):");
                 const uniqueBreaking = [...new Set(totals.breakingPackages)].sort();
                 for (const pkg of uniqueBreaking) {
-                  const marker = multiNsSet.has(pkg) ? " ⚠️ multi-ns (may include spec drift)" : "";
-                  console.log(`  - ${pkg}${marker}`);
+                  console.log(`  - ${pkg}`);
                 }
               }
 
@@ -613,11 +558,6 @@ stages:
                   withBreaking: totals.withBreaking,
                   breakingPackages: [...new Set(totals.breakingPackages)].sort(),
                   failedPackages: totals.changelogFailedPackages,
-                },
-                pinning: {
-                  ...totals.pinning,
-                  disabledMode: totals.pinningDisabledMode,
-                  multiNamespacePackages: totals.multiNsPackages,
                 },
                 skippedNoTspLocation: [...dedupSkipped.entries()]
                   .sort(([a], [b]) => a.localeCompare(b))
@@ -710,8 +650,15 @@ stages:
                   echo "Pushing to source repo: ${repoOwner}/${repoName} (using GH App token)"
                 fi
 
+                # Normalize sentinel values ('empty', 'auto', '') so that
+                # picking the default-named option in the ADO UI (which can't
+                # leave the field truly empty) still triggers the auto-branch
+                # logic below. Without this, branch=='empty' literally became
+                # the PR head ref and every run reused PR #1 (see PR #38604
+                # comment thread).
                 branch="${{ parameters.PullRequestBranch }}"
-                if [ -z "$branch" ]; then
+                branch_lc=$(echo "$branch" | tr '[:upper:]' '[:lower:]')
+                if [ -z "$branch" ] || [ "$branch_lc" = "empty" ] || [ "$branch_lc" = "auto" ]; then
                   branch="sdk-regenerate-$(Build.BuildId)"
                 fi
                 echo "Using PR branch: $branch"
@@ -803,14 +750,6 @@ stages:
                     $lines.Add("- Built OK:    **$($agg.build.success)/$($agg.build.total)**")
                     $lines.Add("- Changelog generated: **$($agg.changelog.generated)/$($agg.changelog.total)**")
                     $lines.Add("- Packages with breaking changes: **$($agg.changelog.withBreaking)**")
-                    if ($agg.pinning.disabledMode) {
-                      $lines.Add('- ⚠️ **api-version pinning DISABLED for this run (A/B test mode)** — breaking counts include spec-evolution noise.')
-                    } else {
-                      $covered = $agg.pinning.pinned
-                      $denom = $agg.pinning.pinned + $agg.pinning.multi + $agg.pinning.empty + $agg.pinning.none + $agg.pinning.error
-                      $pct = if ($denom -gt 0) { [math]::Round(100.0 * $covered / $denom, 1) } else { 0 }
-                      $lines.Add("- api-version pinning coverage: **$pct%** ($covered/$denom)")
-                    }
                     $lines.Add('')
 
                     if ($agg.changelog.breakingPackages -and $agg.changelog.breakingPackages.Count -gt 0) {
@@ -838,10 +777,18 @@ stages:
                   }
 
                   $bodyText = ($lines -join "`n")
+                  $prTitle  = 'TypeSpec emitter delta: $(previousEmitterVersion) -> $(emitterVersion) [${{ parameters.ChangePushMode }}]'
                   Write-Host '----- PR body preview (first 60 lines) -----'
                   $lines | Select-Object -First 60 | ForEach-Object { Write-Host $_ }
                   Write-Host '----- end preview -----'
 
+                  # Every pipeline run uses a unique branch name
+                  # (`sdk-regenerate-$(Build.BuildId)`) so Submit-PullRequest
+                  # always creates a fresh PR with the correct title+body,
+                  # rather than reusing an old PR whose body would otherwise
+                  # be stuck on the first run's content. This preserves a
+                  # per-run history of breaking-change reports that mentor
+                  # and reviewers can compare across emitter versions.
                   & ./eng/common/scripts/Submit-PullRequest.ps1 `
                     -RepoOwner '$(RepoOwner)' `
                     -RepoName '$(RepoNameOnly)' `
@@ -849,5 +796,5 @@ stages:
                     -PROwner '$(RepoOwner)' `
                     -PRBranch '$(PRBranchName)' `
                     -AuthToken '$(PushToken)' `
-                    -PRTitle 'TypeSpec emitter delta: $(previousEmitterVersion) -> $(emitterVersion) [${{ parameters.ChangePushMode }}]' `
+                    -PRTitle $prTitle `
                     -PRBody $bodyText

@@ -19,13 +19,6 @@ const skipBuild = getArg("--skipBuild", "false").toLowerCase() === "true";
 const emitterVersion = getArg("--emitterVersion", "");
 const directoryListFile = getArg("--directoryList", "");
 const resultOutputDir = getArg("--resultOutputDir", "");
-// Comment #4 A/B-test toggle. When true, skip the metadata.json-driven
-// api-version pinning entirely: emitter runs against whatever api-version
-// the spec's tspconfig.yaml declares by default, so the diff reflects
-// pure (emitter + spec-evolution) signal rather than (emitter only).
-// Run the pipeline twice (false vs true) and compare Summary breaking
-// counts to decide whether the pinning machinery actually reduces noise.
-const disableApiVersionPinning = getArg("--disableApiVersionPinning", "false").toLowerCase() === "true";
 // No per-process timeout: aligned with azure-sdk-for-net / azure-sdk-for-go
 // regeneration scripts, which rely on the ADO job-level timeout
 // (timeoutInMinutes, default 60min) and let individual tsp-client / pnpm
@@ -284,78 +277,6 @@ function extractError(output) {
 // Sanitize a package directory like "sdk/foo/arm-foo" into a safe filename.
 function safeLogName(pkg) {
   return pkg.replace(/[\\/]/g, "__");
-}
-
-// Patch a tspconfig.yaml content string to pin `api-version` inside the
-// `@azure-tools/typespec-ts` emitter options block.
-//
-// We intentionally do a minimal string-level edit instead of a real YAML
-// parse+serialize round-trip, because YAML libraries reformat the file
-// (comments lost, key ordering shuffled, anchors mangled) and we want to
-// touch the file as little as possible so the rest of the spec config is
-// unaffected.
-//
-// Strategy:
-//   1. Locate the "@azure-tools/typespec-ts:" key inside the options block.
-//   2. If it has an existing `api-version: <something>` child, replace its value.
-//   3. Otherwise, insert a new `api-version: <pin>` line as the first child
-//      of that emitter, preserving the indentation level of its other children.
-// Returns the patched content; returns original if the emitter block can't
-// be located (caller treats that as a no-op + warning).
-function patchTspConfigApiVersion(content, apiVersion) {
-  const lines = content.split(/\r?\n/);
-
-  // Find the emitter options line. Two common shapes:
-  //   options:
-  //     "@azure-tools/typespec-ts":
-  //   options:
-  //     '@azure-tools/typespec-ts':
-  //   options:
-  //     @azure-tools/typespec-ts:
-  let emitterIdx = -1;
-  let emitterIndent = "";
-  const emitterRegex = /^(\s*)["']?@azure-tools\/typespec-ts["']?\s*:\s*$/;
-  for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].match(emitterRegex);
-    if (m) {
-      emitterIdx = i;
-      emitterIndent = m[1];
-      break;
-    }
-  }
-  if (emitterIdx < 0) return content;
-
-  // Determine child indentation by looking at the first non-empty child line.
-  let childIndent = emitterIndent + "  ";
-  for (let i = emitterIdx + 1; i < lines.length; i++) {
-    if (lines[i].trim() === "") continue;
-    const cIndent = lines[i].match(/^(\s*)/)[1];
-    if (cIndent.length > emitterIndent.length) {
-      childIndent = cIndent;
-      break;
-    } else {
-      // Sibling or dedent — block had no children at all.
-      break;
-    }
-  }
-
-  // Scan children for existing api-version line. A child is anything at or
-  // deeper than childIndent; we stop when we hit a line at or shallower than
-  // emitterIndent (next sibling / parent dedent).
-  const apiVerRegex = new RegExp("^" + childIndent + "api-version\\s*:");
-  for (let i = emitterIdx + 1; i < lines.length; i++) {
-    if (lines[i].trim() === "") continue;
-    const cIndent = lines[i].match(/^(\s*)/)[1];
-    if (cIndent.length <= emitterIndent.length) break; // exited the block
-    if (apiVerRegex.test(lines[i])) {
-      lines[i] = `${childIndent}api-version: "${apiVersion}"`;
-      return lines.join("\n");
-    }
-  }
-
-  // No existing api-version — insert one right after the emitter header.
-  lines.splice(emitterIdx + 1, 0, `${childIndent}api-version: "${apiVersion}"`);
-  return lines.join("\n");
 }
 
 // Write the full log for a single package to <resultOutputDir>/logs/<phase>/<pkg>.log,
@@ -841,106 +762,13 @@ async function regenerateAll(packages) {
       return;
     }
 
-    // API-version pinning: read metadata.json (written by previous emitter run)
-    // to learn which apiVersion this package is currently built against, then
-    // temporarily patch the spec's tspconfig.yaml to pin the new emitter to
-    // the same apiVersion. This isolates "pure emitter delta" without
-    // requiring commit-locked spec.
-    //
-    // metadata.json shape:
-    //   { "apiVersions": { "Microsoft.Batch": "2025-06-01" }, ... }
-    //
-    // - 0 namespaces → no metadata / brand-new package → skip pinning
-    // - 1 namespace  → pin emitter to that single apiVersion
-    // - N namespaces (rare, e.g. arm-network) → skip pinning, log a notice;
-    //   tspconfig only takes one api-version value and we don't know which
-    //   namespace to prioritize. Diff for these packages may include spec
-    //   evolution noise.
-    let pinnedApiVersion = null;
-    let pinReason = "";
-    // Classification used by downstream Summary report:
-    //   "pinned"      — single-namespace, api-version was successfully pinned
-    //   "multi"       — package has multiple namespaces / api-versions; tspconfig
-    //                   only takes one api-version value, so pinning is skipped.
-    //                   Reviewers must treat the breaking count for these
-    //                   packages as a UPPER BOUND that may include spec-drift noise.
-    //   "empty"       — apiVersions field present but empty / no field
-    //   "none"        — no metadata.json (likely a brand-new package)
-    //   "error"       — metadata.json existed but could not be parsed
-    //   "disabled"    — Comment #4 A/B-test flag: pinning intentionally
-    //                   skipped for this whole run (--disableApiVersionPinning)
-    let pinClass = "none";
-    const multiNamespaces = [];
-
-    // Comment #4 A/B-test short-circuit: when pinning is disabled for the
-    // entire run, skip metadata.json lookup and tspconfig patching entirely.
-    if (disableApiVersionPinning) {
-      pinClass = "disabled";
-      pinReason = "A/B test mode: pinning intentionally disabled (--disableApiVersionPinning)";
-      output += `api-version   : ${pinReason}\n`;
-    } else {
-    const metadataPath = path.join(pkg.pkgDir, "metadata.json");
-    if (fs.existsSync(metadataPath)) {
-      try {
-        const meta = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
-        const apiVersions = meta && meta.apiVersions;
-        if (apiVersions && typeof apiVersions === "object") {
-          const ns = Object.keys(apiVersions);
-          if (ns.length === 1) {
-            pinnedApiVersion = String(apiVersions[ns[0]]);
-            pinReason = `pinned to ${ns[0]}=${pinnedApiVersion}`;
-            pinClass = "pinned";
-          } else if (ns.length > 1) {
-            pinReason = `skipped (multiple namespaces: ${ns.join(", ")})`;
-            pinClass = "multi";
-            for (const n of ns) multiNamespaces.push({ namespace: n, apiVersion: String(apiVersions[n]) });
-          } else {
-            pinReason = "skipped (empty apiVersions in metadata.json)";
-            pinClass = "empty";
-          }
-        } else {
-          pinReason = "skipped (metadata.json has no apiVersions field)";
-          pinClass = "empty";
-        }
-      } catch (err) {
-        pinReason = `skipped (failed to parse metadata.json: ${err.message})`;
-        pinClass = "error";
-      }
-    } else {
-      pinReason = "skipped (no metadata.json — likely a new package)";
-      pinClass = "none";
-    }
-    output += `api-version   : ${pinReason}\n`;
-    } // end of !disableApiVersionPinning block
-
-    // If we have a pinned apiVersion, patch the spec's tspconfig.yaml to add
-    // `options."@azure-tools/typespec-ts".api-version: <pin>`. We patch a
-    // COPY of tspconfig in-place inside the cloned spec repo (which is a
-    // throwaway sibling dir, not the SDK repo) — and restore it afterwards
-    // so subsequent packages reading the same tspconfig still see the
-    // original content. Backup is by string snapshot, simplest possible.
-    let originalTspConfig = null;
-    if (pinnedApiVersion) {
-      try {
-        originalTspConfig = fs.readFileSync(pkg.tspConfigPath, "utf8");
-        const patched = patchTspConfigApiVersion(originalTspConfig, pinnedApiVersion);
-        if (patched !== originalTspConfig) {
-          fs.writeFileSync(pkg.tspConfigPath, patched);
-        } else {
-          // Nothing changed (e.g., emitter section not found) — no need to restore later.
-          originalTspConfig = null;
-          output += `api-version   : (warning) could not find typespec-ts options block in tspconfig.yaml; emitter default will be used\n`;
-        }
-      } catch (err) {
-        output += `api-version   : (warning) failed to patch tspconfig.yaml: ${err.message}\n`;
-        originalTspConfig = null;
-      }
-    }
-
     // Use `tsp-client init --update-if-exists` with the latest main spec from
-    // the locally cloned azure-rest-api-specs repo. apiVersion pinning above
-    // ensures emitter targets the same version that's currently committed in
-    // SDK repo's metadata.json, so the diff reflects emitter delta only.
+    // the locally cloned azure-rest-api-specs repo. The emitter runs against
+    // whatever api-version the spec's tspconfig.yaml declares by default, so
+    // the diff reflects the combined (emitter + spec-evolution) signal.
+    // (api-version pinning machinery was removed after the A/B test in PR
+    // #38604 showed it didn't materially reduce breaking-change noise — only
+    // 1 package differed between pinned and unpinned runs out of 95.)
     // Single attempt, no retry — aligned with azure-sdk-for-net / azure-sdk-for-go.
     const tspClientArgs = ["init", "--update-if-exists", "-c", pkg.tspConfigPath, "--local-spec-repo", pkg.localSpecPath, "--debug"];
     output += `tsp-client    : init --local-spec-repo (latest main)\n`;
@@ -949,19 +777,6 @@ async function regenerateAll(packages) {
     output += `\n${result.output}`;
     output += `\nExit code: ${result.code}\n`;
     success = result.code === 0;
-
-    // Restore tspconfig.yaml if we patched it. Done in a finally-style block
-    // so a failing tsp-client run doesn't leave the spec repo in a modified
-    // state. (The spec repo is a throwaway sibling dir on the agent, but
-    // restoring keeps the workspace tidy and avoids confusing subsequent
-    // shards / debugging sessions that share the same agent.)
-    if (originalTspConfig !== null) {
-      try {
-        fs.writeFileSync(pkg.tspConfigPath, originalTspConfig);
-      } catch (err) {
-        output += `api-version   : (warning) failed to restore tspconfig.yaml: ${err.message}\n`;
-      }
-    }
 
     const duration = ((Date.now() - start) / 1000).toFixed(1);
     completed++;
@@ -972,7 +787,7 @@ async function regenerateAll(packages) {
       console.log(`     ${extractError(output)}`);
     }
     recordPackageLog("regenerate", pkg.pkg, success, output);
-    results.push({ pkg: pkg.pkg, success, duration, output, pinClass, pinnedApiVersion, multiNamespaces });
+    results.push({ pkg: pkg.pkg, success, duration, output });
   }
 
   for (const pkg of packages) {
@@ -1183,19 +998,6 @@ async function main() {
 
   // Write result summary as JSON for artifact collection in matrix mode
   if (resultOutputDir) {
-    // Aggregate api-version pinning classification for this shard, so the
-    // Summarize stage can annotate the breaking-change report (multi-ns
-    // packages produce noisier diffs and reviewers need to know).
-    const pinning = { pinned: [], multi: [], empty: [], none: [], error: [], disabled: [] };
-    for (const r of regenResults) {
-      const cls = r.pinClass || "none";
-      if (!pinning[cls]) pinning[cls] = [];
-      const entry = { pkg: r.pkg };
-      if (cls === "pinned") entry.apiVersion = r.pinnedApiVersion;
-      if (cls === "multi") entry.namespaces = r.multiNamespaces || [];
-      pinning[cls].push(entry);
-    }
-
     const resultSummary = {
       emitterVersion,
       directoryList: directoryListFile || null,
@@ -1212,19 +1014,6 @@ async function main() {
           pkg: r.pkg,
           error: extractError(r.output),
         })),
-      },
-      apiVersionPinning: {
-        // Comment #4: when this run was invoked with --disableApiVersionPinning,
-        // the `disabled` bucket holds every package and the others are 0.
-        // Summary stage uses `disabledMode` to print a prominent A/B-test banner.
-        disabledMode: disableApiVersionPinning,
-        pinned: pinning.pinned.length,
-        multi: pinning.multi.length,
-        empty: pinning.empty.length,
-        none: pinning.none.length,
-        error: pinning.error.length,
-        disabled: pinning.disabled.length,
-        details: pinning,
       },
       build: buildSkipped ? null : {
         total: regenSuccess,
