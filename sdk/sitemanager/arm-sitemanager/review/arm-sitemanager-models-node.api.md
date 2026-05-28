@@ -28,6 +28,10 @@ export interface ErrorResponse {
 }
 
 // @public
+export interface ExtensionResource extends Resource {
+}
+
+// @public
 export enum KnownCreatedByType {
     Application = "Application",
     Key = "Key",
@@ -48,10 +52,6 @@ export enum KnownVersions {
 }
 
 // @public
-export interface ProxyResource extends Resource {
-}
-
-// @public
 export interface Resource {
     readonly id?: string;
     readonly name?: string;
@@ -63,7 +63,7 @@ export interface Resource {
 export type ResourceProvisioningState = string;
 
 // @public
-export interface Site extends ProxyResource {
+export interface Site extends ExtensionResource {
     properties?: SiteProperties;
 }
 

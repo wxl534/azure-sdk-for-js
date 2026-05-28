@@ -4,11 +4,11 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
-export function $delete(context: SearchManagementContext, resourceGroupName: string, searchServiceName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsDeleteOptionalParams): Promise<PrivateEndpointConnection>;
+export function $delete(context: SearchManagementContext, resourceGroupName: string, searchServiceName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsDeleteOptionalParams): Promise<PrivateEndpointConnection | undefined>;
 
 // @public
 export function get(context: SearchManagementContext, resourceGroupName: string, searchServiceName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsGetOptionalParams): Promise<PrivateEndpointConnection>;

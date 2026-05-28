@@ -37,6 +37,26 @@ export interface DeidUpdate {
 }
 
 // @public
+export interface ErrorAdditionalInfo {
+    readonly info?: any;
+    readonly type?: string;
+}
+
+// @public
+export interface ErrorDetail {
+    readonly additionalInfo?: ErrorAdditionalInfo[];
+    readonly code?: string;
+    readonly details?: ErrorDetail[];
+    readonly message?: string;
+    readonly target?: string;
+}
+
+// @public
+export interface ErrorResponse {
+    error?: ErrorDetail;
+}
+
+// @public
 export enum KnownActionType {
     Internal = "Internal"
 }
@@ -100,7 +120,7 @@ export interface ManagedServiceIdentity {
     readonly principalId?: string;
     readonly tenantId?: string;
     type: ManagedServiceIdentityType;
-    userAssignedIdentities?: Record<string, UserAssignedIdentity | null>;
+    userAssignedIdentities?: Record<string, UserAssignedIdentity>;
 }
 
 // @public
@@ -109,13 +129,13 @@ export type ManagedServiceIdentityType = string;
 // @public
 export interface ManagedServiceIdentityUpdate {
     type?: ManagedServiceIdentityType;
-    userAssignedIdentities?: Record<string, UserAssignedIdentity | null>;
+    userAssignedIdentities?: Record<string, UserAssignedIdentity>;
 }
 
 // @public
 export interface Operation {
-    actionType?: ActionType;
-    readonly display?: OperationDisplay;
+    readonly actionType?: ActionType;
+    display?: OperationDisplay;
     readonly isDataAction?: boolean;
     readonly name?: string;
     readonly origin?: Origin;

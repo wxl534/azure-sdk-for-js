@@ -11,11 +11,12 @@ import { TokenCredential } from '@azure/core-auth';
 // @public
 export interface CloudHealthClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public (undocumented)
 export interface CloudHealthContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

@@ -16,7 +16,7 @@ export function $delete(context: DataFactoryManagementContext, resourceGroupName
 export function createOrUpdate(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, triggerName: string, trigger: TriggerResource, options?: TriggersCreateOrUpdateOptionalParams): Promise<TriggerResource>;
 
 // @public
-export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, triggerName: string, options?: TriggersGetOptionalParams): Promise<TriggerResource>;
+export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, triggerName: string, options?: TriggersGetOptionalParams): Promise<TriggerResource | undefined>;
 
 // @public
 export function getEventSubscriptionStatus(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, triggerName: string, options?: TriggersGetEventSubscriptionStatusOptionalParams): Promise<TriggerSubscriptionOperationStatus>;

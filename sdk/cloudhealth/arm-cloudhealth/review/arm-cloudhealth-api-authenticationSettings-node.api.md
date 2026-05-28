@@ -6,16 +6,20 @@
 
 import { Client } from '@azure-rest/core-client';
 import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
-export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, authenticationSettingName: string, options?: AuthenticationSettingsDeleteOptionalParams): Promise<void>;
+export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, authenticationSettingName: string, options?: AuthenticationSettingsDeleteOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
 export interface AuthenticationSettingsCreateOrUpdateOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public
 export interface AuthenticationSettingsDeleteOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public
@@ -27,7 +31,7 @@ export interface AuthenticationSettingsListByHealthModelOptionalParams extends O
 }
 
 // @public
-export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, authenticationSettingName: string, resource: AuthenticationSetting, options?: AuthenticationSettingsCreateOrUpdateOptionalParams): Promise<AuthenticationSetting>;
+export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, authenticationSettingName: string, resource: AuthenticationSetting, options?: AuthenticationSettingsCreateOrUpdateOptionalParams): PollerLike<OperationState<AuthenticationSetting>, AuthenticationSetting>;
 
 // @public
 export function get(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, authenticationSettingName: string, options?: AuthenticationSettingsGetOptionalParams): Promise<AuthenticationSetting>;

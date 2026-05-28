@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: DataProtectionContext, resourceGroupName: string, vaultName: string, backupInstanceName: string, options?: BackupInstancesDeleteOptionalParams): PollerLike<OperationState<void>, void>;
@@ -53,6 +53,7 @@ export interface BackupInstancesResumeBackupsOptionalParams extends OperationOpt
 
 // @public
 export interface BackupInstancesResumeProtectionOptionalParams extends OperationOptions {
+    parameters?: ResumeProtectionRequest;
     updateIntervalInMs?: number;
 }
 
@@ -121,7 +122,7 @@ export function createOrUpdate(context: DataProtectionContext, resourceGroupName
 export function get(context: DataProtectionContext, resourceGroupName: string, vaultName: string, backupInstanceName: string, options?: BackupInstancesGetOptionalParams): Promise<BackupInstanceResource>;
 
 // @public
-export function getBackupInstanceOperationResult(context: DataProtectionContext, resourceGroupName: string, vaultName: string, backupInstanceName: string, operationId: string, options?: BackupInstancesGetBackupInstanceOperationResultOptionalParams): Promise<BackupInstanceResource>;
+export function getBackupInstanceOperationResult(context: DataProtectionContext, resourceGroupName: string, vaultName: string, backupInstanceName: string, operationId: string, options?: BackupInstancesGetBackupInstanceOperationResultOptionalParams): Promise<BackupInstanceResource | undefined>;
 
 // @public
 export function list(context: DataProtectionContext, resourceGroupName: string, vaultName: string, options?: BackupInstancesListOptionalParams): PagedAsyncIterableIterator<BackupInstanceResource>;

@@ -12,7 +12,7 @@ export type CreatedByType = string;
 
 // @public
 export interface ErrorAdditionalInfo {
-    readonly info?: Record<string, any>;
+    readonly info?: any;
     readonly type?: string;
 }
 
@@ -88,7 +88,6 @@ export enum KnownSingleSignOnType {
 
 // @public
 export enum KnownVersions {
-    // (undocumented)
     V20240201 = "2024-02-01"
 }
 
@@ -97,7 +96,7 @@ export interface ManagedServiceIdentity {
     readonly principalId?: string;
     readonly tenantId?: string;
     type: ManagedServiceIdentityType;
-    userAssignedIdentities?: Record<string, UserAssignedIdentity | null>;
+    userAssignedIdentities?: Record<string, UserAssignedIdentity>;
 }
 
 // @public

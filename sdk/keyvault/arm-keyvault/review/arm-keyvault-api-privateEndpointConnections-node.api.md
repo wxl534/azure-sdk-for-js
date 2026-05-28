@@ -4,16 +4,16 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: KeyVaultManagementContext, resourceGroupName: string, vaultName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsDeleteOptionalParams): PollerLike<OperationState<PrivateEndpointConnection>, PrivateEndpointConnection>;
 
 // @public
-export function get(context: KeyVaultManagementContext, resourceGroupName: string, vaultName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsGetOptionalParams): Promise<PrivateEndpointConnection>;
+export function get(context: KeyVaultManagementContext, resourceGroupName: string, vaultName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsGetOptionalParams): Promise<PrivateEndpointConnection | undefined>;
 
 // @public
 export function listByResource(context: KeyVaultManagementContext, resourceGroupName: string, vaultName: string, options?: PrivateEndpointConnectionsListByResourceOptionalParams): PagedAsyncIterableIterator<PrivateEndpointConnection>;

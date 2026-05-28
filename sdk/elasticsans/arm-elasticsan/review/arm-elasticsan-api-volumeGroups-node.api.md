@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: ElasticSanManagementContext, resourceGroupName: string, elasticSanName: string, volumeGroupName: string, options?: VolumeGroupsDeleteOptionalParams): PollerLike<OperationState<void>, void>;
@@ -40,6 +40,7 @@ export interface VolumeGroupsGetOptionalParams extends OperationOptions {
 
 // @public
 export interface VolumeGroupsListByElasticSanOptionalParams extends OperationOptions {
+    xMsAccessSoftDeletedResources?: XMsAccessSoftDeletedResources;
 }
 
 // @public

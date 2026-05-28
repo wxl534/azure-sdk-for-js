@@ -12,7 +12,7 @@ export type CreatedByType = string;
 
 // @public
 export interface ErrorAdditionalInfo {
-    readonly info?: Record<string, any>;
+    readonly info?: any;
     readonly type?: string;
 }
 
@@ -127,7 +127,7 @@ export interface ManagedServiceIdentity {
     readonly principalId?: string;
     readonly tenantId?: string;
     type: ManagedServiceIdentityType;
-    userAssignedIdentities?: Record<string, UserAssignedIdentity | null>;
+    userAssignedIdentities?: Record<string, UserAssignedIdentity>;
 }
 
 // @public

@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: KeyVaultManagementContext, resourceGroupName: string, name: string, options?: ManagedHsmsDeleteOptionalParams): PollerLike<OperationState<void>, void>;
@@ -19,7 +19,7 @@ export function checkMhsmNameAvailability(context: KeyVaultManagementContext, mh
 export function createOrUpdate(context: KeyVaultManagementContext, resourceGroupName: string, name: string, parameters: ManagedHsm, options?: ManagedHsmsCreateOrUpdateOptionalParams): PollerLike<OperationState<ManagedHsm>, ManagedHsm>;
 
 // @public
-export function get(context: KeyVaultManagementContext, resourceGroupName: string, name: string, options?: ManagedHsmsGetOptionalParams): Promise<ManagedHsm>;
+export function get(context: KeyVaultManagementContext, resourceGroupName: string, name: string, options?: ManagedHsmsGetOptionalParams): Promise<ManagedHsm | undefined>;
 
 // @public
 export function getDeleted(context: KeyVaultManagementContext, name: string, location: string, options?: ManagedHsmsGetDeletedOptionalParams): Promise<DeletedManagedHsm>;

@@ -80,6 +80,10 @@ export enum KnownVersions {
 }
 
 // @public
+export interface ProxyResource extends Resource {
+}
+
+// @public
 export interface Resource {
     readonly id?: string;
     readonly name?: string;
@@ -98,7 +102,7 @@ export interface SystemData {
 }
 
 // @public
-export interface TenantActivityLogAlertResource extends Resource {
+export interface TenantActivityLogAlertResource extends ProxyResource {
     actions: ActionList;
     condition: AlertRuleAllOfCondition;
     description?: string;

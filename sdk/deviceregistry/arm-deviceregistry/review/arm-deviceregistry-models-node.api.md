@@ -8,11 +8,6 @@
 export type ActionType = string;
 
 // @public
-export interface ActivateBringYourOwnRootRequest {
-    certificateChain: string;
-}
-
-// @public
 export interface Asset extends TrackedResource {
     extendedLocation: ExtendedLocation;
     properties?: AssetProperties;
@@ -164,68 +159,12 @@ export interface BillingContainerProperties {
 }
 
 // @public
-export interface BringYourOwnRoot {
-    readonly certificateSigningRequest?: string;
-    enabled: boolean;
-    readonly issuingCertificateThumbprint?: string;
-    readonly status?: BringYourOwnRootStatus;
-}
-
-// @public
-export type BringYourOwnRootStatus = string;
-
-// @public
-export interface BringYourOwnRootUpdate {
-}
-
-// @public
 export interface BrokerStateStoreDestinationConfiguration {
     key: string;
 }
 
 // @public
-export interface CertificateAuthorityConfiguration {
-    bringYourOwnRoot?: BringYourOwnRoot;
-    keyType: SupportedKeyType;
-    readonly subject?: string;
-    readonly validityNotAfter?: Date;
-    readonly validityNotBefore?: Date;
-}
-
-// @public
-export interface CertificateAuthorityConfigurationUpdate {
-    bringYourOwnRoot?: BringYourOwnRootUpdate;
-}
-
-// @public
-export interface CertificateConfiguration {
-    certificateAuthorityConfiguration: CertificateAuthorityConfiguration;
-    leafCertificateConfiguration: LeafCertificateConfiguration;
-}
-
-// @public
-export interface CertificateConfigurationUpdate {
-    certificateAuthorityConfiguration?: CertificateAuthorityConfigurationUpdate;
-    leafCertificateConfiguration: LeafCertificateConfigurationUpdate;
-}
-
-// @public
 export type CreatedByType = string;
-
-// @public
-export interface Credential extends TrackedResource {
-    properties?: CredentialProperties;
-}
-
-// @public
-export interface CredentialProperties {
-    readonly provisioningState?: ProvisioningState;
-}
-
-// @public
-export interface CredentialUpdate {
-    tags?: Record<string, string>;
-}
 
 // @public
 export interface DataPoint extends DataPointBase {
@@ -280,16 +219,6 @@ export interface DatasetStorageDestination extends DatasetDestination {
 }
 
 // @public
-export interface DeviceCredentialPolicy {
-    resourceId?: string;
-}
-
-// @public
-export interface DeviceCredentialsRevokeRequest {
-    disable?: boolean;
-}
-
-// @public
 export interface DeviceMessagingEndpoint {
     address: string;
     endpointType?: string;
@@ -310,6 +239,7 @@ export interface DeviceStatus {
 // @public
 export interface DeviceStatusEndpoint {
     readonly error?: StatusError;
+    readonly healthState?: HealthState;
 }
 
 // @public
@@ -416,6 +346,18 @@ export interface ExtendedLocation {
 export type Format = string;
 
 // @public
+export interface HealthState {
+    readonly lastTransitionTime?: string;
+    readonly lastUpdateTime?: string;
+    readonly message?: string;
+    readonly reasonCode?: string;
+    readonly status?: HealthStatus;
+}
+
+// @public
+export type HealthStatus = string;
+
+// @public
 export interface HostAuthentication {
     method: AuthenticationMethod;
     usernamePasswordCredentials?: UsernamePasswordCredentials;
@@ -442,13 +384,6 @@ export enum KnownAuthenticationMethod {
     Anonymous = "Anonymous",
     Certificate = "Certificate",
     UsernamePassword = "UsernamePassword"
-}
-
-// @public
-export enum KnownBringYourOwnRootStatus {
-    Active = "Active",
-    ActiveButPendingRenewal = "ActiveButPendingRenewal",
-    PendingActivation = "PendingActivation"
 }
 
 // @public
@@ -491,6 +426,14 @@ export enum KnownEventObservabilityMode {
 export enum KnownFormat {
     Delta10 = "Delta/1.0",
     JsonSchemaDraft7 = "JsonSchema/draft-07"
+}
+
+// @public
+export enum KnownHealthStatus {
+    Available = "Available",
+    Degraded = "Degraded",
+    Unavailable = "Unavailable",
+    Unknown = "Unknown"
 }
 
 // @public
@@ -546,11 +489,6 @@ export enum KnownStreamDestinationTarget {
 }
 
 // @public
-export enum KnownSupportedKeyType {
-    ECC = "ECC"
-}
-
-// @public
 export enum KnownSystemAssignedServiceIdentityType {
     None = "None",
     SystemAssigned = "SystemAssigned"
@@ -564,23 +502,14 @@ export enum KnownTopicRetainType {
 
 // @public
 export enum KnownVersions {
-    V20231101Preview = "2023-11-01-preview",
-    V20240901Preview = "2024-09-01-preview",
     V20241101 = "2024-11-01",
-    V20250701Preview = "2025-07-01-preview",
     V20251001 = "2025-10-01",
-    V20251101Preview = "2025-11-01-preview",
-    V20260301Preview = "2026-03-01-preview"
+    V20260401 = "2026-04-01"
 }
 
 // @public
-export interface LeafCertificateConfiguration {
-    validityPeriodInDays: number;
-}
-
-// @public
-export interface LeafCertificateConfigurationUpdate {
-    validityPeriodInDays: number;
+export interface Management {
+    endpoints?: Record<string, ManagementEndpoint>;
 }
 
 // @public
@@ -596,6 +525,14 @@ export interface ManagementAction {
 
 // @public
 export type ManagementActionType = string;
+
+// @public
+export interface ManagementEndpoint {
+    address: string;
+    endpointType: string;
+    resourceId: string;
+    scopeId: string;
+}
 
 // @public
 export interface ManagementGroup {
@@ -657,6 +594,13 @@ export interface NamespaceAsset extends TrackedResource {
 }
 
 // @public
+export interface NamespaceAssetExecuteActionRequest {
+    managementActionName: string;
+    managementGroupName: string;
+    payload?: Record<string, any>;
+}
+
+// @public
 export interface NamespaceAssetProperties {
     assetTypeRefs?: string[];
     attributes?: Record<string, any>;
@@ -697,6 +641,7 @@ export interface NamespaceAssetStatus {
     readonly config?: StatusConfig;
     readonly datasets?: NamespaceAssetStatusDataset[];
     readonly eventGroups?: NamespaceAssetStatusEventGroup[];
+    readonly healthState?: HealthState;
     readonly managementGroups?: NamespaceAssetStatusManagementGroup[];
     readonly streams?: NamespaceAssetStatusStream[];
 }
@@ -813,7 +758,6 @@ export interface NamespaceDeviceProperties {
     model?: string;
     operatingSystem?: string;
     operatingSystemVersion?: string;
-    policy?: DeviceCredentialPolicy;
     readonly provisioningState?: ProvisioningState;
     readonly status?: DeviceStatus;
     readonly uuid?: string;
@@ -832,7 +776,6 @@ export interface NamespaceDeviceUpdateProperties {
     enabled?: boolean;
     endpoints?: MessagingEndpoints;
     operatingSystemVersion?: string;
-    policy?: DeviceCredentialPolicy;
 }
 
 // @public
@@ -1055,6 +998,7 @@ export interface NamespaceMigrateRequest {
 
 // @public
 export interface NamespaceProperties {
+    management?: Management;
     messaging?: Messaging;
     readonly provisioningState?: ProvisioningState;
     readonly uuid?: string;
@@ -1077,6 +1021,7 @@ export interface NamespaceUpdate {
 
 // @public
 export interface NamespaceUpdateProperties {
+    management?: Management;
     messaging?: Messaging;
 }
 
@@ -1117,28 +1062,6 @@ export type Origin = string;
 export interface OutboundEndpoints {
     assigned: Record<string, DeviceMessagingEndpoint>;
     unassigned?: Record<string, DeviceMessagingEndpoint>;
-}
-
-// @public
-export interface Policy extends ProxyResource {
-    properties?: PolicyProperties;
-}
-
-// @public
-export interface PolicyProperties {
-    certificate?: CertificateConfiguration;
-    readonly provisioningState?: ProvisioningState;
-}
-
-// @public
-export interface PolicyUpdate {
-    properties?: PolicyUpdateProperties;
-    tags?: Record<string, string>;
-}
-
-// @public
-export interface PolicyUpdateProperties {
-    certificate?: CertificateConfigurationUpdate;
 }
 
 // @public
@@ -1262,9 +1185,6 @@ export interface StreamStorageDestination extends StreamDestination {
     configuration: StorageDestinationConfiguration;
     target: "Storage";
 }
-
-// @public
-export type SupportedKeyType = string;
 
 // @public
 export interface SystemAssignedServiceIdentity {

@@ -156,8 +156,8 @@ export enum KnownProvisioningState {
 
 // @public
 export enum KnownVersions {
-    _20250901Preview = "2025-09-01-preview",
-    _20251201Preview = "2025-12-01-preview"
+    V20250901Preview = "2025-09-01-preview",
+    V20251201Preview = "2025-12-01-preview"
 }
 
 // @public

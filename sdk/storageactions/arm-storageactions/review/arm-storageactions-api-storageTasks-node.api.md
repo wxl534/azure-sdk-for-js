@@ -28,6 +28,9 @@ export function listBySubscription(context: StorageActionsManagementContext, opt
 export function previewActions(context: StorageActionsManagementContext, location: string, parameters: StorageTaskPreviewAction, options?: StorageTasksPreviewActionsOptionalParams): Promise<StorageTaskPreviewAction>;
 
 // @public
+export function stopAllAssignments(context: StorageActionsManagementContext, resourceGroupName: string, storageTaskName: string, options?: StorageTasksStopAllAssignmentsOptionalParams): PollerLike<OperationState<void>, void>;
+
+// @public
 export interface StorageTasksCreateOptionalParams extends OperationOptions {
     updateIntervalInMs?: number;
 }
@@ -51,6 +54,11 @@ export interface StorageTasksListBySubscriptionOptionalParams extends OperationO
 
 // @public
 export interface StorageTasksPreviewActionsOptionalParams extends OperationOptions {
+}
+
+// @public
+export interface StorageTasksStopAllAssignmentsOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public

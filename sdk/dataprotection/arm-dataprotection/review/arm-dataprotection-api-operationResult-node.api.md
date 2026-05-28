@@ -4,11 +4,11 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
-export function get(context: DataProtectionContext, operationId: string, location: string, options?: OperationResultGetOptionalParams): Promise<OperationJobExtendedInfo>;
+export function get(context: DataProtectionContext, operationId: string, location: string, options?: OperationResultGetOptionalParams): Promise<OperationJobExtendedInfo | undefined>;
 
 // @public
 export interface OperationResultGetOptionalParams extends OperationOptions {

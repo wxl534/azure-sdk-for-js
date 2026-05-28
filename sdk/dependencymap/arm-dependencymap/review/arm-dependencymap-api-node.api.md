@@ -14,11 +14,12 @@ export function createDependencyMap(credential: TokenCredential, subscriptionId:
 // @public
 export interface DependencyMapClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public
 export interface DependencyMapContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

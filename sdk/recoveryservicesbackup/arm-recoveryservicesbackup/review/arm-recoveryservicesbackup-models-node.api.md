@@ -378,14 +378,14 @@ export interface AzureVmWorkloadProtectableItem extends WorkloadProtectableItem 
     parentName?: string;
     parentUniqueName?: string;
     prebackupvalidation?: PreBackupValidation;
-    protectableItemType: "AzureVmWorkloadProtectableItem" | "SAPAseDatabase" | "SAPAseSystem" | "SAPHanaDatabase" | "SAPHanaSystem" | "SAPHanaDBInstance" | "HanaHSRContainer" | "HanaScaleoutContainer" | "SQLAvailabilityGroupContainer" | "SQLDataBase" | "SQLInstance";
+    protectableItemType: "AzureVmWorkloadProtectableItem" | "SAPAseDatabase" | "SAPAseSystem" | "SAPHanaDatabase" | "SAPHanaSystem" | "SAPHanaDBInstance" | "HanaHSRContainer" | "SQLAvailabilityGroupContainer" | "SQLDataBase" | "SQLInstance";
     serverName?: string;
     subinquireditemcount?: number;
     subprotectableitemcount?: number;
 }
 
 // @public
-export type AzureVmWorkloadProtectableItemUnion = AzureVmWorkloadSAPAseDatabaseProtectableItem | AzureVmWorkloadSAPAseSystemProtectableItem | AzureVmWorkloadSAPHanaDatabaseProtectableItem | AzureVmWorkloadSAPHanaSystemProtectableItem | AzureVmWorkloadSAPHanaDBInstance | AzureVmWorkloadSAPHanaHSRProtectableItem | AzureVmWorkloadSAPHanaScaleoutProtectableItem | AzureVmWorkloadSQLAvailabilityGroupProtectableItem | AzureVmWorkloadSQLDatabaseProtectableItem | AzureVmWorkloadSQLInstanceProtectableItem | AzureVmWorkloadProtectableItem;
+export type AzureVmWorkloadProtectableItemUnion = AzureVmWorkloadSAPAseDatabaseProtectableItem | AzureVmWorkloadSAPAseSystemProtectableItem | AzureVmWorkloadSAPHanaDatabaseProtectableItem | AzureVmWorkloadSAPHanaSystemProtectableItem | AzureVmWorkloadSAPHanaDBInstance | AzureVmWorkloadSAPHanaHSRProtectableItem | AzureVmWorkloadSQLAvailabilityGroupProtectableItem | AzureVmWorkloadSQLDatabaseProtectableItem | AzureVmWorkloadSQLInstanceProtectableItem | AzureVmWorkloadProtectableItem;
 
 // @public
 export interface AzureVmWorkloadProtectedItem extends ProtectedItem {
@@ -400,7 +400,7 @@ export interface AzureVmWorkloadProtectedItem extends ProtectedItem {
     parentType?: string;
     protectedItemDataSourceId?: string;
     protectedItemHealthStatus?: ProtectedItemHealthStatus;
-    protectedItemType: "AzureVmWorkloadProtectedItem" | "AzureVmWorkloadSAPAseDatabase" | "AzureVmWorkloadSAPHanaDatabase" | "AzureVmWorkloadSAPHanaDBInstance" | "AzureVmWorkloadSQLDatabase" | "AzureVmWorkloadSQLInstance";
+    protectedItemType: "AzureVmWorkloadProtectedItem" | "AzureVmWorkloadSAPAseDatabase" | "AzureVmWorkloadSAPHanaDatabase" | "AzureVmWorkloadSAPHanaDBInstance" | "AzureVmWorkloadSQLDatabase";
     protectionState?: ProtectionState;
     readonly protectionStatus?: string;
     serverName?: string;
@@ -418,7 +418,7 @@ export interface AzureVmWorkloadProtectedItemExtendedInfo {
 }
 
 // @public
-export type AzureVmWorkloadProtectedItemUnion = AzureVmWorkloadSAPAseDatabaseProtectedItem | AzureVmWorkloadSAPHanaDatabaseProtectedItem | AzureVmWorkloadSAPHanaDBInstanceProtectedItem | AzureVmWorkloadSQLDatabaseProtectedItem | AzureVmWorkloadSQLInstanceProtectedItem | AzureVmWorkloadProtectedItem;
+export type AzureVmWorkloadProtectedItemUnion = AzureVmWorkloadSAPAseDatabaseProtectedItem | AzureVmWorkloadSAPHanaDatabaseProtectedItem | AzureVmWorkloadSAPHanaDBInstanceProtectedItem | AzureVmWorkloadSQLDatabaseProtectedItem | AzureVmWorkloadProtectedItem;
 
 // @public
 export interface AzureVmWorkloadProtectionPolicy extends ProtectionPolicy {
@@ -426,7 +426,6 @@ export interface AzureVmWorkloadProtectionPolicy extends ProtectionPolicy {
     makePolicyConsistent?: boolean;
     settings?: Settings;
     subProtectionPolicy?: SubProtectionPolicy[];
-    vmWorkloadPolicyType?: VMWorkloadPolicyType;
     workLoadType?: WorkloadType;
 }
 
@@ -486,11 +485,6 @@ export interface AzureVmWorkloadSAPHanaHSRProtectableItem extends AzureVmWorkloa
 }
 
 // @public
-export interface AzureVmWorkloadSAPHanaScaleoutProtectableItem extends AzureVmWorkloadProtectableItem {
-    protectableItemType: "HanaScaleoutContainer";
-}
-
-// @public
 export interface AzureVmWorkloadSAPHanaSystemProtectableItem extends AzureVmWorkloadProtectableItem {
     protectableItemType: "SAPHanaSystem";
 }
@@ -513,9 +507,7 @@ export interface AzureVmWorkloadSQLDatabaseProtectableItem extends AzureVmWorklo
 
 // @public
 export interface AzureVmWorkloadSQLDatabaseProtectedItem extends AzureVmWorkloadProtectedItem {
-    parentProtectedItem?: string;
     protectedItemType: "AzureVmWorkloadSQLDatabase";
-    protectionLevel?: ProtectionLevel;
 }
 
 // @public
@@ -526,13 +518,6 @@ export interface AzureVmWorkloadSQLDatabaseWorkloadItem extends AzureVmWorkloadI
 // @public
 export interface AzureVmWorkloadSQLInstanceProtectableItem extends AzureVmWorkloadProtectableItem {
     protectableItemType: "SQLInstance";
-}
-
-// @public
-export interface AzureVmWorkloadSQLInstanceProtectedItem extends AzureVmWorkloadProtectedItem {
-    childDBNames?: string[];
-    instanceProtectionReadiness?: InstanceProtectionReadiness;
-    protectedItemType: "AzureVmWorkloadSQLInstance";
 }
 
 // @public
@@ -759,7 +744,6 @@ export interface AzureWorkloadSQLRecoveryPoint extends AzureWorkloadRecoveryPoin
 export interface AzureWorkloadSQLRecoveryPointExtendedInfo {
     dataDirectoryPaths?: SQLDataDirectory[];
     dataDirectoryTimeInUTC?: Date;
-    includedDatabases?: DatabaseInRP[];
 }
 
 // @public
@@ -1033,12 +1017,6 @@ export interface DailyRetentionSchedule {
 // @public
 export interface DailySchedule {
     scheduleRunTimes?: Date[];
-}
-
-// @public
-export interface DatabaseInRP {
-    datasourceId?: string;
-    datasourceName?: string;
 }
 
 // @public
@@ -1481,9 +1459,6 @@ export interface InquiryValidation {
 }
 
 // @public
-export type InstanceProtectionReadiness = string;
-
-// @public
 export interface InstantItemRecoveryTarget {
     clientScripts?: ClientScriptForConnect[];
 }
@@ -1714,15 +1689,6 @@ export enum KnownInquiryStatus {
 }
 
 // @public
-export enum KnownInstanceProtectionReadiness {
-    PartialProtection = "PartialProtection",
-    ProtectionError = "ProtectionError",
-    Ready = "Ready",
-    ScheduleDisabled = "ScheduleDisabled",
-    Unknown = "Unknown"
-}
-
-// @public
 export enum KnownLastBackupStatus {
     Healthy = "Healthy",
     Invalid = "Invalid",
@@ -1833,12 +1799,6 @@ export enum KnownProtectionIntentItemType {
     AzureWorkloadSQLAutoProtectionIntent = "AzureWorkloadSQLAutoProtectionIntent",
     Invalid = "Invalid",
     RecoveryServiceVaultItem = "RecoveryServiceVaultItem"
-}
-
-// @public
-export enum KnownProtectionLevel {
-    Database = "Database",
-    DatabaseUnderInstance = "DatabaseUnderInstance"
 }
 
 // @public
@@ -1964,21 +1924,6 @@ export enum KnownSoftDeleteFeatureState {
 }
 
 // @public
-export enum KnownSourceSideScanStatus {
-    Configured = "Configured",
-    NotApplicable = "NotApplicable",
-    NotConfigured = "NotConfigured"
-}
-
-// @public
-export enum KnownSourceSideScanSummary {
-    Healthy = "Healthy",
-    NotApplicable = "NotApplicable",
-    Suspicious = "Suspicious",
-    Unknown = "Unknown"
-}
-
-// @public
 export enum KnownSQLDataDirectoryType {
     Data = "Data",
     Invalid = "Invalid",
@@ -2008,31 +1953,6 @@ export enum KnownSupportStatus {
     Invalid = "Invalid",
     NotSupported = "NotSupported",
     Supported = "Supported"
-}
-
-// @public
-export enum KnownThreatSeverity {
-    Critical = "Critical",
-    High = "High",
-    Informational = "Informational",
-    Warning = "Warning"
-}
-
-// @public
-export enum KnownThreatState {
-    Active = "Active",
-    Ignored = "Ignored",
-    InProgress = "InProgress",
-    Resolved = "Resolved"
-}
-
-// @public
-export enum KnownThreatStatus {
-    Healthy = "Healthy",
-    NotAvailable = "NotAvailable",
-    UnHealthy = "UnHealthy",
-    Unknown = "Unknown",
-    Warning = "Warning"
 }
 
 // @public
@@ -2072,15 +1992,7 @@ export enum KnownVersions {
     V20250201 = "2025-02-01",
     V20250801 = "2025-08-01",
     V20260101 = "2026-01-01",
-    V20260131Preview = "2026-01-31-preview"
-}
-
-// @public
-export enum KnownVMWorkloadPolicyType {
-    Invalid = "Invalid",
-    SnapshotV1 = "SnapshotV1",
-    SnapshotV2 = "SnapshotV2",
-    Streaming = "Streaming"
+    V20260201 = "2026-02-01"
 }
 
 // @public
@@ -2362,16 +2274,6 @@ export interface OperationWorkerResponse {
 export type OverwriteOptions = string;
 
 // @public
-export interface PatchRecoveryPointInput {
-    recoveryPointProperties?: PatchRecoveryPointPropertiesInput;
-}
-
-// @public
-export interface PatchRecoveryPointPropertiesInput {
-    expiryTime?: Date;
-}
-
-// @public
 export interface PointInTimeRange {
     endTime?: Date;
     startTime?: Date;
@@ -2494,7 +2396,6 @@ export interface ProtectedItem {
     resourceGuardOperationRequests?: string[];
     softDeleteRetentionPeriodInDays?: number;
     sourceResourceId?: string;
-    sourceSideScanInfo?: SourceSideScanInfo;
     readonly vaultId?: string;
     readonly workloadType?: DataSourceType;
 }
@@ -2562,9 +2463,6 @@ export interface ProtectionIntentResource extends ProxyResource {
 export type ProtectionIntentUnion = AzureRecoveryServiceVaultProtectionIntentUnion | AzureResourceProtectionIntent | AzureWorkloadContainerAutoProtectionIntent | ProtectionIntent;
 
 // @public
-export type ProtectionLevel = string;
-
-// @public
 export interface ProtectionPolicy {
     backupManagementType: string;
     protectedItemsCount?: number;
@@ -2601,8 +2499,6 @@ export type RecoveryMode = string;
 // @public
 export interface RecoveryPoint {
     objectType: string;
-    threatInfo?: ThreatInfo[];
-    threatStatus?: ThreatStatus;
 }
 
 // @public
@@ -2846,18 +2742,6 @@ export interface SnapshotRestoreParameters {
 export type SoftDeleteFeatureState = string;
 
 // @public
-export interface SourceSideScanInfo {
-    sourceSideScanStatus?: SourceSideScanStatus;
-    sourceSideScanSummary?: SourceSideScanSummary;
-}
-
-// @public
-export type SourceSideScanStatus = string;
-
-// @public
-export type SourceSideScanSummary = string;
-
-// @public
 export interface SQLDataDirectory {
     logicalName?: string;
     path?: string;
@@ -2927,27 +2811,6 @@ export interface TargetRestoreInfo {
 }
 
 // @public
-export interface ThreatInfo {
-    readonly lastUpdatedTime?: Date;
-    readonly threatDescription?: string;
-    readonly threatEndTime?: Date;
-    threatSeverity?: ThreatSeverity;
-    readonly threatStartTime?: Date;
-    threatState?: ThreatState;
-    readonly threatTitle?: string;
-    readonly threatURI?: string;
-}
-
-// @public
-export type ThreatSeverity = string;
-
-// @public
-export type ThreatState = string;
-
-// @public
-export type ThreatStatus = string;
-
-// @public
 export interface TieringCostInfo {
     objectType: string;
 }
@@ -3009,11 +2872,6 @@ export interface UnlockDeleteRequest {
 // @public
 export interface UnlockDeleteResponse {
     unlockDeleteExpiryTime?: string;
-}
-
-// @public
-export interface UpdateRecoveryPointRequest {
-    properties?: PatchRecoveryPointInput;
 }
 
 // @public
@@ -3111,9 +2969,6 @@ export type VaultStorageConfigOperationResultResponseUnion = PrepareDataMoveResp
 
 // @public
 export type VaultSubResourceType = string;
-
-// @public
-export type VMWorkloadPolicyType = string;
 
 // @public
 export interface WeeklyRetentionFormat {

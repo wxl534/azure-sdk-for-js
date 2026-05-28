@@ -17,6 +17,11 @@ export interface AsyncOperationResult {
 }
 
 // @public
+export interface CertificateListDescription {
+    value?: CertificateResponse[];
+}
+
+// @public
 export interface CertificateProperties {
     certificate?: Uint8Array;
     readonly created?: Date;
@@ -130,12 +135,18 @@ export interface IotDpsSkuInfo {
 }
 
 // @public
+export type IotHubAuthenticationType = string;
+
+// @public
 export interface IotHubDefinitionDescription {
     allocationWeight?: number;
     applyAllocationPolicy?: boolean;
-    connectionString: string;
+    authenticationType?: IotHubAuthenticationType;
+    connectionString?: string;
+    hostName?: string;
     location: string;
     readonly name?: string;
+    selectedUserAssignedIdentityResourceId?: string;
 }
 
 // @public
@@ -195,6 +206,13 @@ export enum KnownIotDpsSku {
 }
 
 // @public
+export enum KnownIotHubAuthenticationType {
+    KeyBased = "KeyBased",
+    SystemAssigned = "SystemAssigned",
+    UserAssigned = "UserAssigned"
+}
+
+// @public
 export enum KnownManagedServiceIdentityType {
     None = "None",
     SystemAssigned = "SystemAssigned",
@@ -240,7 +258,8 @@ export enum KnownState {
 
 // @public
 export enum KnownVersions {
-    V20250201Preview = "2025-02-01-preview"
+    V20250201Preview = "2025-02-01-preview",
+    V20260301Preview = "2026-03-01-preview"
 }
 
 // @public
@@ -293,6 +312,11 @@ export interface PrivateEndpointConnection extends ProxyResource {
 export interface PrivateEndpointConnectionProperties {
     privateEndpoint?: PrivateEndpoint;
     privateLinkServiceConnectionState: PrivateLinkServiceConnectionState;
+}
+
+// @public
+export interface PrivateLinkResources {
+    value?: GroupIdInformation[];
 }
 
 // @public

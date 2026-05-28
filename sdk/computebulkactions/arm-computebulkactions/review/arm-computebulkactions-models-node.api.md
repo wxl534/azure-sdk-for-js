@@ -516,8 +516,8 @@ export enum KnownModes {
 
 // @public
 export enum KnownNetworkApiVersion {
-    _20201101 = "2020-11-01",
-    _20221101 = "2022-11-01"
+    NetworkApiVersion20201101 = "2020-11-01",
+    NetworkApiVersion20221101 = "2022-11-01"
 }
 
 // @public
@@ -644,7 +644,7 @@ export enum KnownStorageAccountTypes {
 
 // @public
 export enum KnownVersions {
-    _20260201Preview = "2026-02-01-preview"
+    V20260201Preview = "2026-02-01-preview"
 }
 
 // @public

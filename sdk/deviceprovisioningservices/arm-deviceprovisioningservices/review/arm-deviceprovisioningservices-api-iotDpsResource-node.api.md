@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: IotDpsContext, resourceGroupName: string, provisioningServiceName: string, options?: IotDpsResourceDeleteOptionalParams): PollerLike<OperationState<void>, void>;
@@ -125,7 +125,7 @@ export function listKeysForKeyName(context: IotDpsContext, provisioningServiceNa
 export function listPrivateEndpointConnections(context: IotDpsContext, resourceGroupName: string, resourceName: string, options?: IotDpsResourceListPrivateEndpointConnectionsOptionalParams): Promise<PrivateEndpointConnection[]>;
 
 // @public
-export function listPrivateLinkResources(context: IotDpsContext, resourceGroupName: string, resourceName: string, options?: IotDpsResourceListPrivateLinkResourcesOptionalParams): PagedAsyncIterableIterator<GroupIdInformation>;
+export function listPrivateLinkResources(context: IotDpsContext, resourceGroupName: string, resourceName: string, options?: IotDpsResourceListPrivateLinkResourcesOptionalParams): Promise<PrivateLinkResources>;
 
 // @public
 export function listValidSkus(context: IotDpsContext, provisioningServiceName: string, resourceGroupName: string, options?: IotDpsResourceListValidSkusOptionalParams): PagedAsyncIterableIterator<IotDpsSkuDefinition>;

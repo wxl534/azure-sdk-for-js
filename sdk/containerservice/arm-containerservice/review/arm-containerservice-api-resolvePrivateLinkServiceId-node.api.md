@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export function post(context: ContainerServiceContext, resourceGroupName: string, resourceName: string, parameters: PrivateLinkResource, options?: ResolvePrivateLinkServiceIdPostOptionalParams): Promise<PrivateLinkResource>;

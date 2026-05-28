@@ -4,11 +4,11 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
-export function get(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, fabricName: string, containerName: string, protectedItemName: string, operationId: string, options?: ProtectedItemOperationResultsGetOptionalParams): Promise<ProtectedItemResource>;
+export function get(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, fabricName: string, containerName: string, protectedItemName: string, operationId: string, options?: ProtectedItemOperationResultsGetOptionalParams): Promise<ProtectedItemResource | undefined>;
 
 // @public
 export interface ProtectedItemOperationResultsGetOptionalParams extends OperationOptions {

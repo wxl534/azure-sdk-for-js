@@ -11,11 +11,12 @@ import { TokenCredential } from '@azure/core-auth';
 // @public
 export interface BlockClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public (undocumented)
 export interface BlockContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

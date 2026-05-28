@@ -13,7 +13,7 @@ export function createHybridConnectivityManagementAPI(credential: TokenCredentia
 
 // @public
 export interface HybridConnectivityManagementAPIContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

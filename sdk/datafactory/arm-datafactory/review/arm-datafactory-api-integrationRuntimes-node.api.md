@@ -19,7 +19,7 @@ export function createLinkedIntegrationRuntime(context: DataFactoryManagementCon
 export function createOrUpdate(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, integrationRuntimeName: string, integrationRuntime: IntegrationRuntimeResource, options?: IntegrationRuntimesCreateOrUpdateOptionalParams): Promise<IntegrationRuntimeResource>;
 
 // @public
-export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, integrationRuntimeName: string, options?: IntegrationRuntimesGetOptionalParams): Promise<IntegrationRuntimeResource>;
+export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, integrationRuntimeName: string, options?: IntegrationRuntimesGetOptionalParams): Promise<IntegrationRuntimeResource | undefined>;
 
 // @public
 export function getConnectionInfo(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, integrationRuntimeName: string, options?: IntegrationRuntimesGetConnectionInfoOptionalParams): Promise<IntegrationRuntimeConnectionInfo>;

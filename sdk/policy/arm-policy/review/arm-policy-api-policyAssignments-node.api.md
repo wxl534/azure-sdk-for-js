@@ -4,11 +4,11 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
-export function $delete(context: PolicyContext, scope: string, policyAssignmentName: string, options?: PolicyAssignmentsDeleteOptionalParams): Promise<PolicyAssignment>;
+export function $delete(context: PolicyContext, scope: string, policyAssignmentName: string, options?: PolicyAssignmentsDeleteOptionalParams): Promise<PolicyAssignment | undefined>;
 
 // @public
 export function create(context: PolicyContext, scope: string, policyAssignmentName: string, parameters: PolicyAssignment, options?: PolicyAssignmentsCreateOptionalParams): Promise<PolicyAssignment>;

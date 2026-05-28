@@ -14,11 +14,12 @@ export function createPortalServices(credential: TokenCredential, options?: Port
 // @public
 export interface PortalServicesClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public
 export interface PortalServicesContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
 }
 
 // (No @packageDocumentation comment for this package)

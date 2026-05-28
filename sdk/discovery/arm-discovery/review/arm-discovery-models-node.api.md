@@ -10,14 +10,19 @@ export type ActionType = string;
 // @public
 export interface AzureNetAppFilesStore extends StorageStore {
     kind: "AzureNetAppFiles";
+    mountProtocol?: NetAppMountProtocol;
     netAppVolumeId: string;
 }
 
 // @public
 export interface AzureStorageBlobStore extends StorageStore {
     kind: "AzureStorageBlob";
+    mountProtocol?: BlobStorageMountProtocol;
     storageAccountId: string;
 }
+
+// @public
+export type BlobStorageMountProtocol = string;
 
 // @public
 export interface Bookshelf extends TrackedResource {
@@ -83,9 +88,12 @@ export interface ChatModelDeployment extends TrackedResource {
 
 // @public
 export interface ChatModelDeploymentProperties {
+    capacity?: number;
     modelFormat: string;
     modelName: string;
+    modelVersion?: string;
     readonly provisioningState?: ProvisioningState;
+    skuName?: string;
 }
 
 // @public
@@ -145,6 +153,12 @@ export enum KnownActionType {
 }
 
 // @public
+export enum KnownBlobStorageMountProtocol {
+    BlobfuseCaching = "BlobfuseCaching",
+    NFS = "NFS"
+}
+
+// @public
 export enum KnownCreatedByType {
     Application = "Application",
     Key = "Key",
@@ -156,6 +170,11 @@ export enum KnownCreatedByType {
 export enum KnownCustomerManagedKeys {
     Disabled = "Disabled",
     Enabled = "Enabled"
+}
+
+// @public
+export enum KnownNetAppMountProtocol {
+    NFS = "NFS"
 }
 
 // @public
@@ -216,6 +235,12 @@ export enum KnownStorageStoreType {
 }
 
 // @public
+export enum KnownSystemAssignedServiceIdentityType {
+    None = "None",
+    SystemAssigned = "SystemAssigned"
+}
+
+// @public
 export enum KnownSystemSku {
     StandardD4SV4 = "Standard_D4s_v4",
     StandardD4SV5 = "Standard_D4s_v5",
@@ -224,7 +249,7 @@ export enum KnownSystemSku {
 
 // @public
 export enum KnownVersions {
-    V20260201Preview = "2026-02-01-preview"
+    V20260601 = "2026-06-01"
 }
 
 // @public
@@ -251,6 +276,9 @@ export interface MoboBrokerResource {
 }
 
 // @public
+export type NetAppMountProtocol = string;
+
+// @public
 export type NetworkEgressType = string;
 
 // @public
@@ -260,8 +288,11 @@ export interface NodePool extends TrackedResource {
 
 // @public
 export interface NodePoolProperties {
+    imageCacheLowerThreshold?: number;
+    imageCacheUpperThreshold?: number;
     maxNodeCount: number;
     minNodeCount?: number;
+    osDiskSizeGb?: number;
     readonly provisioningState?: ProvisioningState;
     scaleSetPriority?: ScaleSetPriority;
     subnetId: string;
@@ -440,6 +471,7 @@ export type StorageStoreUnion = AzureStorageBlobStore | AzureNetAppFilesStore | 
 
 // @public
 export interface Supercomputer extends TrackedResource {
+    identity?: SystemAssignedServiceIdentity;
     properties?: SupercomputerProperties;
 }
 
@@ -480,6 +512,16 @@ export interface SupercomputerUpdate {
 export interface SupercomputerUpdateProperties {
     identities?: SupercomputerIdentitiesUpdate;
 }
+
+// @public
+export interface SystemAssignedServiceIdentity {
+    readonly principalId?: string;
+    readonly tenantId?: string;
+    type: SystemAssignedServiceIdentityType;
+}
+
+// @public
+export type SystemAssignedServiceIdentityType = string;
 
 // @public
 export interface SystemData {

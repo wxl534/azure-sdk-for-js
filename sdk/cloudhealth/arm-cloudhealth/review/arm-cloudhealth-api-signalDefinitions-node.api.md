@@ -6,12 +6,14 @@
 
 import { Client } from '@azure-rest/core-client';
 import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
-export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, signalDefinitionName: string, options?: SignalDefinitionsDeleteOptionalParams): Promise<void>;
+export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, signalDefinitionName: string, options?: SignalDefinitionsDeleteOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
-export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, signalDefinitionName: string, resource: SignalDefinition, options?: SignalDefinitionsCreateOrUpdateOptionalParams): Promise<SignalDefinition>;
+export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, signalDefinitionName: string, resource: SignalDefinition, options?: SignalDefinitionsCreateOrUpdateOptionalParams): PollerLike<OperationState<SignalDefinition>, SignalDefinition>;
 
 // @public
 export function get(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, signalDefinitionName: string, options?: SignalDefinitionsGetOptionalParams): Promise<SignalDefinition>;
@@ -21,10 +23,12 @@ export function listByHealthModel(context: CloudHealthContext, resourceGroupName
 
 // @public
 export interface SignalDefinitionsCreateOrUpdateOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public
 export interface SignalDefinitionsDeleteOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public

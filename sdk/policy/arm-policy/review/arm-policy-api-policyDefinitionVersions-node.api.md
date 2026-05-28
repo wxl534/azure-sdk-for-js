@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export function $delete(context: PolicyContext, policyDefinitionName: string, policyDefinitionVersion: string, options?: PolicyDefinitionVersionsDeleteOptionalParams): Promise<void>;
@@ -32,13 +32,13 @@ export function getBuiltIn(context: PolicyContext, policyDefinitionName: string,
 export function list(context: PolicyContext, policyDefinitionName: string, options?: PolicyDefinitionVersionsListOptionalParams): PagedAsyncIterableIterator<PolicyDefinitionVersion>;
 
 // @public
-export function listAll(context: PolicyContext, options?: PolicyDefinitionVersionsListAllOptionalParams): Promise<_PolicyDefinitionVersionListResult>;
+export function listAll(context: PolicyContext, options?: PolicyDefinitionVersionsListAllOptionalParams): Promise<PolicyDefinitionVersionListResult>;
 
 // @public
-export function listAllAtManagementGroup(context: PolicyContext, managementGroupName: string, options?: PolicyDefinitionVersionsListAllAtManagementGroupOptionalParams): Promise<_PolicyDefinitionVersionListResult>;
+export function listAllAtManagementGroup(context: PolicyContext, managementGroupName: string, options?: PolicyDefinitionVersionsListAllAtManagementGroupOptionalParams): Promise<PolicyDefinitionVersionListResult>;
 
 // @public
-export function listAllBuiltins(context: PolicyContext, options?: PolicyDefinitionVersionsListAllBuiltinsOptionalParams): Promise<_PolicyDefinitionVersionListResult>;
+export function listAllBuiltins(context: PolicyContext, options?: PolicyDefinitionVersionsListAllBuiltinsOptionalParams): Promise<PolicyDefinitionVersionListResult>;
 
 // @public
 export function listBuiltIn(context: PolicyContext, policyDefinitionName: string, options?: PolicyDefinitionVersionsListBuiltInOptionalParams): PagedAsyncIterableIterator<PolicyDefinitionVersion>;

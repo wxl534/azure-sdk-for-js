@@ -26,6 +26,7 @@ export interface Connectivity {
 
 // @public
 export interface Connector extends ProxyResource {
+    identity?: ManagedServiceIdentityOnlyUserAssigned;
     properties?: ConnectorProperties;
 }
 
@@ -34,18 +35,10 @@ export interface ConnectorProperties {
     readonly connectorId: string;
     connectorType: Platform;
     readonly lastRunTimeStamp: Date;
+    readonly processingState: string;
+    readonly processingStateMessage: string;
     readonly provisioningState?: ProvisioningState;
     readonly tenantId: string;
-}
-
-// @public
-export interface ConnectorUpdate {
-    properties?: ConnectorUpdateProperties;
-}
-
-// @public
-export interface ConnectorUpdateProperties {
-    connectorType?: Platform;
 }
 
 // @public
@@ -58,8 +51,11 @@ export interface Content {
 export type CreatedByType = string;
 
 // @public
+export type DetectionType = string;
+
+// @public
 export interface ErrorAdditionalInfo {
-    readonly info?: Record<string, any>;
+    readonly info?: any;
     readonly type?: string;
 }
 
@@ -120,6 +116,13 @@ export interface Insight extends ProxyResource {
 }
 
 // @public
+export interface InsightCategoryGroup {
+    category: string;
+    insights?: InsightReference[];
+    status?: string;
+}
+
+// @public
 export interface InsightProperties {
     additionalDetails?: Record<string, any>;
     category: string;
@@ -131,6 +134,11 @@ export interface InsightProperties {
     insightUniqueId: string;
     readonly provisioningState?: ProvisioningState;
     status?: string;
+}
+
+// @public
+export interface InsightReference {
+    id: string;
 }
 
 // @public
@@ -154,12 +162,25 @@ export enum KnownCreatedByType {
 }
 
 // @public
+export enum KnownDetectionType {
+    BusinessAlert = "BusinessAlert",
+    MetricsAnomaly = "MetricsAnomaly",
+    MetricsThreshold = "MetricsThreshold"
+}
+
+// @public
 export enum KnownIncidentSource {
     AzureDevops = "AzureDevops",
     ICM = "ICM",
     Jira = "Jira",
     Other = "Other",
     ServiceNow = "ServiceNow"
+}
+
+// @public
+export enum KnownManagedServiceIdentityTypeOnlyUserAssigned {
+    None = "None",
+    UserAssigned = "UserAssigned"
 }
 
 // @public
@@ -210,6 +231,14 @@ export enum KnownProvisioningState {
 }
 
 // @public
+export enum KnownSeverity {
+    Critical = "Critical",
+    High = "High",
+    Low = "Low",
+    Medium = "Medium"
+}
+
+// @public
 export enum KnownToolset {
     Ansible = "Ansible",
     ARM = "ARM",
@@ -224,8 +253,18 @@ export enum KnownToolset {
 
 // @public
 export enum KnownVersions {
-    V20240501Preview = "2024-05-01-preview"
+    V20250101Preview = "2025-01-01-preview",
+    V20260101Preview = "2026-01-01-preview"
 }
+
+// @public
+export interface ManagedServiceIdentityOnlyUserAssigned {
+    type: ManagedServiceIdentityTypeOnlyUserAssigned;
+    userAssignedIdentities?: Record<string, UserAssignedIdentity>;
+}
+
+// @public
+export type ManagedServiceIdentityTypeOnlyUserAssigned = string;
 
 // @public
 export type MetricUnit = string;
@@ -287,6 +326,9 @@ export interface Resource {
 }
 
 // @public
+export type Severity = string;
+
+// @public
 export interface SourceOrTarget {
     azureResourceId?: string;
 }
@@ -303,6 +345,17 @@ export interface SystemData {
 
 // @public
 export type Toolset = string;
+
+// @public
+export interface UploadTokenResult {
+    uploadUrl: string;
+}
+
+// @public
+export interface UserAssignedIdentity {
+    readonly clientId?: string;
+    readonly principalId?: string;
+}
 
 // @public
 export interface Workload {
@@ -322,16 +375,23 @@ export interface WorkloadImpactProperties {
     clientIncidentDetails?: ClientIncidentDetails;
     confidenceLevel?: ConfidenceLevel;
     connectivity?: Connectivity;
+    detectionType?: DetectionType;
+    durationInSec?: number;
+    durationMarginInSec?: number;
     endDateTime?: Date;
     errorDetails?: ErrorDetailProperties;
+    hitCount?: number;
     impactCategory: string;
     impactDescription?: string;
     impactedResourceId: string;
     impactGroupId?: string;
     readonly impactUniqueId?: string;
+    readonly insightsByCategory?: InsightCategoryGroup[];
+    ongoingImpact?: boolean;
     performance?: Performance[];
     readonly provisioningState?: ProvisioningState;
     readonly reportedTimeUtc?: Date;
+    severity?: Severity;
     startDateTime: Date;
     workload?: Workload;
 }

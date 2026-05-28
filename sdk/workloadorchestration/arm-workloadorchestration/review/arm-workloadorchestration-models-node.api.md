@@ -8,6 +8,11 @@
 export type ActiveState = string;
 
 // @public
+export interface AdditionalData {
+    workflowId?: string;
+}
+
+// @public
 export interface AvailableSolutionTemplateVersion {
     isConfigured: boolean;
     latestConfigRevision: string;
@@ -26,6 +31,7 @@ export interface BulkDeployTargetDetails {
 
 // @public
 export interface BulkPublishSolutionParameter {
+    solutionConfiguration?: string;
     solutionDependencies?: SolutionDependencyParameter[];
     solutionInstanceName?: string;
     targets: BulkPublishTargetDetails[];
@@ -33,6 +39,23 @@ export interface BulkPublishSolutionParameter {
 
 // @public
 export interface BulkPublishTargetDetails {
+    solutionConfiguration?: string;
+    solutionInstanceName?: string;
+    solutionVersionId?: string;
+    targetId: string;
+}
+
+// @public
+export interface BulkReviewSolutionParameter {
+    solutionConfiguration?: string;
+    solutionDependencies?: SolutionDependencyParameter[];
+    solutionInstanceName?: string;
+    targets: BulkReviewTargetDetails[];
+}
+
+// @public
+export interface BulkReviewTargetDetails {
+    solutionConfiguration?: string;
     solutionInstanceName?: string;
     targetId: string;
 }
@@ -43,6 +66,9 @@ export interface Capability {
     name: string;
     state?: ResourceState;
 }
+
+// @public
+export type CMStages = string;
 
 // @public
 export interface ComponentStatus {
@@ -61,6 +87,7 @@ export interface ConfigTemplateProperties {
     description: string;
     readonly latestVersion?: string;
     readonly provisioningState?: ProvisioningState;
+    readonly uniqueIdentifier?: string;
 }
 
 // @public
@@ -186,6 +213,7 @@ export interface DynamicSchema extends ProxyResource {
 export interface DynamicSchemaProperties {
     readonly configurationModel?: ConfigurationModel;
     readonly configurationType?: ConfigurationType;
+    readonly displayName?: string;
     readonly provisioningState?: ProvisioningState;
 }
 
@@ -323,10 +351,11 @@ export interface JobParameterBase {
 }
 
 // @public
-export type JobParameterBaseUnion = DeployJobParameter | JobParameterBase;
+export type JobParameterBaseUnion = DeployJobParameter | PublishJobParameter | JobParameterBase;
 
 // @public
 export interface JobProperties {
+    additionalData?: AdditionalData;
     correlationId?: string;
     endTime?: Date;
     readonly errorDetails?: ErrorDetail;
@@ -360,7 +389,7 @@ export interface JobStepStatisticsBase {
 }
 
 // @public
-export type JobStepStatisticsBaseUnion = DeployJobStepStatistics | JobStepStatisticsBase;
+export type JobStepStatisticsBaseUnion = PublishJobStepStatistics | DeployJobStepStatistics | JobStepStatisticsBase;
 
 // @public
 export type JobType = string;
@@ -369,6 +398,17 @@ export type JobType = string;
 export enum KnownActiveState {
     Active = "active",
     Inactive = "inactive"
+}
+
+// @public
+export enum KnownCMStages {
+    Configuration = "Configuration",
+    Deployment = "Deployment",
+    ExternalValidation = "ExternalValidation",
+    Publish = "Publish",
+    Staging = "Staging",
+    Uninstallation = "Uninstallation",
+    Unstaging = "Unstaging"
 }
 
 // @public
@@ -416,6 +456,7 @@ export enum KnownJobStatus {
 export enum KnownJobType {
     Deploy = "deploy",
     ExternalValidation = "externalValidation",
+    Publish = "publish",
     Staging = "staging"
 }
 
@@ -453,12 +494,22 @@ export enum KnownState {
     ExternalValidationFailed = "ExternalValidationFailed",
     Failed = "Failed",
     InReview = "InReview",
+    NotApplicable = "NotApplicable",
     PendingExternalValidation = "PendingExternalValidation",
     ReadyToDeploy = "ReadyToDeploy",
     ReadyToUpgrade = "ReadyToUpgrade",
     Staging = "Staging",
     Undeployed = "Undeployed",
     UpgradeInReview = "UpgradeInReview"
+}
+
+// @public
+export enum KnownStateCategory {
+    Completed = "Completed",
+    Failed = "Failed",
+    InProgress = "InProgress",
+    None = "None",
+    Pending = "Pending"
 }
 
 // @public
@@ -476,8 +527,8 @@ export enum KnownValidationStatus {
 
 // @public
 export enum KnownVersions {
-    // (undocumented)
-    V20250601 = "2025-06-01"
+    V20250601 = "2025-06-01",
+    V20250801 = "2025-08-01"
 }
 
 // @public
@@ -488,6 +539,21 @@ export type ProvisioningState = string;
 
 // @public
 export interface ProxyResource extends Resource {
+}
+
+// @public
+export interface PublishJobParameter extends JobParameterBase {
+    jobType: "publish";
+    // (undocumented)
+    parameter?: SolutionVersionParameter;
+}
+
+// @public
+export interface PublishJobStepStatistics extends JobStepStatisticsBase {
+    failedCount?: number;
+    statisticsType: "publish";
+    successCount?: number;
+    totalCount?: number;
 }
 
 // @public
@@ -620,6 +686,7 @@ export interface SolutionDependencyParameter {
 // @public
 export interface SolutionProperties {
     readonly availableSolutionTemplateVersions?: AvailableSolutionTemplateVersion[];
+    readonly displayName?: string;
     readonly provisioningState?: ProvisioningState;
     readonly solutionTemplateId?: string;
 }
@@ -645,6 +712,7 @@ export interface SolutionTemplateProperties {
     readonly latestVersion?: string;
     readonly provisioningState?: ProvisioningState;
     state?: ResourceState;
+    readonly uniqueIdentifier?: string;
 }
 
 // @public
@@ -708,9 +776,11 @@ export interface SolutionVersionParameter {
 export interface SolutionVersionProperties {
     readonly actionType?: JobType;
     readonly configuration?: string;
+    readonly currentStage?: StageMap;
     readonly errorDetails?: ErrorDetail;
     readonly externalValidationId?: string;
     readonly latestActionTrackingUri?: string;
+    readonly latestActionTriggeredBy?: string;
     readonly provisioningState?: ProvisioningState;
     readonly reviewId?: string;
     readonly revision?: number;
@@ -718,6 +788,7 @@ export interface SolutionVersionProperties {
     readonly solutionInstanceName?: string;
     readonly solutionTemplateVersionId?: string;
     specification: Record<string, any>;
+    readonly stages?: StageMap[];
     readonly state?: State;
     readonly targetDisplayName?: string;
     readonly targetLevelConfiguration?: string;
@@ -727,6 +798,16 @@ export interface SolutionVersionProperties {
 export interface SolutionVersionSnapshot {
     solutionVersionId?: string;
     specification?: Record<string, any>;
+}
+
+// @public
+export interface StageMap {
+    readonly childStages?: StageMap[];
+    readonly displayState: string;
+    readonly endTime?: Date;
+    readonly stage: CMStages;
+    readonly startTime?: Date;
+    readonly status: StateCategory;
 }
 
 // @public
@@ -751,6 +832,9 @@ export interface StageStatus {
 
 // @public
 export type State = string;
+
+// @public
+export type StateCategory = string;
 
 // @public
 export interface SystemData {

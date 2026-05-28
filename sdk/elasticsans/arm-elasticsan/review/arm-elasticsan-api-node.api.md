@@ -4,9 +4,12 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { ClientOptions } from '@azure-rest/core-client';
-import type { TokenCredential } from '@azure/core-auth';
+import { Client } from '@azure-rest/core-client';
+import { ClientOptions } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
+import { TokenCredential } from '@azure/core-auth';
 
 // @public
 export function createElasticSanManagement(credential: TokenCredential, subscriptionId: string, options?: ElasticSanManagementOptionalParams): ElasticSanManagementContext;
@@ -21,6 +24,14 @@ export interface ElasticSanManagementContext extends Client {
 export interface ElasticSanManagementOptionalParams extends ClientOptions {
     apiVersion?: string;
     cloudSetting?: AzureSupportedClouds;
+}
+
+// @public
+export function restoreVolume(context: ElasticSanManagementContext, resourceGroupName: string, elasticSanName: string, volumeGroupName: string, volumeName: string, options?: RestoreVolumeOptionalParams): PollerLike<OperationState<Volume>, Volume>;
+
+// @public
+export interface RestoreVolumeOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // (No @packageDocumentation comment for this package)

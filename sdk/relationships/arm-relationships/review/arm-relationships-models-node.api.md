@@ -101,7 +101,7 @@ export enum KnownRelationshipOrigins {
 
 // @public
 export enum KnownVersions {
-    Versions20230901Preview = "2023-09-01-preview"
+    V20230901Preview = "2023-09-01-preview"
 }
 
 // @public

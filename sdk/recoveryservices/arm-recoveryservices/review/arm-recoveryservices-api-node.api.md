@@ -4,16 +4,16 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { ClientOptions } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { TokenCredential } from '@azure/core-auth';
+import { Client } from '@azure-rest/core-client';
+import { ClientOptions } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { TokenCredential } from '@azure/core-auth';
 
 // @public (undocumented)
 export function createRecoveryServices(credential: TokenCredential, subscriptionId: string, options?: RecoveryServicesClientOptionalParams): RecoveryServicesContext;
 
 // @public
-export function getOperationResult(context: RecoveryServicesContext, resourceGroupName: string, vaultName: string, operationId: string, options?: GetOperationResultOptionalParams): Promise<Vault | null>;
+export function getOperationResult(context: RecoveryServicesContext, resourceGroupName: string, vaultName: string, operationId: string, options?: GetOperationResultOptionalParams): Promise<Vault | undefined>;
 
 // @public
 export interface GetOperationResultOptionalParams extends OperationOptions {
@@ -34,7 +34,7 @@ export interface RecoveryServicesClientOptionalParams extends ClientOptions {
 
 // @public (undocumented)
 export interface RecoveryServicesContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

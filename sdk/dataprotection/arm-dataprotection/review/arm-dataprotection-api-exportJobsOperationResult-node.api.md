@@ -4,15 +4,15 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export interface ExportJobsOperationResultGetOptionalParams extends OperationOptions {
 }
 
 // @public
-export function get(context: DataProtectionContext, resourceGroupName: string, vaultName: string, operationId: string, options?: ExportJobsOperationResultGetOptionalParams): Promise<ExportJobsResult>;
+export function get(context: DataProtectionContext, resourceGroupName: string, vaultName: string, operationId: string, options?: ExportJobsOperationResultGetOptionalParams): Promise<ExportJobsResult | undefined>;
 
 // (No @packageDocumentation comment for this package)
 

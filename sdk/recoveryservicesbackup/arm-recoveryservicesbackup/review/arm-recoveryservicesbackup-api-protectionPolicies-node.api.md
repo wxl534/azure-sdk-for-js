@@ -4,16 +4,16 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, policyName: string, options?: ProtectionPoliciesDeleteOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
-export function createOrUpdate(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, policyName: string, parameters: ProtectionPolicyResource, options?: ProtectionPoliciesCreateOrUpdateOptionalParams): Promise<ProtectionPolicyResource>;
+export function createOrUpdate(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, policyName: string, parameters: ProtectionPolicyResource, options?: ProtectionPoliciesCreateOrUpdateOptionalParams): Promise<ProtectionPolicyResource | undefined>;
 
 // @public
 export function get(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, policyName: string, options?: ProtectionPoliciesGetOptionalParams): Promise<ProtectionPolicyResource>;

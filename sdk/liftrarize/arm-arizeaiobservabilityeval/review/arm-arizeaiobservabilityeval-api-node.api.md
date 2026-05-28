@@ -14,11 +14,12 @@ export function createObservabilityEval(credential: TokenCredential, subscriptio
 // @public
 export interface ObservabilityEvalClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public (undocumented)
 export interface ObservabilityEvalContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

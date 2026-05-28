@@ -11,11 +11,12 @@ import { TokenCredential } from '@azure/core-auth';
 // @public
 export interface CarbonOptimizationManagementClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public
 export interface CarbonOptimizationManagementContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
 }
 
 // @public

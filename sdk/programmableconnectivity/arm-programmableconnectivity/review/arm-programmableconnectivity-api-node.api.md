@@ -14,11 +14,12 @@ export function createProgrammableConnectivity(credential: TokenCredential, subs
 // @public
 export interface ProgrammableConnectivityClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public
 export interface ProgrammableConnectivityContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

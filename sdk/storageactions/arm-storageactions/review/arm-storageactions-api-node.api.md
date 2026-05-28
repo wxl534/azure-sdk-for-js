@@ -14,11 +14,12 @@ export function createStorageActionsManagement(credential: TokenCredential, subs
 // @public
 export interface StorageActionsManagementClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public
 export interface StorageActionsManagementContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

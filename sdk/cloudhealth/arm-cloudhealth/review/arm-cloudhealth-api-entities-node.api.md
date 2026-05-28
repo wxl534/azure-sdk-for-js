@@ -6,23 +6,54 @@
 
 import { Client } from '@azure-rest/core-client';
 import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
-export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, options?: EntitiesDeleteOptionalParams): Promise<void>;
+export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, options?: EntitiesDeleteOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
-export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, resource: Entity, options?: EntitiesCreateOrUpdateOptionalParams): Promise<Entity>;
+export function addDataAnnotation(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, body: AddDataAnnotationRequest, options?: EntitiesAddDataAnnotationOptionalParams): Promise<DataAnnotation>;
+
+// @public
+export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, resource: Entity, options?: EntitiesCreateOrUpdateOptionalParams): PollerLike<OperationState<Entity>, Entity>;
+
+// @public
+export interface EntitiesAddDataAnnotationOptionalParams extends OperationOptions {
+}
 
 // @public
 export interface EntitiesCreateOrUpdateOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public
 export interface EntitiesDeleteOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
+}
+
+// @public
+export interface EntitiesGetDataAnnotationsOptionalParams extends OperationOptions {
+}
+
+// @public
+export interface EntitiesGetHistoryOptionalParams extends OperationOptions {
 }
 
 // @public
 export interface EntitiesGetOptionalParams extends OperationOptions {
+}
+
+// @public
+export interface EntitiesGetSignalHistoryOptionalParams extends OperationOptions {
+}
+
+// @public
+export interface EntitiesGetSignalRecommendationsOptionalParams extends OperationOptions {
+}
+
+// @public
+export interface EntitiesIngestHealthReportOptionalParams extends OperationOptions {
 }
 
 // @public
@@ -32,6 +63,21 @@ export interface EntitiesListByHealthModelOptionalParams extends OperationOption
 
 // @public
 export function get(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, options?: EntitiesGetOptionalParams): Promise<Entity>;
+
+// @public
+export function getDataAnnotations(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, body: GetDataAnnotationsRequest, options?: EntitiesGetDataAnnotationsOptionalParams): Promise<GetDataAnnotationsResponse>;
+
+// @public
+export function getHistory(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, body: EntityHistoryRequest, options?: EntitiesGetHistoryOptionalParams): Promise<EntityHistoryResponse>;
+
+// @public
+export function getSignalHistory(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, body: SignalHistoryRequest, options?: EntitiesGetSignalHistoryOptionalParams): Promise<SignalHistoryResponse>;
+
+// @public
+export function getSignalRecommendations(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, options?: EntitiesGetSignalRecommendationsOptionalParams): Promise<GetSignalRecommendationsResponse>;
+
+// @public
+export function ingestHealthReport(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, entityName: string, body: HealthReportRequest, options?: EntitiesIngestHealthReportOptionalParams): Promise<void>;
 
 // @public
 export function listByHealthModel(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, options?: EntitiesListByHealthModelOptionalParams): PagedAsyncIterableIterator<Entity>;

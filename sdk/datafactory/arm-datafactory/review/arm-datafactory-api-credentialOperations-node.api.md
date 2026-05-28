@@ -32,7 +32,7 @@ export interface CredentialOperationsListByFactoryOptionalParams extends Operati
 }
 
 // @public
-export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, credentialName: string, options?: CredentialOperationsGetOptionalParams): Promise<CredentialResource>;
+export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, credentialName: string, options?: CredentialOperationsGetOptionalParams): Promise<CredentialResource | undefined>;
 
 // @public
 export function listByFactory(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, options?: CredentialOperationsListByFactoryOptionalParams): PagedAsyncIterableIterator<CredentialResource>;

@@ -4,14 +4,26 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
+
+// @public
+export function createOrUpdate(context: ContainerServiceContext, resourceGroupName: string, resourceName: string, agentPoolName: string, machineName: string, parameters: Machine, options?: MachinesCreateOrUpdateOptionalParams): PollerLike<OperationState<Machine>, Machine>;
 
 // @public
 export function get(context: ContainerServiceContext, resourceGroupName: string, resourceName: string, agentPoolName: string, machineName: string, options?: MachinesGetOptionalParams): Promise<Machine>;
 
 // @public
 export function list(context: ContainerServiceContext, resourceGroupName: string, resourceName: string, agentPoolName: string, options?: MachinesListOptionalParams): PagedAsyncIterableIterator<Machine>;
+
+// @public
+export interface MachinesCreateOrUpdateOptionalParams extends OperationOptions {
+    ifMatch?: string;
+    ifNoneMatch?: string;
+    updateIntervalInMs?: number;
+}
 
 // @public
 export interface MachinesGetOptionalParams extends OperationOptions {

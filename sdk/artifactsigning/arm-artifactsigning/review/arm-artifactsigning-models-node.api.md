@@ -44,6 +44,7 @@ export interface CertificateProfileProperties {
     includeState?: boolean;
     includeStreetAddress?: boolean;
     profileType: ProfileType;
+    programType?: string;
     readonly provisioningState?: ProvisioningState;
     readonly status?: CertificateProfileStatus;
 }
@@ -187,7 +188,10 @@ export enum KnownSkuName {
 
 // @public
 export enum KnownVersions {
-    V20251013 = "2025-10-13"
+    V20240205Preview = "2024-02-05-preview",
+    V20240930Preview = "2024-09-30-preview",
+    V20251013 = "2025-10-13",
+    V20260515Preview = "2026-05-15-preview"
 }
 
 // @public
@@ -251,6 +255,11 @@ export interface RevokeCertificate {
     remarks?: string;
     serialNumber: string;
     thumbprint: string;
+}
+
+// @public
+export interface RevokeCertificateList {
+    revokeCertificates: RevokeCertificate[];
 }
 
 // @public

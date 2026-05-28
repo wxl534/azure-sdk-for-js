@@ -4,11 +4,11 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
-export function cancel(context: PostgreSQLManagementFlexibleServerContext, resourceGroupName: string, serverName: string, migrationName: string, options?: MigrationsCancelOptionalParams): Promise<Migration>;
+export function cancel(context: PostgreSQLManagementFlexibleServerContext, resourceGroupName: string, serverName: string, migrationName: string, options?: MigrationsCancelOptionalParams): Promise<Migration | undefined>;
 
 // @public
 export function checkNameAvailability(context: PostgreSQLManagementFlexibleServerContext, resourceGroupName: string, serverName: string, parameters: MigrationNameAvailability, options?: MigrationsCheckNameAvailabilityOptionalParams): Promise<MigrationNameAvailability>;

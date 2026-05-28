@@ -6,6 +6,14 @@
 
 import { Client } from '@azure-rest/core-client';
 import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
+
+// @public
+export function $delete(context: WorkloadOrchestrationManagementContext, resourceUri: string, schemaReferenceName: string, options?: SchemaReferencesDeleteOptionalParams): PollerLike<OperationState<void>, void>;
+
+// @public
+export function createOrUpdate(context: WorkloadOrchestrationManagementContext, resourceUri: string, schemaReferenceName: string, resource: SchemaReference, options?: SchemaReferencesCreateOrUpdateOptionalParams): PollerLike<OperationState<SchemaReference>, SchemaReference>;
 
 // @public
 export function get(context: WorkloadOrchestrationManagementContext, resourceUri: string, schemaReferenceName: string, options?: SchemaReferencesGetOptionalParams): Promise<SchemaReference>;
@@ -14,12 +22,29 @@ export function get(context: WorkloadOrchestrationManagementContext, resourceUri
 export function listByResourceGroup(context: WorkloadOrchestrationManagementContext, resourceUri: string, options?: SchemaReferencesListByResourceGroupOptionalParams): PagedAsyncIterableIterator<SchemaReference>;
 
 // @public
+export interface SchemaReferencesCreateOrUpdateOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
+}
+
+// @public
+export interface SchemaReferencesDeleteOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
+}
+
+// @public
 export interface SchemaReferencesGetOptionalParams extends OperationOptions {
 }
 
 // @public
 export interface SchemaReferencesListByResourceGroupOptionalParams extends OperationOptions {
 }
+
+// @public
+export interface SchemaReferencesUpdateOptionalParams extends OperationOptions {
+}
+
+// @public
+export function update(context: WorkloadOrchestrationManagementContext, resourceUri: string, schemaReferenceName: string, properties: SchemaReference, options?: SchemaReferencesUpdateOptionalParams): Promise<SchemaReference>;
 
 // (No @packageDocumentation comment for this package)
 

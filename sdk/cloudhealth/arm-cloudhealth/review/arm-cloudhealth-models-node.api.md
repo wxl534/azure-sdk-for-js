@@ -8,6 +8,12 @@
 export type ActionType = string;
 
 // @public
+export interface AddDataAnnotationRequest {
+    annotationDetails: Record<string, string>;
+    description?: string;
+}
+
+// @public
 export interface AlertConfiguration {
     actionGroupIds?: string[];
     description?: string;
@@ -16,6 +22,12 @@ export interface AlertConfiguration {
 
 // @public
 export type AlertSeverity = string;
+
+// @public
+export interface ApplicationInsightsTopologySpecification extends DiscoveryRuleSpecification {
+    applicationInsightsResourceId: string;
+    kind: "ApplicationInsightsTopology";
+}
 
 // @public
 export type AuthenticationKind = string;
@@ -36,30 +48,88 @@ export interface AuthenticationSettingProperties {
 export type AuthenticationSettingPropertiesUnion = ManagedIdentityAuthenticationSettingProperties | AuthenticationSettingProperties;
 
 // @public
-export interface AzureMonitorWorkspaceSignalGroup {
+export interface AzureMonitorWorkspaceSignals {
     authenticationSetting: string;
     azureMonitorWorkspaceResourceId: string;
-    signalAssignments?: SignalAssignment[];
+    signals?: PrometheusMetricsSignal[];
 }
 
 // @public
-export interface AzureResourceSignalGroup {
+export interface AzureResourceHealthSignal {
+    enabled?: ResourceHealthAvailabilityStateSignalBehavior;
+    readonly signalName?: string;
+    readonly status?: AzureResourceHealthSignalStatus;
+}
+
+// @public
+export interface AzureResourceHealthSignalStatus {
+    additionalContext?: string;
+    readonly availabilityReportedTime?: Date;
+    readonly availabilityState?: ResourceHealthAvailabilityState;
+    readonly category?: ResourceHealthCategory;
+    readonly detailedStatus?: string;
+    readonly error?: string;
+    readonly healthState?: HealthState;
+    readonly reasonChronicity?: ResourceHealthReasonChronicity;
+    readonly reasonType?: ResourceHealthReasonType;
+    readonly reportedAt?: Date;
+    readonly summary?: string;
+    readonly value?: number;
+}
+
+// @public
+export interface AzureResourceSignal extends SignalInstanceProperties {
+    aggregationType?: MetricAggregationType;
+    dataUnit?: string;
+    dimensionFilter?: string;
+    displayName?: string;
+    evaluationRules?: EvaluationRule;
+    metricName?: string;
+    metricNamespace?: string;
+    refreshInterval?: RefreshInterval;
+    signalKind: "AzureResourceMetric";
+    timeGrain?: string;
+}
+
+// @public
+export interface AzureResourceSignals {
     authenticationSetting: string;
     azureResourceId: string;
-    signalAssignments?: SignalAssignment[];
+    azureResourceKind?: string;
+    resourceHealth?: AzureResourceHealthSignal;
+    signals?: AzureResourceSignal[];
 }
 
 // @public
 export type CreatedByType = string;
 
 // @public
+export interface DataAnnotation {
+    annotationDetails: Record<string, string>;
+    readonly annotationId?: string;
+    readonly createdAt?: Date;
+    description?: string;
+}
+
+// @public
 export type DependenciesAggregationType = string;
 
 // @public
-export interface DependenciesSignalGroup {
+export type DependenciesAggregationUnit = string;
+
+// @public
+export interface DependenciesSignalGroupV2 {
     aggregationType: DependenciesAggregationType;
-    degradedThreshold?: string;
-    unhealthyThreshold?: string;
+    degradedThreshold?: number;
+    ignoreUnknown?: boolean;
+    unhealthyThreshold?: number;
+    unit?: DependenciesAggregationUnit;
+}
+
+// @public
+export interface DiscoveryError {
+    readonly context?: string[];
+    readonly message: string;
 }
 
 // @public
@@ -68,17 +138,19 @@ export interface DiscoveryRule extends ProxyResource {
 }
 
 // @public
+export type DiscoveryRuleKind = string;
+
+// @public
 export interface DiscoveryRuleProperties {
     addRecommendedSignals: DiscoveryRuleRecommendedSignalsBehavior;
+    addResourceHealthSignal?: ResourceHealthAvailabilityStateSignalBehavior;
     authenticationSetting: string;
-    readonly deletionDate?: Date;
     discoverRelationships: DiscoveryRuleRelationshipDiscoveryBehavior;
     displayName?: string;
     readonly entityName: string;
-    readonly errorMessage?: string;
-    readonly numberOfDiscoveredEntities?: number;
+    readonly error?: DiscoveryError;
     readonly provisioningState?: HealthModelProvisioningState;
-    resourceGraphQuery: string;
+    specification: DiscoveryRuleSpecificationUnion;
 }
 
 // @public
@@ -88,18 +160,15 @@ export type DiscoveryRuleRecommendedSignalsBehavior = string;
 export type DiscoveryRuleRelationshipDiscoveryBehavior = string;
 
 // @public
-export interface DynamicDetectionRule {
-    dynamicThresholdDirection: DynamicThresholdDirection;
-    dynamicThresholdModel: DynamicThresholdModel;
-    modelSensitivity: number;
-    trainingStartTime?: Date;
+export interface DiscoveryRuleSpecification {
+    kind: DiscoveryRuleKind;
 }
 
 // @public
-export type DynamicThresholdDirection = string;
+export type DiscoveryRuleSpecificationUnion = ResourceGraphQuerySpecification | ApplicationInsightsTopologySpecification | DiscoveryRuleSpecification;
 
 // @public
-export type DynamicThresholdModel = string;
+export type DynamicThresholdSensitivity = string;
 
 // @public
 export interface Entity extends ProxyResource {
@@ -119,23 +188,36 @@ export interface EntityCoordinates {
 }
 
 // @public
+export interface EntityHistoryRequest {
+    endAt?: Date;
+    nextMarker?: string;
+    startAt?: Date;
+    top?: number;
+}
+
+// @public
+export interface EntityHistoryResponse {
+    entityName: string;
+    history: HealthStateTransition[];
+    nextMarker?: string;
+}
+
+// @public
 export type EntityImpact = string;
 
 // @public
 export interface EntityProperties {
     alerts?: EntityAlerts;
     canvasPosition?: EntityCoordinates;
-    readonly deletionDate?: Date;
     readonly discoveredBy?: string;
     displayName?: string;
     healthObjective?: number;
     readonly healthState?: HealthState;
     icon?: IconDefinition;
     impact?: EntityImpact;
-    kind?: string;
-    labels?: Record<string, string>;
     readonly provisioningState?: HealthModelProvisioningState;
-    signals?: SignalGroup;
+    signalGroups?: SignalGroups;
+    tags?: Record<string, string>;
 }
 
 // @public
@@ -160,9 +242,40 @@ export interface ErrorResponse {
 
 // @public
 export interface EvaluationRule {
-    degradedRule?: ThresholdRule;
-    dynamicDetectionRule?: DynamicDetectionRule;
-    unhealthyRule?: ThresholdRule;
+    degradedRule?: ThresholdRuleV2;
+    unhealthyRule: ThresholdRuleV2;
+}
+
+// @public
+export interface ExternalSignal extends SignalInstanceProperties {
+    evaluationRules?: EvaluationRule;
+    signalKind: "External";
+}
+
+// @public
+export interface ExternalSignalGroup {
+    readonly signals?: ExternalSignal[];
+}
+
+// @public
+export interface GetDataAnnotationsRequest {
+    endAt?: Date;
+    nextMarker?: string;
+    startAt?: Date;
+    top?: number;
+}
+
+// @public
+export interface GetDataAnnotationsResponse {
+    annotations: DataAnnotation[];
+    entityName: string;
+    nextMarker?: string;
+}
+
+// @public
+export interface GetSignalRecommendationsResponse {
+    recommendedConfigurations: SignalConfiguration[];
+    recommendedSignals: SignalConfiguration[];
 }
 
 // @public
@@ -173,8 +286,6 @@ export interface HealthModel extends TrackedResource {
 
 // @public
 export interface HealthModelProperties {
-    readonly dataplaneEndpoint?: string;
-    discovery?: ModelDiscoverySettings;
     readonly provisioningState?: HealthModelProvisioningState;
 }
 
@@ -184,17 +295,35 @@ export type HealthModelProvisioningState = string;
 // @public
 export interface HealthModelUpdate {
     identity?: ManagedServiceIdentity;
-    properties?: HealthModelUpdateProperties;
     tags?: Record<string, string>;
 }
 
 // @public
-export interface HealthModelUpdateProperties {
-    discovery?: ModelDiscoverySettings;
+export interface HealthReportEvaluationRule {
+    degradedRule?: ThresholdRuleV2;
+    unhealthyRule: ThresholdRuleV2;
+}
+
+// @public
+export interface HealthReportRequest {
+    additionalContext?: string;
+    evaluationRules?: HealthReportEvaluationRule;
+    expiresInMinutes?: number;
+    healthState: HealthState;
+    signalName: string;
+    value?: number;
 }
 
 // @public
 export type HealthState = string;
+
+// @public
+export interface HealthStateTransition {
+    newState: HealthState;
+    occurredAt: Date;
+    previousState: HealthState;
+    reason?: string;
+}
 
 // @public
 export interface IconDefinition {
@@ -218,7 +347,6 @@ export enum KnownAlertSeverity {
 
 // @public
 export enum KnownAuthenticationKind {
-    // (undocumented)
     ManagedIdentity = "ManagedIdentity"
 }
 
@@ -232,8 +360,21 @@ export enum KnownCreatedByType {
 
 // @public
 export enum KnownDependenciesAggregationType {
-    Thresholds = "Thresholds",
+    MaxNotHealthy = "MaxNotHealthy",
+    MinHealthy = "MinHealthy",
     WorstOf = "WorstOf"
+}
+
+// @public
+export enum KnownDependenciesAggregationUnit {
+    Absolute = "Absolute",
+    Percentage = "Percentage"
+}
+
+// @public
+export enum KnownDiscoveryRuleKind {
+    ApplicationInsightsTopology = "ApplicationInsightsTopology",
+    ResourceGraphQuery = "ResourceGraphQuery"
 }
 
 // @public
@@ -249,15 +390,10 @@ export enum KnownDiscoveryRuleRelationshipDiscoveryBehavior {
 }
 
 // @public
-export enum KnownDynamicThresholdDirection {
-    GreaterOrLowerThan = "GreaterOrLowerThan",
-    GreaterThan = "GreaterThan",
-    LowerThan = "LowerThan"
-}
-
-// @public
-export enum KnownDynamicThresholdModel {
-    AnomalyDetection = "AnomalyDetection"
+export enum KnownDynamicThresholdSensitivity {
+    High = "High",
+    Low = "Low",
+    Medium = "Medium"
 }
 
 // @public
@@ -270,9 +406,7 @@ export enum KnownEntityImpact {
 // @public
 export enum KnownHealthModelProvisioningState {
     Canceled = "Canceled",
-    // (undocumented)
     Creating = "Creating",
-    // (undocumented)
     Deleting = "Deleting",
     Failed = "Failed",
     Succeeded = "Succeeded"
@@ -282,9 +416,17 @@ export enum KnownHealthModelProvisioningState {
 export enum KnownHealthState {
     Degraded = "Degraded",
     Deleted = "Deleted",
-    Error = "Error",
     Healthy = "Healthy",
+    Unhealthy = "Unhealthy",
     Unknown = "Unknown"
+}
+
+// @public
+export enum KnownLookBackWindow {
+    PT15M = "PT15M",
+    PT1H = "PT1H",
+    PT30M = "PT30M",
+    PT5M = "PT5M"
 }
 
 // @public
@@ -297,17 +439,11 @@ export enum KnownManagedServiceIdentityType {
 
 // @public
 export enum KnownMetricAggregationType {
-    // (undocumented)
     Average = "Average",
-    // (undocumented)
     Count = "Count",
-    // (undocumented)
     Maximum = "Maximum",
-    // (undocumented)
     Minimum = "Minimum",
-    // (undocumented)
     None = "None",
-    // (undocumented)
     Total = "Total"
 }
 
@@ -329,27 +465,62 @@ export enum KnownRefreshInterval {
 }
 
 // @public
+export enum KnownResourceHealthAvailabilityState {
+    Available = "Available",
+    Degraded = "Degraded",
+    Unavailable = "Unavailable",
+    Unknown = "Unknown"
+}
+
+// @public
+export enum KnownResourceHealthAvailabilityStateSignalBehavior {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
+}
+
+// @public
+export enum KnownResourceHealthCategory {
+    Planned = "Planned",
+    Unplanned = "Unplanned"
+}
+
+// @public
+export enum KnownResourceHealthReasonChronicity {
+    Persistent = "Persistent",
+    Transient = "Transient"
+}
+
+// @public
+export enum KnownResourceHealthReasonType {
+    Planned = "Planned",
+    Unplanned = "Unplanned",
+    UserInitiated = "UserInitiated"
+}
+
+// @public
 export enum KnownSignalKind {
-    // (undocumented)
     AzureResourceMetric = "AzureResourceMetric",
-    // (undocumented)
+    ExternalSignal = "External",
     LogAnalyticsQuery = "LogAnalyticsQuery",
-    // (undocumented)
     PrometheusMetricsQuery = "PrometheusMetricsQuery"
 }
 
 // @public
 export enum KnownSignalOperator {
-    Equals = "Equals",
-    GreaterOrEquals = "GreaterOrEquals",
+    Dynamic = "Dynamic",
+    Equal = "Equal",
     GreaterThan = "GreaterThan",
-    LowerOrEquals = "LowerOrEquals",
-    LowerThan = "LowerThan"
+    GreaterThanOrEqual = "GreaterThanOrEqual",
+    LessThan = "LessThan",
+    LessThanOrEqual = "LessThanOrEqual",
+    NotEqual = "NotEqual"
 }
 
 // @public
 export enum KnownVersions {
-    V20250501Preview = "2025-05-01-preview"
+    V20250501Preview = "2025-05-01-preview",
+    V20260101Preview = "2026-01-01-preview",
+    V20260501Preview = "2026-05-01-preview"
 }
 
 // @public
@@ -361,11 +532,26 @@ export interface LogAnalyticsQuerySignalDefinitionProperties extends SignalDefin
 }
 
 // @public
-export interface LogAnalyticsSignalGroup {
+export interface LogAnalyticsSignal extends SignalInstanceProperties {
+    dataUnit?: string;
+    displayName?: string;
+    evaluationRules?: EvaluationRule;
+    queryText?: string;
+    refreshInterval?: RefreshInterval;
+    signalKind: "LogAnalyticsQuery";
+    timeGrain?: string;
+    valueColumnName?: string;
+}
+
+// @public
+export interface LogAnalyticsSignals {
     authenticationSetting: string;
     logAnalyticsWorkspaceResourceId: string;
-    signalAssignments?: SignalAssignment[];
+    signals?: LogAnalyticsSignal[];
 }
+
+// @public
+export type LookBackWindow = string;
 
 // @public
 export interface ManagedIdentityAuthenticationSettingProperties extends AuthenticationSettingProperties {
@@ -378,7 +564,7 @@ export interface ManagedServiceIdentity {
     readonly principalId?: string;
     readonly tenantId?: string;
     type: ManagedServiceIdentityType;
-    userAssignedIdentities?: Record<string, UserAssignedIdentity | null>;
+    userAssignedIdentities?: Record<string, UserAssignedIdentity>;
 }
 
 // @public
@@ -386,13 +572,6 @@ export type ManagedServiceIdentityType = string;
 
 // @public
 export type MetricAggregationType = string;
-
-// @public
-export interface ModelDiscoverySettings {
-    addRecommendedSignals: DiscoveryRuleRecommendedSignalsBehavior;
-    identity?: string;
-    scope: string;
-}
 
 // @public
 export interface Operation {
@@ -413,6 +592,17 @@ export interface OperationDisplay {
 
 // @public
 export type Origin = string;
+
+// @public
+export interface PrometheusMetricsSignal extends SignalInstanceProperties {
+    dataUnit?: string;
+    displayName?: string;
+    evaluationRules?: EvaluationRule;
+    queryText?: string;
+    refreshInterval?: RefreshInterval;
+    signalKind: "PrometheusMetricsQuery";
+    timeGrain?: string;
+}
 
 // @public
 export interface PrometheusMetricsSignalDefinitionProperties extends SignalDefinitionProperties {
@@ -436,12 +626,11 @@ export interface Relationship extends ProxyResource {
 // @public
 export interface RelationshipProperties {
     childEntityName: string;
-    readonly deletionDate?: Date;
     readonly discoveredBy?: string;
     displayName?: string;
-    labels?: Record<string, string>;
     parentEntityName: string;
     readonly provisioningState?: HealthModelProvisioningState;
+    tags?: Record<string, string>;
 }
 
 // @public
@@ -453,9 +642,29 @@ export interface Resource {
 }
 
 // @public
+export interface ResourceGraphQuerySpecification extends DiscoveryRuleSpecification {
+    kind: "ResourceGraphQuery";
+    resourceGraphQuery: string;
+}
+
+// @public
+export type ResourceHealthAvailabilityState = string;
+
+// @public
+export type ResourceHealthAvailabilityStateSignalBehavior = string;
+
+// @public
+export type ResourceHealthCategory = string;
+
+// @public
+export type ResourceHealthReasonChronicity = string;
+
+// @public
+export type ResourceHealthReasonType = string;
+
+// @public
 export interface ResourceMetricSignalDefinitionProperties extends SignalDefinitionProperties {
     aggregationType: MetricAggregationType;
-    dimension?: string;
     dimensionFilter?: string;
     metricName: string;
     metricNamespace: string;
@@ -464,8 +673,15 @@ export interface ResourceMetricSignalDefinitionProperties extends SignalDefiniti
 }
 
 // @public
-export interface SignalAssignment {
-    signalDefinitions: string[];
+export interface SignalConfiguration {
+    aggregationType?: MetricAggregationType;
+    dimensionFilter?: string;
+    evaluationRules?: EvaluationRule;
+    metricName?: string;
+    metricNamespace?: string;
+    signalId: string;
+    timeGrain?: string;
+    unit?: string;
 }
 
 // @public
@@ -476,31 +692,76 @@ export interface SignalDefinition extends ProxyResource {
 // @public
 export interface SignalDefinitionProperties {
     dataUnit?: string;
-    readonly deletionDate?: Date;
     displayName?: string;
     evaluationRules: EvaluationRule;
-    labels?: Record<string, string>;
     readonly provisioningState?: HealthModelProvisioningState;
     refreshInterval?: RefreshInterval;
     signalKind: SignalKind;
+    tags?: Record<string, string>;
 }
 
 // @public
 export type SignalDefinitionPropertiesUnion = ResourceMetricSignalDefinitionProperties | LogAnalyticsQuerySignalDefinitionProperties | PrometheusMetricsSignalDefinitionProperties | SignalDefinitionProperties;
 
 // @public
-export interface SignalGroup {
-    azureLogAnalytics?: LogAnalyticsSignalGroup;
-    azureMonitorWorkspace?: AzureMonitorWorkspaceSignalGroup;
-    azureResource?: AzureResourceSignalGroup;
-    dependencies?: DependenciesSignalGroup;
+export interface SignalGroups {
+    azureLogAnalytics?: LogAnalyticsSignals;
+    azureMonitorWorkspace?: AzureMonitorWorkspaceSignals;
+    azureResource?: AzureResourceSignals;
+    dependencies?: DependenciesSignalGroupV2;
+    readonly external?: ExternalSignalGroup;
 }
+
+// @public
+export interface SignalHistoryDataPoint {
+    additionalContext?: string;
+    healthState: HealthState;
+    occurredAt: Date;
+    value?: number;
+}
+
+// @public
+export interface SignalHistoryRequest {
+    endAt?: Date;
+    nextMarker?: string;
+    signalName: string;
+    startAt?: Date;
+    top?: number;
+}
+
+// @public
+export interface SignalHistoryResponse {
+    entityName: string;
+    history: SignalHistoryDataPoint[];
+    nextMarker?: string;
+    signalName: string;
+}
+
+// @public
+export interface SignalInstanceProperties {
+    name: string;
+    signalDefinitionName?: string;
+    signalKind: SignalKind;
+    readonly status?: SignalStatus;
+}
+
+// @public
+export type SignalInstancePropertiesUnion = AzureResourceSignal | LogAnalyticsSignal | PrometheusMetricsSignal | ExternalSignal | SignalInstanceProperties;
 
 // @public
 export type SignalKind = string;
 
 // @public
 export type SignalOperator = string;
+
+// @public
+export interface SignalStatus {
+    additionalContext?: string;
+    readonly error?: string;
+    readonly healthState?: HealthState;
+    readonly reportedAt?: Date;
+    readonly value?: number;
+}
 
 // @public
 export interface SystemData {
@@ -513,9 +774,11 @@ export interface SystemData {
 }
 
 // @public
-export interface ThresholdRule {
+export interface ThresholdRuleV2 {
+    lookBackWindow?: LookBackWindow;
     operator: SignalOperator;
-    threshold: string;
+    sensitivity?: DynamicThresholdSensitivity;
+    threshold?: number;
 }
 
 // @public

@@ -4,15 +4,15 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export interface BMSPrepareDataMoveOperationResultGetOptionalParams extends OperationOptions {
 }
 
 // @public
-export function get(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, operationId: string, options?: BMSPrepareDataMoveOperationResultGetOptionalParams): Promise<VaultStorageConfigOperationResultResponseUnion>;
+export function get(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, operationId: string, options?: BMSPrepareDataMoveOperationResultGetOptionalParams): Promise<VaultStorageConfigOperationResultResponseUnion | undefined>;
 
 // (No @packageDocumentation comment for this package)
 

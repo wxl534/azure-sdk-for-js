@@ -69,9 +69,44 @@ export interface AutoUpgradeProfileStatus {
 }
 
 // @public
+export interface CiliumProperties {
+    readonly id: number;
+    readonly name: string;
+}
+
+// @public
 export interface ClusterAffinity {
     requiredDuringSchedulingIgnoredDuringExecution?: ClusterSelector;
 }
+
+// @public
+export interface ClusterMeshProfile extends ProxyResource {
+    readonly eTag?: string;
+    memberSelector?: MemberSelector;
+    readonly provisioningState?: ClusterMeshProfileProvisioningState;
+    readonly status?: ClusterMeshProfileStatus;
+}
+
+// @public
+export interface ClusterMeshProfileProperties {
+    memberSelector?: MemberSelector;
+    readonly provisioningState?: ClusterMeshProfileProvisioningState;
+    readonly status?: ClusterMeshProfileStatus;
+}
+
+// @public
+export type ClusterMeshProfileProvisioningState = string;
+
+// @public
+export interface ClusterMeshProfileStatus {
+    readonly lastAppliedMemberSelector?: MemberSelector;
+    readonly lastOperationError?: ErrorDetail;
+    readonly lastOperationId?: string;
+    readonly state: ClusterMeshState;
+}
+
+// @public
+export type ClusterMeshState = string;
 
 // @public
 export interface ClusterResourcePlacementSpec {
@@ -191,6 +226,7 @@ export interface FleetMemberProperties {
     clusterResourceId: string;
     group?: string;
     labels?: Record<string, string>;
+    readonly meshProperties?: MeshProperties;
     readonly provisioningState?: FleetMemberProvisioningState;
     readonly status?: FleetMemberStatus;
 }
@@ -335,6 +371,22 @@ export enum KnownAutoUpgradeProfileProvisioningState {
 }
 
 // @public
+export enum KnownClusterMeshProfileProvisioningState {
+    Canceled = "Canceled",
+    Failed = "Failed",
+    Succeeded = "Succeeded"
+}
+
+// @public
+export enum KnownClusterMeshState {
+    Applying = "Applying",
+    Connected = "Connected",
+    Degraded = "Degraded",
+    Failed = "Failed",
+    NotConnected = "NotConnected"
+}
+
+// @public
 export enum KnownCreatedByType {
     Application = "Application",
     Key = "Key",
@@ -425,6 +477,14 @@ export enum KnownManagedServiceIdentityType {
     SystemAndUserAssigned = "SystemAssigned, UserAssigned",
     SystemAssigned = "SystemAssigned",
     UserAssigned = "UserAssigned"
+}
+
+// @public
+export enum KnownMeshMemberState {
+    Connected = "Connected",
+    Connecting = "Connecting",
+    Disconnecting = "Disconnecting",
+    Failed = "Failed"
 }
 
 // @public
@@ -534,7 +594,8 @@ export enum KnownVersions {
     V20250301 = "2025-03-01",
     V20250401Preview = "2025-04-01-preview",
     V20250801Preview = "2025-08-01-preview",
-    V20260201Preview = "2026-02-01-preview"
+    V20260201Preview = "2026-02-01-preview",
+    V20260302Preview = "2026-03-02-preview"
 }
 
 // @public
@@ -588,12 +649,35 @@ export interface ManagedServiceIdentity {
 export type ManagedServiceIdentityType = string;
 
 // @public
+export interface MemberSelector {
+    byLabel: string;
+}
+
+// @public
 export interface MemberUpdateStatus {
     readonly clusterResourceId?: string;
     readonly message?: string;
     readonly name?: string;
     readonly operationId?: string;
     readonly status?: UpdateStatus;
+}
+
+// @public
+export type MeshMemberState = string;
+
+// @public
+export interface MeshMemberStatus {
+    readonly error?: ErrorDetail;
+    readonly lastOperationId?: string;
+    readonly lastUpdatedAt?: Date;
+    readonly state: MeshMemberState;
+}
+
+// @public
+export interface MeshProperties {
+    readonly ciliumProperties: CiliumProperties;
+    readonly clusterMeshProfileResourceId: string;
+    readonly status: MeshMemberStatus;
 }
 
 // @public

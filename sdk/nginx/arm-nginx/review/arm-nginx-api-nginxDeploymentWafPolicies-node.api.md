@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export function analysis(context: NginxManagementContext, resourceGroupName: string, deploymentName: string, wafPolicyName: string, options?: NginxDeploymentWafPoliciesAnalysisOptionalParams): Promise<NginxDeploymentWafPolicyAnalysisResponse>;

@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState as OperationState_2 } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState as OperationState_2 } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: ComputeBulkActionsContext, resourceGroupName: string, location: string, name: string, options?: BulkActionsDeleteOptionalParams): PollerLike<OperationState_2<void>, void>;

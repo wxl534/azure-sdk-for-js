@@ -4,9 +4,9 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { ClientOptions } from '@azure-rest/core-client';
-import type { TokenCredential } from '@azure/core-auth';
+import { Client } from '@azure-rest/core-client';
+import { ClientOptions } from '@azure-rest/core-client';
+import { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface ConnectedCacheClientOptionalParams extends ClientOptions {
@@ -16,7 +16,7 @@ export interface ConnectedCacheClientOptionalParams extends ClientOptions {
 
 // @public
 export interface ConnectedCacheContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

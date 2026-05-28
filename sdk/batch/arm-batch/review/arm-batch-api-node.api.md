@@ -4,9 +4,9 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { ClientOptions } from '@azure-rest/core-client';
-import type { TokenCredential } from '@azure/core-auth';
+import { Client } from '@azure-rest/core-client';
+import { ClientOptions } from '@azure-rest/core-client';
+import { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface BatchManagementClientOptionalParams extends ClientOptions {
@@ -14,13 +14,13 @@ export interface BatchManagementClientOptionalParams extends ClientOptions {
     cloudSetting?: AzureSupportedClouds;
 }
 
-// @public
+// @public (undocumented)
 export interface BatchManagementContext extends Client {
     apiVersion?: string;
     subscriptionId: string;
 }
 
-// @public
+// @public (undocumented)
 export function createBatchManagement(credential: TokenCredential, subscriptionId: string, options?: BatchManagementClientOptionalParams): BatchManagementContext;
 
 // (No @packageDocumentation comment for this package)

@@ -264,8 +264,11 @@ export interface A2AProtectedManagedDiskDetails {
     monitoringPercentageCompletion?: number;
     primaryDiskEncryptionSetId?: string;
     primaryStagingAzureStorageAccountId?: string;
+    recoveryDiskAccessId?: string;
     recoveryDiskEncryptionSetId?: string;
+    recoveryNetworkAccessPolicy?: DiskNetworkAccessPolicy;
     recoveryOrignalTargetDiskId?: string;
+    recoveryPublicNetworkAccess?: DiskPublicNetworkAccess;
     recoveryReplicaDiskAccountType?: string;
     recoveryReplicaDiskId?: string;
     recoveryResourceGroupId?: string;
@@ -569,7 +572,10 @@ export interface A2AVmManagedDiskInputDetails {
     diskEncryptionInfo?: DiskEncryptionInfo;
     diskId: string;
     primaryStagingAzureStorageAccountId: string;
+    recoveryDiskAccessId?: string;
     recoveryDiskEncryptionSetId?: string;
+    recoveryNetworkAccessPolicy?: DiskNetworkAccessPolicy;
+    recoveryPublicNetworkAccess?: DiskPublicNetworkAccess;
     recoveryReplicaDiskAccountType?: string;
     recoveryResourceGroupId: string;
     recoveryTargetDiskAccountType?: string;
@@ -1156,6 +1162,12 @@ export interface DiskEncryptionKeyInfo {
     keyVaultResourceArmId?: string;
     secretIdentifier?: string;
 }
+
+// @public
+export type DiskNetworkAccessPolicy = string;
+
+// @public
+export type DiskPublicNetworkAccess = string;
 
 // @public
 export type DiskReplicationProgressHealth = string;
@@ -2369,6 +2381,7 @@ export interface InMageRcmDiscoveredProtectedVmDetails {
 
 // @public
 export interface InMageRcmDiskInput {
+    confidentialDiskEncryptionSetId?: string;
     diskEncryptionSetId?: string;
     diskId: string;
     diskSizeInGB?: number;
@@ -2381,6 +2394,7 @@ export interface InMageRcmDiskInput {
 
 // @public
 export interface InMageRcmDisksDefaultInput {
+    confidentialDiskEncryptionSetId?: string;
     diskEncryptionSetId?: string;
     diskSizeInGB?: number;
     diskType: DiskAccountType;
@@ -2627,7 +2641,7 @@ export interface InMageRcmLastAgentUpgradeErrorDetails {
 export interface InMageRcmMobilityAgentDetails {
     readonly agentReinstallAttemptToVersion?: string;
     readonly agentReinstallJobId?: string;
-    readonly agentReinstallState?: MobilityAgentReinstallType[];
+    readonly agentReinstallState?: MobilityAgentReinstallType;
     readonly agentVersionExpiryDate?: Date;
     distroName?: string;
     distroNameForWhichAgentIsInstalled?: string;
@@ -2700,6 +2714,7 @@ export interface InMageRcmPolicyDetails extends PolicyProviderSpecificDetails {
 // @public
 export interface InMageRcmProtectedDiskDetails {
     readonly capacityInBytes?: number;
+    readonly confidentialDiskEncryptionSetId?: string;
     customTargetDiskName?: string;
     readonly dataPendingAtSourceAgentInMB?: number;
     readonly dataPendingInLogDataStoreInMB?: number;
@@ -3262,6 +3277,19 @@ export enum KnownDiskAccountType {
 }
 
 // @public
+export enum KnownDiskNetworkAccessPolicy {
+    AllowAll = "AllowAll",
+    AllowPrivate = "AllowPrivate",
+    DenyAll = "DenyAll"
+}
+
+// @public
+export enum KnownDiskPublicNetworkAccess {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
+}
+
+// @public
 export enum KnownDiskReplicationProgressHealth {
     InProgress = "InProgress",
     None = "None",
@@ -3587,7 +3615,9 @@ export enum KnownTestMigrationState {
 
 // @public
 export enum KnownVersions {
-    V20250801 = "2025-08-01"
+    V20250801 = "2025-08-01",
+    V20260101 = "2026-01-01",
+    V20260201 = "2026-02-01"
 }
 
 // @public
@@ -5513,6 +5543,7 @@ export interface VMwareCbtContainerMappingInput extends ReplicationProviderSpeci
 
 // @public
 export interface VMwareCbtDiskInput {
+    confidentialDiskEncryptionSetId?: string;
     diskEncryptionSetId?: string;
     diskId: string;
     diskSizeInGB?: number;
@@ -5677,6 +5708,7 @@ export interface VmwareCbtPolicyDetails extends PolicyProviderSpecificDetails {
 // @public
 export interface VMwareCbtProtectedDiskDetails {
     readonly capacityInBytes?: number;
+    readonly confidentialDiskEncryptionSetId?: string;
     readonly diskEncryptionSetId?: string;
     readonly diskId?: string;
     readonly diskName?: string;

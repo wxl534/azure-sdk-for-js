@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: DeviceRegistryManagementContext, resourceGroupName: string, namespaceName: string, deviceName: string, options?: NamespaceDevicesDeleteOptionalParams): PollerLike<OperationState<void>, void>;
@@ -40,17 +40,9 @@ export interface NamespaceDevicesListByResourceGroupOptionalParams extends Opera
 }
 
 // @public
-export interface NamespaceDevicesRevokeOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
 export interface NamespaceDevicesUpdateOptionalParams extends OperationOptions {
     updateIntervalInMs?: number;
 }
-
-// @public
-export function revoke(context: DeviceRegistryManagementContext, resourceGroupName: string, namespaceName: string, deviceName: string, body: DeviceCredentialsRevokeRequest, options?: NamespaceDevicesRevokeOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
 export function update(context: DeviceRegistryManagementContext, resourceGroupName: string, namespaceName: string, deviceName: string, properties: NamespaceDeviceUpdate, options?: NamespaceDevicesUpdateOptionalParams): PollerLike<OperationState<NamespaceDevice>, NamespaceDevice>;

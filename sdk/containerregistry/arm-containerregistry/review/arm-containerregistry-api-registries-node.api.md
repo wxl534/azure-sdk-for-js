@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: ContainerRegistryManagementContext, resourceGroupName: string, registryName: string, options?: RegistriesDeleteOptionalParams): PollerLike<OperationState<void>, void>;
@@ -25,7 +25,7 @@ export function generateCredentials(context: ContainerRegistryManagementContext,
 export function get(context: ContainerRegistryManagementContext, resourceGroupName: string, registryName: string, options?: RegistriesGetOptionalParams): Promise<Registry>;
 
 // @public
-export function getPrivateLinkResource(context: ContainerRegistryManagementContext, resourceGroupName: string, registryName: string, groupName: string, options?: RegistriesGetPrivateLinkResourceOptionalParams): Promise<PrivateLinkResource>;
+export function getPrivateLinkResource(context: ContainerRegistryManagementContext, resourceGroupName: string, registryName: string, groupName: string, options?: RegistriesGetPrivateLinkResourceOptionalParams): Promise<MyPrivateLinkResource>;
 
 // @public
 export function importImage(context: ContainerRegistryManagementContext, resourceGroupName: string, registryName: string, parameters: ImportImageParameters, options?: RegistriesImportImageOptionalParams): PollerLike<OperationState<void>, void>;
@@ -40,7 +40,7 @@ export function listByResourceGroup(context: ContainerRegistryManagementContext,
 export function listCredentials(context: ContainerRegistryManagementContext, resourceGroupName: string, registryName: string, options?: RegistriesListCredentialsOptionalParams): Promise<RegistryListCredentialsResult>;
 
 // @public
-export function listPrivateLinkResources(context: ContainerRegistryManagementContext, resourceGroupName: string, registryName: string, options?: RegistriesListPrivateLinkResourcesOptionalParams): PagedAsyncIterableIterator<PrivateLinkResource>;
+export function listPrivateLinkResources(context: ContainerRegistryManagementContext, resourceGroupName: string, registryName: string, options?: RegistriesListPrivateLinkResourcesOptionalParams): PagedAsyncIterableIterator<MyPrivateLinkResource>;
 
 // @public
 export function listUsages(context: ContainerRegistryManagementContext, resourceGroupName: string, registryName: string, options?: RegistriesListUsagesOptionalParams): Promise<RegistryUsageListResult>;

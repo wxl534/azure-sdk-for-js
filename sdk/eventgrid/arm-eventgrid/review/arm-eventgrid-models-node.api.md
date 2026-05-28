@@ -1751,7 +1751,7 @@ export type PartnerClientAuthenticationType = string;
 export type PartnerClientAuthenticationUnion = AzureADPartnerClientAuthentication | PartnerClientAuthentication;
 
 // @public
-export interface PartnerConfiguration extends Resource {
+export interface PartnerConfiguration extends ProxyResource {
     location?: string;
     partnerAuthorization?: PartnerAuthorization;
     provisioningState?: PartnerConfigurationProvisioningState;

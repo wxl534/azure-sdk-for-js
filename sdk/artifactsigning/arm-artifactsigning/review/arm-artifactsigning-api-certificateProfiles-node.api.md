@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: CodeSigningContext, resourceGroupName: string, accountName: string, profileName: string, options?: CertificateProfilesDeleteOptionalParams): PollerLike<OperationState<void>, void>;
@@ -31,7 +31,7 @@ export interface CertificateProfilesListByCodeSigningAccountOptionalParams exten
 }
 
 // @public
-export interface CertificateProfilesRevokeCertificateOptionalParams extends OperationOptions {
+export interface CertificateProfilesRevokeCertificatesOptionalParams extends OperationOptions {
 }
 
 // @public
@@ -44,7 +44,7 @@ export function get(context: CodeSigningContext, resourceGroupName: string, acco
 export function listByCodeSigningAccount(context: CodeSigningContext, resourceGroupName: string, accountName: string, options?: CertificateProfilesListByCodeSigningAccountOptionalParams): PagedAsyncIterableIterator<CertificateProfile>;
 
 // @public
-export function revokeCertificate(context: CodeSigningContext, resourceGroupName: string, accountName: string, profileName: string, body: RevokeCertificate, options?: CertificateProfilesRevokeCertificateOptionalParams): Promise<void>;
+export function revokeCertificates(context: CodeSigningContext, resourceGroupName: string, accountName: string, profileName: string, body: RevokeCertificateList, options?: CertificateProfilesRevokeCertificatesOptionalParams): Promise<void>;
 
 // (No @packageDocumentation comment for this package)
 

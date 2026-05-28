@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export function $delete(context: IotDpsContext, resourceGroupName: string, provisioningServiceName: string, certificateName: string, ifMatch: string, options?: DpsCertificateDeleteOptionalParams): Promise<void>;
@@ -70,7 +70,7 @@ export function generateVerificationCode(context: IotDpsContext, certificateName
 export function get(context: IotDpsContext, certificateName: string, resourceGroupName: string, provisioningServiceName: string, options?: DpsCertificateGetOptionalParams): Promise<CertificateResponse>;
 
 // @public
-export function list(context: IotDpsContext, resourceGroupName: string, provisioningServiceName: string, options?: DpsCertificateListOptionalParams): PagedAsyncIterableIterator<CertificateResponse>;
+export function list(context: IotDpsContext, resourceGroupName: string, provisioningServiceName: string, options?: DpsCertificateListOptionalParams): Promise<CertificateListDescription>;
 
 // @public
 export function verifyCertificate(context: IotDpsContext, certificateName: string, ifMatch: string, resourceGroupName: string, provisioningServiceName: string, request: VerificationCodeRequest, options?: DpsCertificateVerifyCertificateOptionalParams): Promise<CertificateResponse>;

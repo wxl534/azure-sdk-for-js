@@ -173,7 +173,7 @@ export interface EnqueueServerProperties {
 
 // @public
 export interface ErrorAdditionalInfo {
-    readonly info?: Record<string, any>;
+    readonly info?: any;
     readonly type?: string;
 }
 
@@ -767,7 +767,7 @@ export interface SAPVirtualInstanceError {
 // @public
 export interface SAPVirtualInstanceIdentity {
     type: SAPVirtualInstanceIdentityType;
-    userAssignedIdentities?: Record<string, UserAssignedIdentity | null>;
+    userAssignedIdentities?: Record<string, UserAssignedIdentity>;
 }
 
 // @public

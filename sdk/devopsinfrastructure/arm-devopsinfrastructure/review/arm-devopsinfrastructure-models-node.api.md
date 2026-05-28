@@ -24,7 +24,11 @@ export interface AutomaticResourcePredictionsProfile extends ResourcePredictions
 }
 
 // @public
+export type AvailabilityStatus = string;
+
+// @public
 export interface AzureDevOpsOrganizationProfile extends OrganizationProfile {
+    alias?: string;
     kind: "AzureDevOps";
     organizations: Organization[];
     permissionProfile?: AzureDevOpsPermissionProfile;
@@ -44,6 +48,26 @@ export type AzureDevOpsPermissionType = string;
 export type CachingType = string;
 
 // @public
+export type CertificateStoreNameOption = string;
+
+// @public
+export interface CheckNameAvailability {
+    name: string;
+    type: DevOpsInfrastructureResourceType;
+}
+
+// @public
+export type CheckNameAvailabilityReason = string;
+
+// @public
+export interface CheckNameAvailabilityResult {
+    available: AvailabilityStatus;
+    message: string;
+    name: string;
+    reason: CheckNameAvailabilityReason;
+}
+
+// @public
 export type CreatedByType = string;
 
 // @public
@@ -55,8 +79,41 @@ export interface DataDisk {
 }
 
 // @public
+export interface DeleteResourcesDetails {
+    resourceIds: string[];
+}
+
+// @public
 export interface DevOpsAzureSku {
+    linuxNvmePath?: string;
     name: string;
+    windowsNvmeDrive?: string;
+}
+
+// @public
+export type DevOpsInfrastructureResourceType = string;
+
+// @public
+export type EphemeralType = string;
+
+// @public
+export interface ErrorAdditionalInfo {
+    readonly info?: any;
+    readonly type?: string;
+}
+
+// @public
+export interface ErrorDetail {
+    readonly additionalInfo?: ErrorAdditionalInfo[];
+    readonly code?: string;
+    readonly details?: ErrorDetail[];
+    readonly message?: string;
+    readonly target?: string;
+}
+
+// @public
+export interface ErrorResponse {
+    error?: ErrorDetail;
 }
 
 // @public
@@ -95,6 +152,12 @@ export enum KnownActionType {
 }
 
 // @public
+export enum KnownAvailabilityStatus {
+    Available = "Available",
+    Unavailable = "Unavailable"
+}
+
+// @public
 export enum KnownAzureDevOpsPermissionType {
     CreatorOnly = "CreatorOnly",
     Inherit = "Inherit",
@@ -109,11 +172,35 @@ export enum KnownCachingType {
 }
 
 // @public
+export enum KnownCertificateStoreNameOption {
+    My = "My",
+    Root = "Root"
+}
+
+// @public
+export enum KnownCheckNameAvailabilityReason {
+    AlreadyExists = "AlreadyExists",
+    Invalid = "Invalid"
+}
+
+// @public
 export enum KnownCreatedByType {
     Application = "Application",
     Key = "Key",
     ManagedIdentity = "ManagedIdentity",
     User = "User"
+}
+
+// @public
+export enum KnownDevOpsInfrastructureResourceType {
+    MicrosoftDevOpsInfrastructurePools = "Microsoft.DevOpsInfrastructure/pools"
+}
+
+// @public
+export enum KnownEphemeralType {
+    Automatic = "Automatic",
+    CacheDisk = "CacheDisk",
+    ResourceDisk = "ResourceDisk"
 }
 
 // @public
@@ -202,13 +289,15 @@ export enum KnownStorageAccountType {
     PremiumLRS = "Premium_LRS",
     PremiumZRS = "Premium_ZRS",
     StandardLRS = "Standard_LRS",
-    StandardSSDLRS = "StandardSSD_LRS",
-    StandardSSDZRS = "StandardSSD_ZRS"
+    StandardSsdlrs = "StandardSSD_LRS",
+    StandardSsdzrs = "StandardSSD_ZRS"
 }
 
 // @public
 export enum KnownVersions {
-    "V2024-10-19" = "2024-10-19"
+    V20250121 = "2025-01-21",
+    V20250920 = "2025-09-20",
+    V20260417Preview = "2026-04-17-preview"
 }
 
 // @public
@@ -219,7 +308,7 @@ export interface ManagedServiceIdentity {
     readonly principalId?: string;
     readonly tenantId?: string;
     type: ManagedServiceIdentityType;
-    userAssignedIdentities?: Record<string, UserAssignedIdentity | null>;
+    userAssignedIdentities?: Record<string, UserAssignedIdentity>;
 }
 
 // @public
@@ -232,13 +321,15 @@ export interface ManualResourcePredictionsProfile extends ResourcePredictionsPro
 
 // @public
 export interface NetworkProfile {
-    subnetId: string;
+    readonly ipAddresses?: string[];
+    staticIpAddressCount?: number;
+    subnetId?: string;
 }
 
 // @public
 export interface Operation {
-    actionType?: ActionType;
-    readonly display?: OperationDisplay;
+    readonly actionType?: ActionType;
+    display?: OperationDisplay;
     readonly isDataAction?: boolean;
     readonly name?: string;
     readonly origin?: Origin;
@@ -254,6 +345,8 @@ export interface OperationDisplay {
 
 // @public
 export interface Organization {
+    alias?: string;
+    openAccess?: boolean;
     parallelism?: number;
     projects?: string[];
     url: string;
@@ -289,6 +382,8 @@ export interface Pool extends TrackedResource {
 export interface PoolImage {
     aliases?: string[];
     buffer?: string;
+    ephemeralType?: EphemeralType;
+    readonly isEphemeral?: boolean;
     resourceId?: string;
     wellKnownImageName?: string;
 }
@@ -301,6 +396,7 @@ export interface PoolProperties {
     maximumConcurrency: number;
     organizationProfile: OrganizationProfileUnion;
     provisioningState?: ProvisioningState;
+    runtimeConfiguration?: RuntimeConfiguration;
 }
 
 // @public
@@ -318,6 +414,7 @@ export interface PoolUpdateProperties {
     maximumConcurrency?: number;
     organizationProfile?: OrganizationProfileUnion;
     provisioningState?: ProvisioningState;
+    runtimeConfiguration?: RuntimeConfiguration;
 }
 
 // @public
@@ -440,8 +537,14 @@ export interface ResourceSkuZoneDetails {
 export type ResourceStatus = string;
 
 // @public
+export interface RuntimeConfiguration {
+    workFolder?: string;
+}
+
+// @public
 export interface SecretsManagementSettings {
     certificateStoreLocation?: string;
+    certificateStoreName?: CertificateStoreNameOption;
     keyExportable: boolean;
     observedCertificates: string[];
 }

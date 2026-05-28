@@ -5,10 +5,96 @@
 ```ts
 
 // @public
+export interface Alias {
+    defaultMetadata?: AliasPathMetadata;
+    defaultPath?: string;
+    defaultPattern?: AliasPattern;
+    name?: string;
+    paths?: AliasPath[];
+    type?: AliasType;
+}
+
+// @public
+export interface AliasPath {
+    apiVersions?: string[];
+    readonly metadata?: AliasPathMetadata;
+    path?: string;
+    pattern?: AliasPattern;
+}
+
+// @public
+export type AliasPathAttributes = string;
+
+// @public
+export interface AliasPathMetadata {
+    attributes?: AliasPathAttributes;
+    type?: AliasPathTokenType;
+}
+
+// @public
+export type AliasPathTokenType = string;
+
+// @public
+export interface AliasPattern {
+    phrase?: string;
+    type?: AliasPatternType;
+    variable?: string;
+}
+
+// @public
+export type AliasPatternType = "NotSpecified" | "Extract";
+
+// @public
+export type AliasType = "NotSpecified" | "PlainText" | "Mask";
+
+// @public
 export type AssignmentType = string;
 
 // @public
 export type CreatedByType = string;
+
+// @public
+export interface DataEffect {
+    detailsSchema?: any;
+    name?: string;
+}
+
+// @public
+export interface DataManifestCustomResourceFunctionDefinition {
+    allowCustomProperties?: boolean;
+    defaultProperties?: string[];
+    fullyQualifiedResourceType?: string;
+    name?: string;
+}
+
+// @public
+export interface DataManifestResourceFunctionsDefinition {
+    custom?: DataManifestCustomResourceFunctionDefinition[];
+    standard?: string[];
+}
+
+// @public
+export interface DataPolicyManifest extends ProxyResource {
+    effects?: DataEffect[];
+    fieldValues?: string[];
+    isBuiltInOnly?: boolean;
+    namespaces?: string[];
+    policyMode?: string;
+    resourceFunctions?: DataManifestResourceFunctionsDefinition;
+    resourceTypeAliases?: ResourceTypeAliases[];
+}
+
+// @public
+export interface DataPolicyManifestProperties {
+    custom?: DataManifestCustomResourceFunctionDefinition[];
+    effects?: DataEffect[];
+    fieldValues?: string[];
+    isBuiltInOnly?: boolean;
+    namespaces?: string[];
+    policyMode?: string;
+    resourceTypeAliases?: ResourceTypeAliases[];
+    standard?: string[];
+}
 
 // @public
 export type EnforcementMode = string;
@@ -42,9 +128,13 @@ export type ExternalEndpointResult = string;
 
 // @public
 export interface ExternalEvaluationEndpointInvocationResult {
+    additionalInfo?: any;
     claims?: any;
+    endpointKind?: string;
     expiration?: Date;
     message?: string;
+    policyAction?: PolicyAction;
+    policyEvaluationDetails?: any;
     policyInfo?: PolicyLogInfo;
     result?: ExternalEndpointResult;
     retryAfter?: Date;
@@ -70,6 +160,24 @@ export interface Identity {
     readonly tenantId?: string;
     type?: ResourceIdentityType;
     userAssignedIdentities?: Record<string, UserAssignedIdentitiesValue>;
+}
+
+// @public
+export enum KnownAliasPathAttributes {
+    Modifiable = "Modifiable",
+    None = "None"
+}
+
+// @public
+export enum KnownAliasPathTokenType {
+    Any = "Any",
+    Array = "Array",
+    Boolean = "Boolean",
+    Integer = "Integer",
+    NotSpecified = "NotSpecified",
+    Number = "Number",
+    Object = "Object",
+    String = "String"
 }
 
 // @public
@@ -119,6 +227,15 @@ export enum KnownParameterType {
 }
 
 // @public
+export enum KnownPolicyAction {
+    Allow = "Allow",
+    Audit = "Audit",
+    Deny = "Deny",
+    Error = "Error",
+    Unknown = "Unknown"
+}
+
+// @public
 export enum KnownPolicyTokenResult {
     Failed = "Failed",
     Succeeded = "Succeeded"
@@ -134,15 +251,20 @@ export enum KnownPolicyType {
 
 // @public
 export enum KnownSelectorKind {
+    GroupPrincipalId = "groupPrincipalId",
     PolicyDefinitionReferenceId = "policyDefinitionReferenceId",
     ResourceLocation = "resourceLocation",
+    ResourcePercentage = "resourcePercentage",
     ResourceType = "resourceType",
-    ResourceWithoutLocation = "resourceWithoutLocation"
+    ResourceWithoutLocation = "resourceWithoutLocation",
+    UserPrincipalId = "userPrincipalId"
 }
 
 // @public
 export enum KnownVersions {
-    V20250301 = "2025-03-01"
+    V20250301 = "2025-03-01",
+    V20251101 = "2025-11-01",
+    V20260601 = "2026-06-01"
 }
 
 // @public
@@ -188,6 +310,9 @@ export interface ParameterValuesValue {
 }
 
 // @public
+export type PolicyAction = string;
+
+// @public
 export interface PolicyAssignment extends ExtensionResource {
     assignmentType?: AssignmentType;
     definitionVersion?: string;
@@ -207,6 +332,7 @@ export interface PolicyAssignment extends ExtensionResource {
     policyDefinitionId?: string;
     resourceSelectors?: ResourceSelector[];
     readonly scope?: string;
+    selfServeExemptionSettings?: SelfServeExemptionSettings;
 }
 
 // @public
@@ -227,6 +353,7 @@ export interface PolicyAssignmentProperties {
     policyDefinitionId?: string;
     resourceSelectors?: ResourceSelector[];
     readonly scope?: string;
+    selfServeExemptionSettings?: SelfServeExemptionSettings;
 }
 
 // @public
@@ -235,12 +362,14 @@ export interface PolicyAssignmentUpdate {
     location?: string;
     overrides?: Override[];
     resourceSelectors?: ResourceSelector[];
+    selfServeExemptionSettings?: SelfServeExemptionSettings;
 }
 
 // @public
 export interface PolicyAssignmentUpdateProperties {
     overrides?: Override[];
     resourceSelectors?: ResourceSelector[];
+    selfServeExemptionSettings?: SelfServeExemptionSettings;
 }
 
 // @public
@@ -305,6 +434,12 @@ export interface PolicyDefinitionVersion extends ProxyResource {
 }
 
 // @public
+export interface PolicyDefinitionVersionListResult {
+    nextLink?: string;
+    value: PolicyDefinitionVersion[];
+}
+
+// @public
 export interface PolicyDefinitionVersionProperties {
     description?: string;
     displayName?: string;
@@ -319,27 +454,18 @@ export interface PolicyDefinitionVersionProperties {
 
 // @public
 export interface PolicyLogInfo {
-    ancestors?: string;
-    complianceReasonCode?: string;
-    policyAssignmentDisplayName?: string;
     policyAssignmentId?: string;
     policyAssignmentName?: string;
     policyAssignmentScope?: string;
     policyAssignmentVersion?: string;
-    policyDefinitionDisplayName?: string;
     policyDefinitionEffect?: string;
-    policyDefinitionGroupNames?: string[];
     policyDefinitionId?: string;
     policyDefinitionName?: string;
     policyDefinitionReferenceId?: string;
     policyDefinitionVersion?: string;
-    policyExemptionIds?: string[];
-    policySetDefinitionCategory?: string;
-    policySetDefinitionDisplayName?: string;
     policySetDefinitionId?: string;
     policySetDefinitionName?: string;
     policySetDefinitionVersion?: string;
-    resourceLocation?: string;
 }
 
 // @public
@@ -381,6 +507,12 @@ export interface PolicySetDefinitionVersion extends ProxyResource {
 }
 
 // @public
+export interface PolicySetDefinitionVersionListResult {
+    nextLink?: string;
+    value: PolicySetDefinitionVersion[];
+}
+
+// @public
 export interface PolicySetDefinitionVersionProperties {
     description?: string;
     displayName?: string;
@@ -390,6 +522,16 @@ export interface PolicySetDefinitionVersionProperties {
     policyDefinitions: PolicyDefinitionReference[];
     policyType?: PolicyType;
     version?: string;
+}
+
+// @public
+export interface PolicyTokenEvaluatedRequestDetails {
+    apiVersion: string;
+    authorizationAction: string;
+    contentHash: string;
+    httpMethod: string;
+    resourceId: string;
+    uri: string;
 }
 
 // @public
@@ -410,6 +552,7 @@ export interface PolicyTokenResponse {
     changeReference?: string;
     expiration?: Date;
     message?: string;
+    requestDetails?: PolicyTokenEvaluatedRequestDetails;
     result?: PolicyTokenResult;
     results?: ExternalEvaluationEndpointInvocationResult[];
     retryAfter?: Date;
@@ -445,14 +588,27 @@ export interface ResourceSelector {
 }
 
 // @public
+export interface ResourceTypeAliases {
+    aliases?: Alias[];
+    resourceType?: string;
+}
+
+// @public
 export interface Selector {
     in?: string[];
     kind?: SelectorKind;
     notIn?: string[];
+    progress?: number;
 }
 
 // @public
 export type SelectorKind = string;
+
+// @public
+export interface SelfServeExemptionSettings {
+    enabled?: boolean;
+    policyDefinitionReferenceIds?: string[];
+}
 
 // @public
 export interface SystemData {

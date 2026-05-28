@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: EventGridManagementContext, resourceGroupName: string, partnerTopicName: string, options?: PartnerTopicsDeleteOptionalParams): PollerLike<OperationState<void>, void>;
@@ -68,7 +68,7 @@ export interface PartnerTopicsUpdateOptionalParams extends OperationOptions {
 }
 
 // @public
-export function update(context: EventGridManagementContext, resourceGroupName: string, partnerTopicName: string, partnerTopicUpdateParameters: PartnerTopicUpdateParameters, options?: PartnerTopicsUpdateOptionalParams): Promise<PartnerTopic>;
+export function update(context: EventGridManagementContext, resourceGroupName: string, partnerTopicName: string, partnerTopicUpdateParameters: PartnerTopicUpdateParameters, options?: PartnerTopicsUpdateOptionalParams): Promise<PartnerTopic | undefined>;
 
 // (No @packageDocumentation comment for this package)
 

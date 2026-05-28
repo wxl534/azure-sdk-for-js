@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export function clusterGetVersion(context: ExtensionTypesContext, resourceGroupName: string, clusterRp: string, clusterResourceName: string, clusterName: string, extensionTypeName: string, versionNumber: string, options?: ExtensionTypesClusterGetVersionOptionalParams): Promise<ExtensionTypeVersionForReleaseTrain>;

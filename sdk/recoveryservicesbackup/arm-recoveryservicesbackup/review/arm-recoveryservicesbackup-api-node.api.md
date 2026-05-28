@@ -4,12 +4,12 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { ClientOptions } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
-import type { TokenCredential } from '@azure/core-auth';
+import { Client } from '@azure-rest/core-client';
+import { ClientOptions } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
+import { TokenCredential } from '@azure/core-auth';
 
 // @public
 export function bmsPrepareDataMove(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, parameters: PrepareDataMoveRequest, options?: BMSPrepareDataMoveOptionalParams): PollerLike<OperationState<void>, void>;

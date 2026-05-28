@@ -128,6 +128,11 @@ export interface CmkKeyVaultProperties {
 }
 
 // @public
+export interface CostManagementSettings {
+    granularityLevel?: GranularityLevel;
+}
+
+// @public
 export type CreatedByType = string;
 
 // @public
@@ -205,6 +210,9 @@ export interface ErrorModel {
 export interface ErrorResponse {
     error?: ErrorDetail;
 }
+
+// @public
+export type GranularityLevel = string;
 
 // @public
 export interface IdentityData {
@@ -293,6 +301,13 @@ export enum KnownEnhancedSecurityState {
     Disabled = "Disabled",
     Enabled = "Enabled",
     Invalid = "Invalid"
+}
+
+// @public
+export enum KnownGranularityLevel {
+    ProtectedItemLevel = "ProtectedItemLevel",
+    ProtectedItemWithParentTag = "ProtectedItemWithParentTag",
+    VaultLevel = "VaultLevel"
 }
 
 // @public
@@ -442,7 +457,9 @@ export enum KnownVaultUpgradeState {
 // @public
 export enum KnownVersions {
     V20250201 = "2025-02-01",
-    V20250801 = "2025-08-01"
+    V20250801 = "2025-08-01",
+    V20260101 = "2026-01-01",
+    V20260201 = "2026-02-01"
 }
 
 // @public
@@ -755,6 +772,7 @@ export type VaultPrivateEndpointState = string;
 export interface VaultProperties {
     readonly backupStorageVersion?: BackupStorageVersion;
     readonly bcdrSecurityLevel?: BcdrSecurityLevel;
+    costManagementSettings?: CostManagementSettings;
     encryption?: VaultPropertiesEncryption;
     monitoringSettings?: MonitoringSettings;
     moveDetails?: VaultPropertiesMoveDetails;

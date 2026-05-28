@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export function getOperationStatus(context: RecoveryServicesBackupContext, vaultName: string, resourceGroupName: string, privateEndpointConnectionName: string, operationId: string, options?: PrivateEndpointGetOperationStatusOptionalParams): Promise<OperationStatus>;

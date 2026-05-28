@@ -3461,7 +3461,7 @@ export interface ExpressionV2 {
 export type ExpressionV2Type = string;
 
 // @public
-export interface Factory extends Resource {
+export interface Factory extends ProxyResource {
     additionalProperties?: Record<string, any>;
     readonly createTime?: Date;
     encryption?: EncryptionConfiguration;

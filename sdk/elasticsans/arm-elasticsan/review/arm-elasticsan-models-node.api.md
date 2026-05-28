@@ -22,6 +22,16 @@ export interface AutoScaleProperties {
 export type CreatedByType = string;
 
 // @public
+export interface DeleteRetentionPolicy {
+    // (undocumented)
+    policyState?: PolicyState;
+    retentionPeriodDays?: number;
+}
+
+// @public
+export type DeleteType = string;
+
+// @public
 export interface DiskSnapshotList {
     diskSnapshotIds: string[];
 }
@@ -152,6 +162,11 @@ export enum KnownCreatedByType {
 }
 
 // @public
+export enum KnownDeleteType {
+    Permanent = "permanent"
+}
+
+// @public
 export enum KnownEncryptionType {
     EncryptionAtRestWithCustomerManagedKey = "EncryptionAtRestWithCustomerManagedKey",
     EncryptionAtRestWithPlatformKey = "EncryptionAtRestWithPlatformKey"
@@ -184,6 +199,12 @@ export enum KnownOrigin {
 }
 
 // @public
+export enum KnownPolicyState {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
+}
+
+// @public
 export enum KnownPrivateEndpointServiceConnectionStatus {
     Approved = "Approved",
     Failed = "Failed",
@@ -201,6 +222,7 @@ export enum KnownProvisioningStates {
     Invalid = "Invalid",
     Pending = "Pending",
     Restoring = "Restoring",
+    SoftDeleting = "SoftDeleting",
     Succeeded = "Succeeded",
     Updating = "Updating"
 }
@@ -230,7 +252,8 @@ export enum KnownStorageTargetType {
 
 // @public
 export enum KnownVersions {
-    V20250901 = "2025-09-01"
+    V20250901 = "2025-09-01",
+    V20260401Preview = "2026-04-01-preview"
 }
 
 // @public
@@ -240,6 +263,12 @@ export enum KnownVolumeCreateOption {
     DiskSnapshot = "DiskSnapshot",
     None = "None",
     VolumeSnapshot = "VolumeSnapshot"
+}
+
+// @public
+export enum KnownXMsAccessSoftDeletedResources {
+    False = "false",
+    True = "true"
 }
 
 // @public
@@ -286,6 +315,9 @@ export interface OperationDisplay {
 
 // @public
 export type Origin = string;
+
+// @public
+export type PolicyState = string;
 
 // @public
 export interface PreValidationResponse {
@@ -469,7 +501,9 @@ export interface VolumeGroup extends ProxyResource {
 
 // @public
 export interface VolumeGroupProperties {
+    deleteRetentionPolicy?: DeleteRetentionPolicy;
     encryption?: EncryptionType;
+    encryptionInTransit?: boolean;
     encryptionProperties?: EncryptionProperties;
     enforceDataIntegrityCheckForIscsi?: boolean;
     networkAcls?: NetworkRuleSet;
@@ -486,6 +520,7 @@ export interface VolumeGroupUpdate {
 
 // @public
 export interface VolumeGroupUpdateProperties {
+    deleteRetentionPolicy?: DeleteRetentionPolicy;
     encryption?: EncryptionType;
     encryptionProperties?: EncryptionProperties;
     enforceDataIntegrityCheckForIscsi?: boolean;
@@ -518,6 +553,9 @@ export interface VolumeUpdateProperties {
     managedBy?: ManagedByInfo;
     sizeGiB?: number;
 }
+
+// @public
+export type XMsAccessSoftDeletedResources = string;
 
 // @public
 export type XMsDeleteSnapshots = string;

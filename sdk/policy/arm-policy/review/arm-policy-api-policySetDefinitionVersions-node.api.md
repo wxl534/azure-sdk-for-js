@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export function $delete(context: PolicyContext, policySetDefinitionName: string, policyDefinitionVersion: string, options?: PolicySetDefinitionVersionsDeleteOptionalParams): Promise<void>;
@@ -32,13 +32,13 @@ export function getBuiltIn(context: PolicyContext, policySetDefinitionName: stri
 export function list(context: PolicyContext, policySetDefinitionName: string, options?: PolicySetDefinitionVersionsListOptionalParams): PagedAsyncIterableIterator<PolicySetDefinitionVersion>;
 
 // @public
-export function listAll(context: PolicyContext, options?: PolicySetDefinitionVersionsListAllOptionalParams): Promise<_PolicySetDefinitionVersionListResult>;
+export function listAll(context: PolicyContext, options?: PolicySetDefinitionVersionsListAllOptionalParams): Promise<PolicySetDefinitionVersionListResult>;
 
 // @public
-export function listAllAtManagementGroup(context: PolicyContext, managementGroupName: string, options?: PolicySetDefinitionVersionsListAllAtManagementGroupOptionalParams): Promise<_PolicySetDefinitionVersionListResult>;
+export function listAllAtManagementGroup(context: PolicyContext, managementGroupName: string, options?: PolicySetDefinitionVersionsListAllAtManagementGroupOptionalParams): Promise<PolicySetDefinitionVersionListResult>;
 
 // @public
-export function listAllBuiltins(context: PolicyContext, options?: PolicySetDefinitionVersionsListAllBuiltinsOptionalParams): Promise<_PolicySetDefinitionVersionListResult>;
+export function listAllBuiltins(context: PolicyContext, options?: PolicySetDefinitionVersionsListAllBuiltinsOptionalParams): Promise<PolicySetDefinitionVersionListResult>;
 
 // @public
 export function listBuiltIn(context: PolicyContext, policySetDefinitionName: string, options?: PolicySetDefinitionVersionsListBuiltInOptionalParams): PagedAsyncIterableIterator<PolicySetDefinitionVersion>;

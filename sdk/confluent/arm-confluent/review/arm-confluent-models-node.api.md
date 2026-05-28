@@ -68,6 +68,22 @@ export interface AccessListUsersSuccessResponse {
 }
 
 // @public
+export interface AccessPointProperties {
+    accessPointName: string;
+    dictionary?: KeyValuePair[];
+    egressRoutes?: string[];
+    metadata?: SCMetadataEntity;
+    readonly provisioningState?: ProvisionState;
+    region: string;
+    vnetInjection: VnetInjectionDetails;
+}
+
+// @public
+export interface AccessPointResource extends ProxyResource {
+    properties?: AccessPointProperties;
+}
+
+// @public
 export interface AccessRoleBindingNameListSuccessResponse {
     data?: string[];
     kind?: string;
@@ -460,6 +476,12 @@ export interface KafkaAzureSynapseAnalyticsSinkConnectorInfo extends PartnerInfo
 }
 
 // @public
+export interface KeyValuePair {
+    key: string;
+    value: string;
+}
+
+// @public
 export enum KnownAuthType {
     KafkaAPIKEY = "KAFKA_API_KEY",
     ServiceAccount = "SERVICE_ACCOUNT"
@@ -559,7 +581,8 @@ export enum KnownSaaSOfferStatus {
 export enum KnownVersions {
     V20240701 = "2024-07-01",
     V20250717Preview = "2025-07-17-preview",
-    V20250818Preview = "2025-08-18-preview"
+    V20250818Preview = "2025-08-18-preview",
+    V20260501Preview = "2026-05-01-preview"
 }
 
 // @public
@@ -584,6 +607,20 @@ export interface MetadataEntity {
     resourceName?: string;
     self?: string;
     updatedAt?: string;
+}
+
+// @public
+export interface NetworkGatewayProperties {
+    dictionary?: KeyValuePair[];
+    metadata?: SCMetadataEntity;
+    networkGatewayName: string;
+    readonly provisioningState?: ProvisionState;
+    region: string;
+}
+
+// @public
+export interface NetworkGatewayResource extends ProxyResource {
+    properties?: NetworkGatewayProperties;
 }
 
 // @public
@@ -900,6 +937,12 @@ export interface UserRecord {
 // @public
 export interface ValidationResponse {
     info?: Record<string, string>;
+}
+
+// @public
+export interface VnetInjectionDetails {
+    subnetResourceId: string;
+    virtualNetworkResourceId: string;
 }
 
 // (No @packageDocumentation comment for this package)

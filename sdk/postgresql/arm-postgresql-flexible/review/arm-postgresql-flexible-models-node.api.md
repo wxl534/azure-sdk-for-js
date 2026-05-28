@@ -576,10 +576,12 @@ export enum KnownHighAvailabilityMode {
 
 // @public
 export enum KnownHighAvailabilityState {
+    ComputeUpdatingByFailover = "ComputeUpdatingByFailover",
     CreatingStandby = "CreatingStandby",
     FailingOver = "FailingOver",
     Healthy = "Healthy",
     NotEnabled = "NotEnabled",
+    RecreatingStandby = "RecreatingStandby",
     RemovingStandby = "RemovingStandby",
     ReplicatingData = "ReplicatingData"
 }

@@ -118,13 +118,15 @@ export enum KnownRefillPolicy {
 export enum KnownVersions {
     _20240301 = "2024-03-01",
     _20250301 = "2025-03-01",
-    _20251001 = "2025-10-01"
+    V20251001 = "2025-10-01",
+    V20260401 = "2026-04-01"
 }
 
 // @public
 export enum KnownVirtualMachineState {
     Deallocated = "Deallocated",
     Hibernated = "Hibernated",
+    Mix = "Mix",
     Running = "Running"
 }
 
@@ -279,6 +281,7 @@ export interface StandbyVirtualMachinePoolResourceProperties {
     elasticityProfile?: StandbyVirtualMachinePoolElasticityProfile;
     readonly provisioningState?: ProvisioningState;
     virtualMachineState: VirtualMachineState;
+    vmStateDistribution?: VmStateDistribution;
 }
 
 // @public
@@ -292,6 +295,7 @@ export interface StandbyVirtualMachinePoolResourceUpdateProperties {
     attachedVirtualMachineScaleSetId?: string;
     elasticityProfile?: StandbyVirtualMachinePoolElasticityProfile;
     virtualMachineState?: VirtualMachineState;
+    vmStateDistribution?: VmStateDistribution;
 }
 
 // @public
@@ -347,6 +351,13 @@ export interface VirtualMachineInstanceCountSummary {
 
 // @public
 export type VirtualMachineState = string;
+
+// @public
+export interface VmStateDistribution {
+    deallocatedPercent?: number;
+    hibernatedPercent?: number;
+    runningPercent?: number;
+}
 
 // (No @packageDocumentation comment for this package)
 

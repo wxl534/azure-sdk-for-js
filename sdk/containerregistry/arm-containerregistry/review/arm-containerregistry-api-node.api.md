@@ -4,9 +4,9 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { ClientOptions } from '@azure-rest/core-client';
-import type { TokenCredential } from '@azure/core-auth';
+import { Client } from '@azure-rest/core-client';
+import { ClientOptions } from '@azure-rest/core-client';
+import { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface ContainerRegistryManagementClientOptionalParams extends ClientOptions {
@@ -14,13 +14,13 @@ export interface ContainerRegistryManagementClientOptionalParams extends ClientO
     cloudSetting?: AzureSupportedClouds;
 }
 
-// @public
+// @public (undocumented)
 export interface ContainerRegistryManagementContext extends Client {
     apiVersion?: string;
     subscriptionId: string;
 }
 
-// @public
+// @public (undocumented)
 export function createContainerRegistryManagement(credential: TokenCredential, subscriptionId: string, options?: ContainerRegistryManagementClientOptionalParams): ContainerRegistryManagementContext;
 
 // (No @packageDocumentation comment for this package)

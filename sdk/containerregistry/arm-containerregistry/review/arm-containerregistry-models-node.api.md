@@ -771,6 +771,11 @@ export type LogLevel = string;
 export type MetadataSearch = string;
 
 // @public
+export interface MyPrivateLinkResource extends Resource {
+    properties?: PrivateLinkResourceProperties;
+}
+
+// @public
 export type NetworkRuleBypassOptions = string;
 
 // @public
@@ -949,11 +954,6 @@ export interface PrivateEndpointConnectionProperties {
     privateEndpoint?: PrivateEndpoint;
     privateLinkServiceConnectionState?: PrivateLinkServiceConnectionState;
     readonly provisioningState?: ProvisioningState;
-}
-
-// @public
-export interface PrivateLinkResource extends Resource {
-    properties?: PrivateLinkResourceProperties;
 }
 
 // @public

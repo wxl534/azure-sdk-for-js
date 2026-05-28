@@ -14,11 +14,12 @@ export function createHyperExecute(credential: TokenCredential, subscriptionId: 
 // @public
 export interface HyperExecuteClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public (undocumented)
 export interface HyperExecuteContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

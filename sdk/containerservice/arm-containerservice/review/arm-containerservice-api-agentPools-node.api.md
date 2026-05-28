@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: ContainerServiceContext, resourceGroupName: string, resourceName: string, agentPoolName: string, options?: AgentPoolsDeleteOptionalParams): PollerLike<OperationState<void>, void>;
@@ -17,6 +17,11 @@ export function abortLatestOperation(context: ContainerServiceContext, resourceG
 
 // @public
 export interface AgentPoolsAbortLatestOperationOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
+}
+
+// @public
+export interface AgentPoolsCompleteUpgradeOptionalParams extends OperationOptions {
     updateIntervalInMs?: number;
 }
 
@@ -59,6 +64,9 @@ export interface AgentPoolsListOptionalParams extends OperationOptions {
 export interface AgentPoolsUpgradeNodeImageVersionOptionalParams extends OperationOptions {
     updateIntervalInMs?: number;
 }
+
+// @public
+export function completeUpgrade(context: ContainerServiceContext, resourceGroupName: string, resourceName: string, agentPoolName: string, options?: AgentPoolsCompleteUpgradeOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
 export function createOrUpdate(context: ContainerServiceContext, resourceGroupName: string, resourceName: string, agentPoolName: string, parameters: AgentPool, options?: AgentPoolsCreateOrUpdateOptionalParams): PollerLike<OperationState<AgentPool>, AgentPool>;

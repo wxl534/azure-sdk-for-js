@@ -19,7 +19,7 @@ export interface WorkloadOrchestrationManagementClientOptionalParams extends Cli
 
 // @public
 export interface WorkloadOrchestrationManagementContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

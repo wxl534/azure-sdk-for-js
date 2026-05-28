@@ -32,7 +32,7 @@ export interface DatasetsListByFactoryOptionalParams extends OperationOptions {
 }
 
 // @public
-export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, datasetName: string, options?: DatasetsGetOptionalParams): Promise<DatasetResource>;
+export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, datasetName: string, options?: DatasetsGetOptionalParams): Promise<DatasetResource | undefined>;
 
 // @public
 export function listByFactory(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, options?: DatasetsListByFactoryOptionalParams): PagedAsyncIterableIterator<DatasetResource>;

@@ -265,7 +265,7 @@ export interface BackupDatasourceParameters {
 }
 
 // @public
-export type BackupDatasourceParametersUnion = KubernetesClusterBackupDatasourceParameters | BlobBackupDatasourceParametersUnion | BlobBackupDatasourceParametersForAutoProtection | AdlsBlobBackupDatasourceParametersForAutoProtection | BackupDatasourceParameters;
+export type BackupDatasourceParametersUnion = KubernetesClusterBackupDatasourceParameters | BlobBackupDatasourceParametersUnion | BlobBackupDatasourceParametersForAutoProtection | AdlsBlobBackupDatasourceParametersForAutoProtection | PostgreSqlFlexibleServerBackupDatasourceParameters | BackupDatasourceParameters;
 
 // @public
 export interface BackupInstance {
@@ -311,6 +311,9 @@ export interface BackupSchedule {
     repeatingTimeIntervals: string[];
     timeZone?: string;
 }
+
+// @public
+export type BackupSolutionType = string;
 
 // @public
 export interface BackupVault {
@@ -863,6 +866,12 @@ export enum KnownAlertsState {
 }
 
 // @public
+export enum KnownBackupSolutionType {
+    LogicalBackup = "LogicalBackup",
+    PhysicalBackup = "PhysicalBackup"
+}
+
+// @public
 export enum KnownBcdrSecurityLevel {
     Excellent = "Excellent",
     Fair = "Fair",
@@ -1083,6 +1092,11 @@ export enum KnownRestoreTargetLocationType {
 }
 
 // @public
+export enum KnownResumeProtectionRequestObjectType {
+    ResumeProtectionRequest = "ResumeProtectionRequest"
+}
+
+// @public
 export enum KnownSecretStoreType {
     AzureKeyVault = "AzureKeyVault",
     Invalid = "Invalid"
@@ -1152,7 +1166,8 @@ export enum KnownValidationType {
 export enum KnownVersions {
     V20250701 = "2025-07-01",
     V20250901 = "2025-09-01",
-    V20260301 = "2026-03-01"
+    V20260301 = "2026-03-01",
+    V20260401Preview = "2026-04-01-preview"
 }
 
 // @public
@@ -1322,6 +1337,13 @@ export interface PolicyInfo {
 export interface PolicyParameters {
     backupDatasourceParametersList?: BackupDatasourceParametersUnion[];
     dataStoreParametersList?: DataStoreParametersUnion[];
+}
+
+// @public
+export interface PostgreSqlFlexibleServerBackupDatasourceParameters extends BackupDatasourceParameters {
+    backupSolutionType?: BackupSolutionType;
+    // (undocumented)
+    objectType: "PostgreSqlFlexibleServerBackupDatasourceParameters";
 }
 
 // @public
@@ -1499,6 +1521,15 @@ export type RestoreTargetInfoBaseUnion = ItemLevelRestoreTargetInfo | RestoreFil
 
 // @public
 export type RestoreTargetLocationType = string;
+
+// @public
+export interface ResumeProtectionRequest {
+    identityDetails?: IdentityDetails;
+    objectType: ResumeProtectionRequestObjectType;
+}
+
+// @public
+export type ResumeProtectionRequestObjectType = string;
 
 // @public
 export interface RetentionTag {

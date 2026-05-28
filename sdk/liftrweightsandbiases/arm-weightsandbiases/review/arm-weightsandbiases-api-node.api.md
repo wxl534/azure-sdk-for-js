@@ -14,11 +14,12 @@ export function createWeightsAndBiases(credential: TokenCredential, subscription
 // @public
 export interface WeightsAndBiasesClientOptionalParams extends ClientOptions {
     apiVersion?: string;
+    cloudSetting?: AzureSupportedClouds;
 }
 
 // @public (undocumented)
 export interface WeightsAndBiasesContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

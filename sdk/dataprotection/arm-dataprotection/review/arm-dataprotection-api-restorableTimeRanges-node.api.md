@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public (undocumented)
 export function find(context: DataProtectionContext, resourceGroupName: string, vaultName: string, backupInstanceName: string, parameters: AzureBackupFindRestorableTimeRangesRequest, options?: RestorableTimeRangesFindOptionalParams): Promise<AzureBackupFindRestorableTimeRangesResponseResource>;

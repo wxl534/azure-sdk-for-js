@@ -4,10 +4,10 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function createUpdateMongoDBCollection(context: CosmosDBManagementContext, resourceGroupName: string, accountName: string, databaseName: string, collectionName: string, createUpdateMongoDBCollectionParameters: MongoDBCollectionCreateUpdateParameters, options?: MongoDBResourcesCreateUpdateMongoDBCollectionOptionalParams): PollerLike<OperationState<MongoDBCollectionGetResults>, MongoDBCollectionGetResults>;

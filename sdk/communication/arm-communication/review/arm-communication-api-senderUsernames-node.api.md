@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export function $delete(context: CommunicationServiceManagementContext, resourceGroupName: string, emailServiceName: string, domainName: string, senderUsername: string, options?: SenderUsernamesDeleteOptionalParams): Promise<void>;

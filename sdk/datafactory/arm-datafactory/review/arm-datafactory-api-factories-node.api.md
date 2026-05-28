@@ -55,7 +55,7 @@ export interface FactoriesUpdateOptionalParams extends OperationOptions {
 }
 
 // @public
-export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, options?: FactoriesGetOptionalParams): Promise<Factory>;
+export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, options?: FactoriesGetOptionalParams): Promise<Factory | undefined>;
 
 // @public
 export function getDataPlaneAccess(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, policy: UserAccessPolicy, options?: FactoriesGetDataPlaneAccessOptionalParams): Promise<AccessPolicyResponse>;

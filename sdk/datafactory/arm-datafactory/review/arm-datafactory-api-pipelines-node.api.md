@@ -17,7 +17,7 @@ export function createOrUpdate(context: DataFactoryManagementContext, resourceGr
 export function createRun(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, pipelineName: string, options?: PipelinesCreateRunOptionalParams): Promise<CreateRunResponse>;
 
 // @public
-export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, pipelineName: string, options?: PipelinesGetOptionalParams): Promise<PipelineResource>;
+export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, pipelineName: string, options?: PipelinesGetOptionalParams): Promise<PipelineResource | undefined>;
 
 // @public
 export function listByFactory(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, options?: PipelinesListByFactoryOptionalParams): PagedAsyncIterableIterator<PipelineResource>;

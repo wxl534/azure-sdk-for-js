@@ -6,19 +6,23 @@
 
 import { Client } from '@azure-rest/core-client';
 import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
-export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, discoveryRuleName: string, options?: DiscoveryRulesDeleteOptionalParams): Promise<void>;
+export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, discoveryRuleName: string, options?: DiscoveryRulesDeleteOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
-export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, discoveryRuleName: string, resource: DiscoveryRule, options?: DiscoveryRulesCreateOrUpdateOptionalParams): Promise<DiscoveryRule>;
+export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, discoveryRuleName: string, resource: DiscoveryRule, options?: DiscoveryRulesCreateOrUpdateOptionalParams): PollerLike<OperationState<DiscoveryRule>, DiscoveryRule>;
 
 // @public
 export interface DiscoveryRulesCreateOrUpdateOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public
 export interface DiscoveryRulesDeleteOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public

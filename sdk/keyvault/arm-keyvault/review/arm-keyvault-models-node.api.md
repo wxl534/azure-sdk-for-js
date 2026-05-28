@@ -426,6 +426,20 @@ export enum KnownStoragePermissions {
 }
 
 // @public
+export enum KnownTokenBindingMode {
+    Enforced = "Enforced",
+    NotEnforced = "NotEnforced"
+}
+
+// @public
+export enum KnownTokenBindingStrength {
+    AttestedConfidential = "AttestedConfidential",
+    AttestedTrustedLaunch = "AttestedTrustedLaunch",
+    NoValidation = "NoValidation",
+    Unattested = "Unattested"
+}
+
+// @public
 export enum KnownVaultProvisioningState {
     RegisteringDns = "RegisteringDns",
     Succeeded = "Succeeded"
@@ -434,7 +448,8 @@ export enum KnownVaultProvisioningState {
 // @public
 export enum KnownVersions {
     V20250501 = "2025-05-01",
-    V20260201 = "2026-02-01"
+    V20260201 = "2026-02-01",
+    V20260301Preview = "2026-03-01-preview"
 }
 
 // @public
@@ -911,6 +926,18 @@ export interface SystemData {
 }
 
 // @public
+export type TokenBindingMode = string;
+
+// @public
+export interface TokenBindingParameters {
+    minimumTokenBindingStrength?: TokenBindingStrength;
+    mode?: TokenBindingMode;
+}
+
+// @public
+export type TokenBindingStrength = string;
+
+// @public
 export interface TrackedResource extends Resource {
     location: string;
     tags?: Record<string, string>;
@@ -983,6 +1010,7 @@ export interface VaultPatchProperties {
     sku?: Sku;
     softDeleteRetentionInDays?: number;
     tenantId?: string;
+    tokenBindingParameters?: TokenBindingParameters;
 }
 
 // @public
@@ -1003,6 +1031,7 @@ export interface VaultProperties {
     sku: Sku;
     softDeleteRetentionInDays?: number;
     tenantId: string;
+    tokenBindingParameters?: TokenBindingParameters;
     vaultUri?: string;
 }
 

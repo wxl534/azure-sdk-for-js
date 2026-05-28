@@ -4,9 +4,9 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { ClientOptions } from '@azure-rest/core-client';
-import type { TokenCredential } from '@azure/core-auth';
+import { Client } from '@azure-rest/core-client';
+import { ClientOptions } from '@azure-rest/core-client';
+import { TokenCredential } from '@azure/core-auth';
 
 // @public
 export function createIotDps(credential: TokenCredential, subscriptionId: string, options?: IotDpsClientOptionalParams): IotDpsContext;
@@ -19,7 +19,7 @@ export interface IotDpsClientOptionalParams extends ClientOptions {
 
 // @public
 export interface IotDpsContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

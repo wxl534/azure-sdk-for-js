@@ -19,7 +19,7 @@ export interface IoTFirmwareDefenseClientOptionalParams extends ClientOptions {
 
 // @public
 export interface IoTFirmwareDefenseContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

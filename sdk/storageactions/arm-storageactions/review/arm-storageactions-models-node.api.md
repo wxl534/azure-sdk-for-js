@@ -64,23 +64,18 @@ export enum KnownManagedServiceIdentityType {
 
 // @public
 export enum KnownMatchedBlockName {
-    // (undocumented)
     Else = "Else",
-    // (undocumented)
     If = "If",
-    // (undocumented)
     None = "None"
 }
 
 // @public
 export enum KnownOnFailure {
-    // (undocumented)
     Break = "break"
 }
 
 // @public
 export enum KnownOnSuccess {
-    // (undocumented)
     Continue = "continue"
 }
 
@@ -93,61 +88,43 @@ export enum KnownOrigin {
 
 // @public
 export enum KnownProvisioningState {
-    // (undocumented)
     Accepted = "Accepted",
-    // (undocumented)
     Canceled = "Canceled",
-    // (undocumented)
     Creating = "Creating",
-    // (undocumented)
     Deleting = "Deleting",
-    // (undocumented)
     Failed = "Failed",
-    // (undocumented)
     Succeeded = "Succeeded",
-    // (undocumented)
     ValidateSubscriptionQuotaBegin = "ValidateSubscriptionQuotaBegin",
-    // (undocumented)
     ValidateSubscriptionQuotaEnd = "ValidateSubscriptionQuotaEnd"
 }
 
 // @public
 export enum KnownRunResult {
-    // (undocumented)
     Failed = "Failed",
-    // (undocumented)
     Succeeded = "Succeeded"
 }
 
 // @public
 export enum KnownRunStatusEnum {
-    // (undocumented)
     Finished = "Finished",
-    // (undocumented)
     InProgress = "InProgress"
 }
 
 // @public
 export enum KnownStorageTaskOperationName {
-    // (undocumented)
     DeleteBlob = "DeleteBlob",
-    // (undocumented)
     SetBlobExpiry = "SetBlobExpiry",
-    // (undocumented)
     SetBlobImmutabilityPolicy = "SetBlobImmutabilityPolicy",
-    // (undocumented)
     SetBlobLegalHold = "SetBlobLegalHold",
-    // (undocumented)
     SetBlobTags = "SetBlobTags",
-    // (undocumented)
     SetBlobTier = "SetBlobTier",
-    // (undocumented)
     UndeleteBlob = "UndeleteBlob"
 }
 
 // @public
 export enum KnownVersions {
-    V20230101 = "2023-01-01"
+    V20230101 = "2023-01-01",
+    V20260301 = "2026-03-01"
 }
 
 // @public
@@ -155,7 +132,7 @@ export interface ManagedServiceIdentity {
     readonly principalId?: string;
     readonly tenantId?: string;
     type: ManagedServiceIdentityType;
-    userAssignedIdentities?: Record<string, UserAssignedIdentity | null>;
+    userAssignedIdentities?: Record<string, UserAssignedIdentity>;
 }
 
 // @public

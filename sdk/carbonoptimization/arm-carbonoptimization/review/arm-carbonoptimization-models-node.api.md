@@ -74,8 +74,8 @@ export type CategoryTypeEnum = string;
 
 // @public
 export interface DateRange {
-    end: string;
-    start: string;
+    end: Date;
+    start: Date;
 }
 
 // @public

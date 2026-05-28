@@ -6,12 +6,14 @@
 
 import { Client } from '@azure-rest/core-client';
 import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
-export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, relationshipName: string, options?: RelationshipsDeleteOptionalParams): Promise<void>;
+export function $delete(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, relationshipName: string, options?: RelationshipsDeleteOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
-export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, relationshipName: string, resource: Relationship, options?: RelationshipsCreateOrUpdateOptionalParams): Promise<Relationship>;
+export function createOrUpdate(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, relationshipName: string, resource: Relationship, options?: RelationshipsCreateOrUpdateOptionalParams): PollerLike<OperationState<Relationship>, Relationship>;
 
 // @public
 export function get(context: CloudHealthContext, resourceGroupName: string, healthModelName: string, relationshipName: string, options?: RelationshipsGetOptionalParams): Promise<Relationship>;
@@ -21,10 +23,12 @@ export function listByHealthModel(context: CloudHealthContext, resourceGroupName
 
 // @public
 export interface RelationshipsCreateOrUpdateOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public
 export interface RelationshipsDeleteOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public

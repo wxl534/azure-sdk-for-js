@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export function $delete(context: PrivateLinkScopesContext, resourceGroupName: string, scopeName: string, options?: PrivateLinkScopesDeleteOptionalParams): Promise<void>;

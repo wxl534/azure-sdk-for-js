@@ -4,15 +4,15 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
 
 // @public
 export interface BackupVaultOperationResultsGetOptionalParams extends OperationOptions {
 }
 
 // @public
-export function get(context: DataProtectionContext, resourceGroupName: string, vaultName: string, operationId: string, options?: BackupVaultOperationResultsGetOptionalParams): Promise<BackupVaultResource>;
+export function get(context: DataProtectionContext, resourceGroupName: string, vaultName: string, operationId: string, options?: BackupVaultOperationResultsGetOptionalParams): Promise<BackupVaultResource | undefined>;
 
 // (No @packageDocumentation comment for this package)
 

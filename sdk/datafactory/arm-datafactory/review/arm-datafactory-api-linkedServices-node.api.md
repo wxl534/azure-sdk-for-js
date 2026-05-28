@@ -14,7 +14,7 @@ export function $delete(context: DataFactoryManagementContext, resourceGroupName
 export function createOrUpdate(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, linkedServiceName: string, linkedService: LinkedServiceResource, options?: LinkedServicesCreateOrUpdateOptionalParams): Promise<LinkedServiceResource>;
 
 // @public
-export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, linkedServiceName: string, options?: LinkedServicesGetOptionalParams): Promise<LinkedServiceResource>;
+export function get(context: DataFactoryManagementContext, resourceGroupName: string, factoryName: string, linkedServiceName: string, options?: LinkedServicesGetOptionalParams): Promise<LinkedServiceResource | undefined>;
 
 // @public
 export interface LinkedServicesCreateOrUpdateOptionalParams extends OperationOptions {

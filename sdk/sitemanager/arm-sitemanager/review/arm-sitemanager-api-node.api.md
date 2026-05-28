@@ -19,7 +19,7 @@ export interface EdgeClientOptionalParams extends ClientOptions {
 
 // @public
 export interface EdgeContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 

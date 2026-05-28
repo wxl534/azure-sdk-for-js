@@ -4,16 +4,19 @@
 
 ```ts
 
-import type { Client } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PollerLike } from '@azure/core-lro';
+import { Client } from '@azure-rest/core-client';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PollerLike } from '@azure/core-lro';
 
 // @public
 export function $delete(context: DeviceRegistryManagementContext, resourceGroupName: string, namespaceName: string, assetName: string, options?: NamespaceAssetsDeleteOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
 export function createOrReplace(context: DeviceRegistryManagementContext, resourceGroupName: string, namespaceName: string, assetName: string, resource: NamespaceAsset, options?: NamespaceAssetsCreateOrReplaceOptionalParams): PollerLike<OperationState<NamespaceAsset>, NamespaceAsset>;
+
+// @public
+export function executeAction(context: DeviceRegistryManagementContext, resourceGroupName: string, namespaceName: string, assetName: string, body: NamespaceAssetExecuteActionRequest, options?: NamespaceAssetsExecuteActionOptionalParams): PollerLike<OperationState<void>, void>;
 
 // @public
 export function get(context: DeviceRegistryManagementContext, resourceGroupName: string, namespaceName: string, assetName: string, options?: NamespaceAssetsGetOptionalParams): Promise<NamespaceAsset>;
@@ -28,6 +31,11 @@ export interface NamespaceAssetsCreateOrReplaceOptionalParams extends OperationO
 
 // @public
 export interface NamespaceAssetsDeleteOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
+}
+
+// @public
+export interface NamespaceAssetsExecuteActionOptionalParams extends OperationOptions {
     updateIntervalInMs?: number;
 }
 

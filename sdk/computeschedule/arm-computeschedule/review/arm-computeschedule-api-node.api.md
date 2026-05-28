@@ -16,7 +16,7 @@ export interface ComputeScheduleClientOptionalParams extends ClientOptions {
 
 // @public
 export interface ComputeScheduleContext extends Client {
-    apiVersion: string;
+    apiVersion?: string;
     subscriptionId: string;
 }
 
