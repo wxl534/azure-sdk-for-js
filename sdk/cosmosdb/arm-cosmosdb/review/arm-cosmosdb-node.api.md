@@ -4,15 +4,17 @@
 
 ```ts
 
-import type { AbortSignalLike } from '@azure/abort-controller';
-import type { CancelOnProgress } from '@azure/core-lro';
-import type { ClientOptions } from '@azure-rest/core-client';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PathUncheckedResponse } from '@azure-rest/core-client';
-import type { Pipeline } from '@azure/core-rest-pipeline';
-import type { PollerLike } from '@azure/core-lro';
-import type { TokenCredential } from '@azure/core-auth';
+import { AbortSignalLike } from '@azure/abort-controller';
+import { CancelOnProgress } from '@azure/core-lro';
+import { ClientOptions } from '@azure-rest/core-client';
+import { isRestError } from '@azure/core-rest-pipeline';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PathUncheckedResponse } from '@azure-rest/core-client';
+import { Pipeline } from '@azure/core-rest-pipeline';
+import { PollerLike } from '@azure/core-lro';
+import { RestError } from '@azure/core-rest-pipeline';
+import { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface AccessRule {
@@ -480,7 +482,7 @@ export interface CassandraKeyspaceGetPropertiesResource extends CassandraKeyspac
 }
 
 // @public
-export interface CassandraKeyspaceGetResults extends Resource {
+export interface CassandraKeyspaceGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -860,7 +862,7 @@ export interface CassandraTableGetPropertiesResource extends CassandraTableResou
 }
 
 // @public
-export interface CassandraTableGetResults extends Resource {
+export interface CassandraTableGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -910,7 +912,7 @@ export interface CassandraViewGetPropertiesResource extends CassandraViewResourc
 }
 
 // @public
-export interface CassandraViewGetResults extends Resource {
+export interface CassandraViewGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -1036,7 +1038,7 @@ export interface ClusterKey {
 }
 
 // @public
-export interface ClusterResource extends Resource {
+export interface ClusterResource extends ProxyResource {
     identity?: ManagedCassandraManagedServiceIdentity;
     location?: string;
     properties?: ClusterResourceProperties;
@@ -1677,7 +1679,7 @@ export interface DatabaseAccountGetProperties {
 }
 
 // @public
-export interface DatabaseAccountGetResults extends Resource {
+export interface DatabaseAccountGetResults extends ProxyResource {
     analyticalStorageConfiguration?: AnalyticalStorageConfiguration;
     apiProperties?: ApiProperties;
     backupPolicy?: BackupPolicyUnion;
@@ -2621,7 +2623,7 @@ export interface GraphResourceGetPropertiesResource extends GraphResource {
 }
 
 // @public
-export interface GraphResourceGetResults extends Resource {
+export interface GraphResourceGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -2697,7 +2699,7 @@ export interface GremlinDatabaseGetPropertiesResource extends GremlinDatabaseRes
 }
 
 // @public
-export interface GremlinDatabaseGetResults extends Resource {
+export interface GremlinDatabaseGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -2752,7 +2754,7 @@ export interface GremlinGraphGetPropertiesResource extends GremlinGraphResource 
 }
 
 // @public
-export interface GremlinGraphGetResults extends Resource {
+export interface GremlinGraphGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -3048,6 +3050,8 @@ export type IndexKind = string;
 export interface IpAddressOrRange {
     ipAddressOrRange?: string;
 }
+
+export { isRestError }
 
 // @public
 export type IssueType = string;
@@ -3779,7 +3783,7 @@ export interface MongoDBCollectionGetPropertiesResource extends MongoDBCollectio
 }
 
 // @public
-export interface MongoDBCollectionGetResults extends Resource {
+export interface MongoDBCollectionGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -3831,7 +3835,7 @@ export interface MongoDBDatabaseGetPropertiesResource extends MongoDBDatabaseRes
 }
 
 // @public
-export interface MongoDBDatabaseGetResults extends Resource {
+export interface MongoDBDatabaseGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -4856,6 +4860,8 @@ export type ResourceIdentityType = "SystemAssigned" | "UserAssigned" | "SystemAs
 export interface ResourceRestoreParameters extends RestoreParametersBase {
 }
 
+export { RestError }
+
 // @public
 export interface RestorableDatabaseAccountGetResult extends ProxyResource {
     accountName?: string;
@@ -5452,7 +5458,7 @@ export interface SqlContainerGetPropertiesResource extends SqlContainerResource 
 }
 
 // @public
-export interface SqlContainerGetResults extends Resource {
+export interface SqlContainerGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -5517,7 +5523,7 @@ export interface SqlDatabaseGetPropertiesResource extends SqlDatabaseResource {
 }
 
 // @public
-export interface SqlDatabaseGetResults extends Resource {
+export interface SqlDatabaseGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -5998,7 +6004,7 @@ export interface SqlStoredProcedureGetPropertiesResource extends SqlStoredProced
 }
 
 // @public
-export interface SqlStoredProcedureGetResults extends Resource {
+export interface SqlStoredProcedureGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -6038,7 +6044,7 @@ export interface SqlTriggerGetPropertiesResource extends SqlTriggerResource {
 }
 
 // @public
-export interface SqlTriggerGetResults extends Resource {
+export interface SqlTriggerGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -6080,7 +6086,7 @@ export interface SqlUserDefinedFunctionGetPropertiesResource extends SqlUserDefi
 }
 
 // @public
-export interface SqlUserDefinedFunctionGetResults extends Resource {
+export interface SqlUserDefinedFunctionGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -6142,7 +6148,7 @@ export interface TableGetPropertiesResource extends TableResource {
 }
 
 // @public
-export interface TableGetResults extends Resource {
+export interface TableGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
@@ -6488,7 +6494,7 @@ export interface ThroughputSettingsGetPropertiesResource extends ThroughputSetti
 }
 
 // @public
-export interface ThroughputSettingsGetResults extends Resource {
+export interface ThroughputSettingsGetResults extends ProxyResource {
     identity?: ManagedServiceIdentity;
     location?: string;
     // (undocumented)
