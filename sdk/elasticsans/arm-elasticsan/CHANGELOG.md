@@ -1,14 +1,28 @@
 # Release History
 
-## 2.0.1 (Unreleased)
+## 2.1.0-beta.1 (2026-06-01)
+Compared with version 2.0.0
 
 ### Features Added
-
-### Breaking Changes
-
-### Bugs Fixed
-
-### Other Changes
+  - Class ElasticSanManagement has a new constructor "beginRestoreVolume(resourceGroupName: string, elasticSanName: string, volumeGroupName: string, volumeName: string, options?: RestoreVolumeOptionalParams): Promise<SimplePollerLike<OperationState<Volume>, Volume>>;"
+  - Class ElasticSanManagement has a new constructor "beginRestoreVolumeAndWait(resourceGroupName: string, elasticSanName: string, volumeGroupName: string, volumeName: string, options?: RestoreVolumeOptionalParams): Promise<Volume>;"
+  - Class ElasticSanManagement has a new constructor "restoreVolume(resourceGroupName: string, elasticSanName: string, volumeGroupName: string, volumeName: string, options?: RestoreVolumeOptionalParams): PollerLike<OperationState<Volume>, Volume>;"
+  - Added Interface DeleteRetentionPolicy
+  - Added Interface RestoreVolumeOptionalParams
+  - Interface VolumeGroupProperties has a new optional parameter deleteRetentionPolicy
+  - Interface VolumeGroupProperties has a new optional parameter encryptionInTransit
+  - Interface VolumeGroupsListByElasticSanOptionalParams has a new optional parameter xMsAccessSoftDeletedResources
+  - Interface VolumeGroupUpdateProperties has a new optional parameter deleteRetentionPolicy
+  - Interface VolumesDeleteOptionalParams has a new optional parameter deleteType
+  - Interface VolumesListByVolumeGroupOptionalParams has a new optional parameter xMsAccessSoftDeletedResources
+  - Added Type Alias DeleteType
+  - Added Type Alias PolicyState
+  - Added Type Alias XMsAccessSoftDeletedResources
+  - Added Enum KnownDeleteType
+  - Added Enum KnownPolicyState
+  - Added Enum KnownXMsAccessSoftDeletedResources
+  - Enum KnownProvisioningStates has a new value SoftDeleting
+  - Enum KnownVersions has a new value V20260401Preview
 
 ## 2.0.0 (2026-02-25)
 

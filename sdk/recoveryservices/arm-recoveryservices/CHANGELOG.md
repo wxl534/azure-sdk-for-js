@@ -1,14 +1,24 @@
 # Release History
 
-## 7.0.1 (Unreleased)
+## 7.1.0 (2026-06-01)
 
 ### Features Added
-
-### Breaking Changes
-
-### Bugs Fixed
-
-### Other Changes
+  - Added operation DeletedVaultsOperations.beginUndelete
+  - Added operation DeletedVaultsOperations.beginUndeleteAndWait
+  - Added operation VaultsOperations.beginCreateOrUpdate
+  - Added operation VaultsOperations.beginCreateOrUpdateAndWait
+  - Added operation VaultsOperations.beginDelete
+  - Added operation VaultsOperations.beginDeleteAndWait
+  - Added operation VaultsOperations.beginUpdate
+  - Added operation VaultsOperations.beginUpdateAndWait
+  - Class RecoveryServicesClient has a new constructor "constructor(credential: TokenCredential, options?: RecoveryServicesClientOptionalParams);"
+  - Added Interface CostManagementSettings
+  - Added Interface SimplePollerLike
+  - Interface VaultProperties has a new optional parameter costManagementSettings
+  - Added Type Alias GranularityLevel
+  - Added Enum KnownGranularityLevel
+  - Enum KnownVersions has a new value V20260101
+  - Enum KnownVersions has a new value V20260201
 
 ## 7.0.0 (2025-09-29)
 
