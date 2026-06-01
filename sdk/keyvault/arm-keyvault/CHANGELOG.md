@@ -1,5 +1,18 @@
 # Release History
 
+## 5.1.0-beta.1 (2026-06-01)
+Compared with version 5.0.0
+
+### Features Added
+  - Added Interface TokenBindingParameters
+  - Interface VaultPatchProperties has a new optional parameter tokenBindingParameters
+  - Interface VaultProperties has a new optional parameter tokenBindingParameters
+  - Added Type Alias TokenBindingMode
+  - Added Type Alias TokenBindingStrength
+  - Added Enum KnownTokenBindingMode
+  - Added Enum KnownTokenBindingStrength
+  - Enum KnownVersions has a new value V20260301Preview
+
 ## 5.0.0 (2026-03-17)
 
 ### Features Added

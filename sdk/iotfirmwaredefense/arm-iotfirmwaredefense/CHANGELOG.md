@@ -1,14 +1,32 @@
 # Release History
 
-## 2.0.1 (Unreleased)
+## 2.1.0-beta.1 (2026-06-01)
+Compared with version 2.0.0
 
 ### Features Added
-
-### Breaking Changes
-
-### Bugs Fixed
-
-### Other Changes
+  - Added Interface CveSummaryResource
+  - Added Interface CweProperties
+  - Added Interface EpssProperties
+  - Added Interface KevProperties
+  - Added Interface PasswordHashSummaryResource
+  - Added Interface SbomSummaryResource
+  - Interface CveResult has a new optional parameter cwes
+  - Interface CveResult has a new optional parameter effectiveExploitMaturity
+  - Interface CveResult has a new optional parameter effectiveVectorString
+  - Interface CveResult has a new optional parameter epss
+  - Interface CveResult has a new optional parameter fixedInVersions
+  - Interface CveResult has a new optional parameter kev
+  - Interface CvssScore has a new optional parameter exploitMaturity
+  - Interface CvssScore has a new optional parameter vectorString
+  - Added Type Alias ExploitMaturityLevel
+  - Added Type Alias RansomwareCampaignUse
+  - Added Enum KnownExploitMaturityLevel
+  - Added Enum KnownRansomwareCampaignUse
+  - Enum KnownSummaryType has a new value Cve
+  - Enum KnownSummaryType has a new value PasswordHash
+  - Enum KnownSummaryType has a new value Sbom
+  - Enum KnownVersions has a new value V20250401Preview
+  - Enum KnownVersions has a new value V20251201Preview
 
 ## 2.0.0 (2025-09-01)
 

@@ -1,14 +1,69 @@
 # Release History
 
-## 6.0.0-beta.4 (Unreleased)
+## 6.0.0-beta.4 (2026-06-01)
+Compared with version 5.1.0
 
 ### Features Added
+  - Added operation IotDpsResourceOperations.createOrUpdate
+  - Added operation IotDpsResourceOperations.createOrUpdatePrivateEndpointConnection
+  - Added operation IotDpsResourceOperations.delete
+  - Added operation IotDpsResourceOperations.deletePrivateEndpointConnection
+  - Added operation IotDpsResourceOperations.update
+  - Added Interface DeviceRegistryNamespaceDescription
+  - Added Interface ErrorAdditionalInfo
+  - Added Interface ErrorDetail
+  - Added Interface ErrorResponse
+  - Added Interface ManagedServiceIdentity
+  - Added Interface PagedAsyncIterableIterator
+  - Added Interface PageSettings
+  - Added Interface ProxyResource
+  - Added Interface RestorePollerOptions
+  - Added Interface TrackedResource
+  - Added Interface UserAssignedIdentity
+  - Interface DpsCertificateDeleteOptionalParams has a new optional parameter certificateName
+  - Interface DpsCertificateGenerateVerificationCodeOptionalParams has a new optional parameter certificateName
+  - Interface DpsCertificateVerifyCertificateOptionalParams has a new optional parameter certificateName
+  - Interface GroupIdInformation has a new optional parameter systemData
+  - Interface IotDpsPropertiesDescription has a new optional parameter deviceRegistryNamespace
+  - Interface IotDpsPropertiesDescription has a new optional parameter portalOperationsHostName
+  - Interface IotHubDefinitionDescription has a new optional parameter authenticationType
+  - Interface IotHubDefinitionDescription has a new optional parameter hostName
+  - Interface IotHubDefinitionDescription has a new optional parameter selectedUserAssignedIdentityResourceId
+  - Interface ProvisioningServiceDescription has a new optional parameter identity
+  - Interface ProvisioningServiceDescription has a new optional parameter resourcegroup
+  - Interface ProvisioningServiceDescription has a new optional parameter subscriptionid
+  - Interface Resource has a new optional parameter systemData
+  - Added Type Alias AzureSupportedClouds
+  - Added Type Alias DeviceRegistryNamespaceAuthenticationType
+  - Added Type Alias IotHubAuthenticationType
+  - Added Type Alias ManagedServiceIdentityType
+  - Added Enum AzureClouds
+  - Added Enum KnownDeviceRegistryNamespaceAuthenticationType
+  - Added Enum KnownIotHubAuthenticationType
+  - Added Enum KnownManagedServiceIdentityType
+  - Added Enum KnownVersions
 
 ### Breaking Changes
-
-### Bugs Fixed
-
-### Other Changes
+  - Removed operation IotDpsResource.beginCreateOrUpdate
+  - Removed operation IotDpsResource.beginCreateOrUpdateAndWait
+  - Removed operation IotDpsResource.beginCreateOrUpdatePrivateEndpointConnection
+  - Removed operation IotDpsResource.beginCreateOrUpdatePrivateEndpointConnectionAndWait
+  - Removed operation IotDpsResource.beginDelete
+  - Removed operation IotDpsResource.beginDeleteAndWait
+  - Removed operation IotDpsResource.beginDeletePrivateEndpointConnection
+  - Removed operation IotDpsResource.beginDeletePrivateEndpointConnectionAndWait
+  - Removed operation IotDpsResource.beginUpdate
+  - Removed operation IotDpsResource.beginUpdateAndWait
+  - Operation IotDpsResource.get has a new signature
+  - Removed Interface CertificateBodyDescription
+  - Removed Interface OperationDisplay
+  - Type of parameter code of interface ErrorDetails is changed from string to number
+  - Interface DpsCertificateDeleteOptionalParams no longer has parameter certificateName1
+  - Interface DpsCertificateGenerateVerificationCodeOptionalParams no longer has parameter certificateName1
+  - Interface DpsCertificateVerifyCertificateOptionalParams no longer has parameter certificateName1
+  - Interface Resource no longer has parameter location
+  - Interface Resource no longer has parameter tags
+  - Parameter connectionString of interface IotHubDefinitionDescription is now optional
 
 ## 6.0.0-beta.3 (2025-10-13)
 Compared with version 5.1.0

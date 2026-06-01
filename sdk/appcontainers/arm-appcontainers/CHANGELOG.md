@@ -1,5 +1,108 @@
 # Release History
 
+## 4.0.0 (2026-06-01)
+
+### Features Added
+  - Added operation ConnectedEnvironmentsOperations.createOrUpdate
+  - Added operation ConnectedEnvironmentsOperations.delete
+  - Added operation ConnectedEnvironmentsCertificatesOperations.createOrUpdate
+  - Added operation ConnectedEnvironmentsCertificatesOperations.delete
+  - Added operation ConnectedEnvironmentsCertificatesOperations.update
+  - Added operation ConnectedEnvironmentsDaprComponentsOperations.createOrUpdate
+  - Added operation ConnectedEnvironmentsDaprComponentsOperations.delete
+  - Added operation ConnectedEnvironmentsStoragesOperations.createOrUpdate
+  - Added operation ConnectedEnvironmentsStoragesOperations.delete
+  - Added operation ContainerAppsOperations.createOrUpdate
+  - Added operation ContainerAppsOperations.delete
+  - Added operation ContainerAppsOperations.start
+  - Added operation ContainerAppsOperations.stop
+  - Added operation ContainerAppsOperations.update
+  - Added operation ContainerAppsSessionPoolsOperations.createOrUpdate
+  - Added operation ContainerAppsSessionPoolsOperations.delete
+  - Added operation ContainerAppsSessionPoolsOperations.update
+  - Added operation ContainerAppsSourceControlsOperations.createOrUpdate
+  - Added operation ContainerAppsSourceControlsOperations.delete
+  - Added operation HttpRouteConfigOperations.delete
+  - Added operation JavaComponentsOperations.createOrUpdate
+  - Added operation JavaComponentsOperations.delete
+  - Added operation JavaComponentsOperations.update
+  - Added operation JobsOperations.createOrUpdate
+  - Added operation JobsOperations.delete
+  - Added operation JobsOperations.start
+  - Added operation JobsOperations.stopExecution
+  - Added operation JobsOperations.stopMultipleExecutions
+  - Added operation JobsOperations.update
+  - Added operation ManagedCertificatesOperations.createOrUpdate
+  - Added operation ManagedEnvironmentPrivateEndpointConnectionsOperations.createOrUpdate
+  - Added operation ManagedEnvironmentPrivateEndpointConnectionsOperations.delete
+  - Added operation ManagedEnvironmentsOperations.createOrUpdate
+  - Added operation ManagedEnvironmentsOperations.delete
+  - Added operation ManagedEnvironmentsOperations.update
+  - Added Interface AuthConfigProperties
+  - Added Interface AvailableWorkloadProfilesListOptionalParams
+  - Added Interface ConnectedEnvironmentProperties
+  - Added Interface ContainerAppAuthTokenProperties
+  - Added Interface ContainerAppProperties
+  - Added Interface DaprComponentProperties
+  - Added Interface EnvironmentAuthTokenProperties
+  - Added Interface JobExecutionProperties
+  - Added Interface JobProperties
+  - Added Interface ManagedEnvironmentProperties
+  - Added Interface PagedAsyncIterableIterator
+  - Added Interface PageSettings
+  - Added Interface PrivateEndpointConnectionProperties
+  - Added Interface PrivateLinkResourceProperties
+  - Added Interface ReplicaProperties
+  - Added Interface RestorePollerOptions
+  - Added Interface RevisionProperties
+  - Added Interface ScheduledEntries
+  - Added Interface SessionPoolProperties
+  - Added Interface SessionPoolUpdatablePropertiesProperties
+  - Added Interface SimplePollerLike
+  - Added Interface SourceControlProperties
+  - Interface JobExecution has a new optional parameter systemData
+  - Added Type Alias AzureSupportedClouds
+  - Added Type Alias SessionPoolIdentityLifeCycle
+  - Added Enum AzureClouds
+  - Added Enum KnownSessionPoolIdentityLifeCycle
+  - Added Enum KnownVersions
+
+### Breaking Changes
+  - Operation ConnectedEnvironmentsCertificates.beginDeleteAndWait has a new signature
+  - Operation ConnectedEnvironmentsDaprComponents.beginDeleteAndWait has a new signature
+  - Operation ConnectedEnvironmentsStorages.beginDeleteAndWait has a new signature
+  - Operation ContainerAppsSessionPools.beginDeleteAndWait has a new signature
+  - Operation HttpRouteConfig.beginDeleteAndWait has a new signature
+  - Operation JavaComponents.beginCreateOrUpdate has a new signature
+  - Operation JavaComponents.beginCreateOrUpdateAndWait has a new signature
+  - Operation JavaComponents.beginDeleteAndWait has a new signature
+  - Operation JavaComponents.beginUpdate has a new signature
+  - Operation JavaComponents.beginUpdateAndWait has a new signature
+  - Operation JavaComponents.get has a new signature
+  - Operation ManagedEnvironmentPrivateEndpointConnections.beginDeleteAndWait has a new signature
+  - Removed Interface AuthConfigCollection
+  - Removed Interface AvailableOperations
+  - Removed Interface AvailableWorkloadProfilesCollection
+  - Removed Interface AvailableWorkloadProfilesGetOptionalParams
+  - Removed Interface CertificateCollection
+  - Removed Interface ConnectedEnvironmentCollection
+  - Removed Interface ContainerAppCollection
+  - Removed Interface DaprComponentsCollection
+  - Removed Interface HttpRouteConfigCollection
+  - Removed Interface JavaComponentsCollection
+  - Removed Interface JobExecutionNamesCollection
+  - Removed Interface JobsCollection
+  - Removed Interface MaintenanceConfigurationCollection
+  - Removed Interface ManagedCertificateCollection
+  - Removed Interface ManagedEnvironmentsCollection
+  - Removed Interface RevisionCollection
+  - Removed Interface SessionPoolCollection
+  - Removed Interface SourceControlCollection
+  - Removed Interface WorkflowEnvelopeCollection
+  - Removed Interface WorkloadProfileStatesCollection
+  - Type of parameter componentType of interface JavaComponentProperties is changed from "SpringBootAdmin" | "SpringCloudEureka" | "SpringCloudConfig" to JavaComponentType
+  - Type alias "JavaComponentPropertiesUnion" has been changed
+
 ## 4.0.0-beta.1 (2026-05-20)
 Compared with version 3.0.0
 

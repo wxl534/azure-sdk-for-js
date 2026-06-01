@@ -1,6 +1,6 @@
 # Release History
 
-## 2.0.0-beta.1 (2026-05-28)
+## 2.0.0-beta.1 (2026-06-01)
 Compared with version 1.1.0
 
 ### Features Added
@@ -262,11 +262,11 @@ Compared with version 1.1.0
   - Added Enum KnownZonePlacementPolicyType
   - Enum KnownResourceOperationType has a new value Create
   - Enum KnownResourceOperationType has a new value Delete
-  - Enum KnownVersions has a new value Versions20240815Preview
-  - Enum KnownVersions has a new value Versions20250415Preview
-  - Enum KnownVersions has a new value Versions20260101Preview
-  - Enum KnownVersions has a new value Versions20260301Preview
-  - Enum KnownVersions has a new value Versions20260415Preview
+  - Enum KnownVersions has a new value V20240815Preview
+  - Enum KnownVersions has a new value V20250415Preview
+  - Enum KnownVersions has a new value V20260101Preview
+  - Enum KnownVersions has a new value V20260301Preview
+  - Enum KnownVersions has a new value V20260415Preview
 
 ### Breaking Changes
   - Interface ExecuteCreateRequest no longer has parameter correlationid

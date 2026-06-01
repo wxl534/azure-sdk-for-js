@@ -1,5 +1,22 @@
 # Release History
 
+## 1.2.0 (2026-06-01)
+
+### Features Added
+  - Added operation NamespaceAssetsOperations.executeAction
+  - Added Interface HealthState
+  - Added Interface Management
+  - Added Interface ManagementEndpoint
+  - Added Interface NamespaceAssetExecuteActionRequest
+  - Added Interface NamespaceAssetsExecuteActionOptionalParams
+  - Interface DeviceStatusEndpoint has a new optional parameter healthState
+  - Interface NamespaceAssetStatus has a new optional parameter healthState
+  - Interface NamespaceProperties has a new optional parameter management
+  - Interface NamespaceUpdateProperties has a new optional parameter management
+  - Added Type Alias HealthStatus
+  - Added Enum KnownHealthStatus
+  - Enum KnownVersions has a new value V20260401
+
 ## 1.2.0-beta.1 (2026-04-09)
 Compared with version 1.1.0
 

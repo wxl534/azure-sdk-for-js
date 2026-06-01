@@ -1,14 +1,18 @@
 # Release History
 
-## 2.0.1 (Unreleased)
+## 2.1.0-beta.1 (2026-06-01)
+Compared with version 2.0.0
 
 ### Features Added
-
-### Breaking Changes
-
-### Bugs Fixed
-
-### Other Changes
+  - Added operation group DashboardDefinitionsOperations
+  - Added Interface DashboardDefinition
+  - Added Interface DashboardDefinitionProperties
+  - Added Interface DashboardDefinitionsCreateOptionalParams
+  - Added Interface DashboardDefinitionsDeleteOptionalParams
+  - Added Interface DashboardDefinitionsGetOptionalParams
+  - Added Interface DashboardDefinitionsListOptionalParams
+  - Enum KnownVersions has a new value V20241101Preview
+  - Enum KnownVersions has a new value V20250901Preview
 
 ## 2.0.0 (2025-10-21)
 
