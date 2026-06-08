@@ -9,67 +9,95 @@ import {
 } from "./static-helpers/pagingHelpers.js";
 
 export { PolicyClient } from "./policyClient.js";
-export {
+export type {
   PolicyAssignment,
   PolicyAssignmentProperties,
   ParameterValuesValue,
-  KnownEnforcementMode,
   EnforcementMode,
   NonComplianceMessage,
   ResourceSelector,
   Selector,
-  KnownSelectorKind,
   SelectorKind,
   Override,
-  KnownOverrideKind,
   OverrideKind,
-  KnownAssignmentType,
   AssignmentType,
+  SelfServeExemptionSettings,
   Identity,
   ResourceIdentityType,
   UserAssignedIdentitiesValue,
   ExtensionResource,
   Resource,
   SystemData,
-  KnownCreatedByType,
   CreatedByType,
   ErrorResponse,
   ErrorDetail,
   ErrorAdditionalInfo,
   PolicyAssignmentUpdate,
   PolicyAssignmentUpdateProperties,
+  DataPolicyManifest,
+  DataPolicyManifestProperties,
+  ResourceTypeAliases,
+  Alias,
+  AliasPath,
+  AliasPattern,
+  AliasPatternType,
+  AliasPathMetadata,
+  AliasPathTokenType,
+  AliasPathAttributes,
+  AliasType,
+  DataEffect,
+  DataManifestResourceFunctionsDefinition,
+  DataManifestCustomResourceFunctionDefinition,
+  ProxyResource,
   PolicyDefinition,
   PolicyDefinitionProperties,
-  KnownPolicyType,
   PolicyType,
   ParameterDefinitionsValue,
-  KnownParameterType,
   ParameterType,
   ParameterDefinitionsValueMetadata,
   ExternalEvaluationEnforcementSettings,
   ExternalEvaluationEndpointSettings,
-  ProxyResource,
   PolicyDefinitionVersion,
   PolicyDefinitionVersionProperties,
+  PolicyDefinitionVersionListResult,
   PolicySetDefinition,
   PolicySetDefinitionProperties,
   PolicyDefinitionReference,
   PolicyDefinitionGroup,
   PolicySetDefinitionVersion,
   PolicySetDefinitionVersionProperties,
+  PolicySetDefinitionVersionListResult,
   PolicyTokenRequest,
   PolicyTokenOperation,
   PolicyTokenResponse,
-  KnownPolicyTokenResult,
   PolicyTokenResult,
+  PolicyTokenEvaluatedRequestDetails,
   ExternalEvaluationEndpointInvocationResult,
   PolicyLogInfo,
-  KnownExternalEndpointResult,
   ExternalEndpointResult,
+  PolicyAction,
+} from "./models/index.js";
+export {
+  KnownEnforcementMode,
+  KnownSelectorKind,
+  KnownOverrideKind,
+  KnownAssignmentType,
+  KnownCreatedByType,
+  KnownAliasPathTokenType,
+  KnownAliasPathAttributes,
+  KnownPolicyType,
+  KnownParameterType,
+  KnownPolicyTokenResult,
+  KnownExternalEndpointResult,
+  KnownPolicyAction,
   KnownVersions,
 } from "./models/index.js";
 export type { PolicyClientOptionalParams } from "./api/index.js";
-export {
+export type {
+  DataPolicyManifestsListOptionalParams,
+  DataPolicyManifestsGetByPolicyModeOptionalParams,
+} from "./api/dataPolicyManifests/index.js";
+export type {
   PolicyAssignmentsListForResourceOptionalParams,
   PolicyAssignmentsListOptionalParams,
   PolicyAssignmentsListForManagementGroupOptionalParams,
@@ -79,7 +107,7 @@ export {
   PolicyAssignmentsCreateOptionalParams,
   PolicyAssignmentsGetOptionalParams,
 } from "./api/policyAssignments/index.js";
-export {
+export type {
   PolicyDefinitionsListByManagementGroupOptionalParams,
   PolicyDefinitionsDeleteAtManagementGroupOptionalParams,
   PolicyDefinitionsCreateOrUpdateAtManagementGroupOptionalParams,
@@ -91,7 +119,7 @@ export {
   PolicyDefinitionsCreateOrUpdateOptionalParams,
   PolicyDefinitionsGetOptionalParams,
 } from "./api/policyDefinitions/index.js";
-export {
+export type {
   PolicyDefinitionVersionsListAllOptionalParams,
   PolicyDefinitionVersionsListAllAtManagementGroupOptionalParams,
   PolicyDefinitionVersionsListAllBuiltinsOptionalParams,
@@ -106,7 +134,7 @@ export {
   PolicyDefinitionVersionsCreateOrUpdateOptionalParams,
   PolicyDefinitionVersionsGetOptionalParams,
 } from "./api/policyDefinitionVersions/index.js";
-export {
+export type {
   PolicySetDefinitionsListByManagementGroupOptionalParams,
   PolicySetDefinitionsDeleteAtManagementGroupOptionalParams,
   PolicySetDefinitionsCreateOrUpdateAtManagementGroupOptionalParams,
@@ -118,7 +146,7 @@ export {
   PolicySetDefinitionsCreateOrUpdateOptionalParams,
   PolicySetDefinitionsGetOptionalParams,
 } from "./api/policySetDefinitions/index.js";
-export {
+export type {
   PolicySetDefinitionVersionsListAllOptionalParams,
   PolicySetDefinitionVersionsListAllAtManagementGroupOptionalParams,
   PolicySetDefinitionVersionsListAllBuiltinsOptionalParams,
@@ -133,11 +161,12 @@ export {
   PolicySetDefinitionVersionsCreateOrUpdateOptionalParams,
   PolicySetDefinitionVersionsGetOptionalParams,
 } from "./api/policySetDefinitionVersions/index.js";
-export {
+export type {
   PolicyTokensAcquireAtManagementGroupOptionalParams,
   PolicyTokensAcquireOptionalParams,
 } from "./api/policyTokens/index.js";
-export {
+export type {
+  DataPolicyManifestsOperations,
   PolicyAssignmentsOperations,
   PolicyDefinitionsOperations,
   PolicyDefinitionVersionsOperations,
@@ -145,5 +174,7 @@ export {
   PolicySetDefinitionVersionsOperations,
   PolicyTokensOperations,
 } from "./classic/index.js";
-export { PageSettings, ContinuablePage, PagedAsyncIterableIterator };
-export { AzureClouds, AzureSupportedClouds };
+export type { PageSettings, ContinuablePage, PagedAsyncIterableIterator };
+export { AzureClouds };
+export type { AzureSupportedClouds };
+export { RestError, isRestError } from "@azure/core-rest-pipeline";
