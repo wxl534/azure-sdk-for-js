@@ -196,6 +196,20 @@
         "default": "./dist/commonjs/api/policyDefinitions/index.js"
       }
     },
+    "./api/dataPolicyManifests": {
+      "browser": {
+        "types": "./dist/browser/api/dataPolicyManifests/index.d.ts",
+        "default": "./dist/browser/api/dataPolicyManifests/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/api/dataPolicyManifests/index.d.ts",
+        "default": "./dist/esm/api/dataPolicyManifests/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/api/dataPolicyManifests/index.d.ts",
+        "default": "./dist/commonjs/api/dataPolicyManifests/index.js"
+      }
+    },
     "./api/policyAssignments": {
       "browser": {
         "types": "./dist/browser/api/policyAssignments/index.d.ts",
