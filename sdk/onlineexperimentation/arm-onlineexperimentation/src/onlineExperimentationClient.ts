@@ -2,19 +2,27 @@
 // Licensed under the MIT License.
 
 import {
-  createOnlineExperimentation,
   OnlineExperimentationContext,
   OnlineExperimentationClientOptionalParams,
+  createOnlineExperimentation,
 } from "./api/index.js";
 import {
   OnlineExperimentationWorkspacesOperations,
   _getOnlineExperimentationWorkspacesOperations,
 } from "./classic/onlineExperimentationWorkspaces/index.js";
 import { OperationsOperations, _getOperationsOperations } from "./classic/operations/index.js";
-import { Pipeline } from "@azure/core-rest-pipeline";
+import {
+  PrivateEndpointConnectionsOperations,
+  _getPrivateEndpointConnectionsOperations,
+} from "./classic/privateEndpointConnections/index.js";
+import {
+  PrivateLinkResourcesOperations,
+  _getPrivateLinkResourcesOperations,
+} from "./classic/privateLinkResources/index.js";
 import { TokenCredential } from "@azure/core-auth";
+import { Pipeline } from "@azure/core-rest-pipeline";
 
-export { type OnlineExperimentationClientOptionalParams } from "./api/onlineExperimentationContext.js";
+export type { OnlineExperimentationClientOptionalParams } from "./api/onlineExperimentationContext.js";
 
 export class OnlineExperimentationClient {
   private _client: OnlineExperimentationContext;
@@ -36,12 +44,18 @@ export class OnlineExperimentationClient {
       userAgentOptions: { userAgentPrefix },
     });
     this.pipeline = this._client.pipeline;
+    this.privateLinkResources = _getPrivateLinkResourcesOperations(this._client);
+    this.privateEndpointConnections = _getPrivateEndpointConnectionsOperations(this._client);
     this.onlineExperimentationWorkspaces = _getOnlineExperimentationWorkspacesOperations(
       this._client,
     );
     this.operations = _getOperationsOperations(this._client);
   }
 
+  /** The operation groups for privateLinkResources */
+  public readonly privateLinkResources: PrivateLinkResourcesOperations;
+  /** The operation groups for privateEndpointConnections */
+  public readonly privateEndpointConnections: PrivateEndpointConnectionsOperations;
   /** The operation groups for onlineExperimentationWorkspaces */
   public readonly onlineExperimentationWorkspaces: OnlineExperimentationWorkspacesOperations;
   /** The operation groups for operations */

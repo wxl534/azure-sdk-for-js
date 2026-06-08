@@ -7,7 +7,7 @@ For the complete API surface, see the corresponding -node.api.md file.
 ===================================================================
 --- NodeJS
 +++ browser
-@@ -523,13 +523,14 @@
+@@ -620,13 +620,14 @@
      updateIntervalInMs?: number;
  }
  
@@ -23,7 +23,7 @@ For the complete API surface, see the corresponding -node.api.md file.
  // @public
  export type CacheLifeCycleState = string;
  
-@@ -599,16 +600,16 @@
+@@ -696,16 +697,16 @@
  }
  
  // @public
@@ -36,9 +36,11 @@ For the complete API surface, see the corresponding -node.api.md file.
 +    get: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, options?: CachesGetOptionalParams) => Promise<Cache_2>;
 +    list: (resourceGroupName: string, accountName: string, poolName: string, options?: CachesListOptionalParams) => PagedAsyncIterableIterator<Cache_2>;
      listPeeringPassphrases: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, options?: CachesListPeeringPassphrasesOptionalParams) => Promise<PeeringPassphrases>;
-     poolChange: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, body: PoolChangeRequest, options?: CachesPoolChangeOptionalParams) => PollerLike<OperationState<void>, void>;
-     resetSmbPassword: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, options?: CachesResetSmbPasswordOptionalParams) => PollerLike<OperationState<void>, void>;
+-    poolChange: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, body: PoolChangeRequest, options?: CachesPoolChangeOptionalParams) => PollerLike<OperationState<Cache>, Cache>;
+-    resetSmbPassword: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, options?: CachesResetSmbPasswordOptionalParams) => PollerLike<OperationState<Cache>, Cache>;
 -    update: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, body: CacheUpdate, options?: CachesUpdateOptionalParams) => PollerLike<OperationState<Cache>, Cache>;
++    poolChange: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, body: PoolChangeRequest, options?: CachesPoolChangeOptionalParams) => PollerLike<OperationState<Cache_2>, Cache_2>;
++    resetSmbPassword: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, options?: CachesResetSmbPasswordOptionalParams) => PollerLike<OperationState<Cache_2>, Cache_2>;
 +    update: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, body: CacheUpdate, options?: CachesUpdateOptionalParams) => PollerLike<OperationState<Cache_2>, Cache_2>;
  }
  

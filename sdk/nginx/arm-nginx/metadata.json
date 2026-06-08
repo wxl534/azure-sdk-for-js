@@ -2,7 +2,7 @@
   "apiVersions": {
     "Nginx.NginxPlus": "2025-11-01"
   },
-  "emitterVersion": "0.50.4",
+  "emitterVersion": "0.54.0-alpha.20260605.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Nginx.NginxPlus",
     "CrossLanguageDefinitionId": {
