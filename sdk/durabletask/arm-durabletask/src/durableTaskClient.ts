@@ -1,18 +1,24 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { DurableTaskContext, DurableTaskClientOptionalParams } from "./api/index.js";
-import { createDurableTask } from "./api/index.js";
-import type { OperationsOperations } from "./classic/operations/index.js";
-import { _getOperationsOperations } from "./classic/operations/index.js";
-import type { RetentionPoliciesOperations } from "./classic/retentionPolicies/index.js";
-import { _getRetentionPoliciesOperations } from "./classic/retentionPolicies/index.js";
-import type { SchedulersOperations } from "./classic/schedulers/index.js";
-import { _getSchedulersOperations } from "./classic/schedulers/index.js";
-import type { TaskHubsOperations } from "./classic/taskHubs/index.js";
-import { _getTaskHubsOperations } from "./classic/taskHubs/index.js";
-import type { TokenCredential } from "@azure/core-auth";
-import type { Pipeline } from "@azure/core-rest-pipeline";
+import {
+  DurableTaskContext,
+  DurableTaskClientOptionalParams,
+  createDurableTask,
+} from "./api/index.js";
+import { OperationsOperations, _getOperationsOperations } from "./classic/operations/index.js";
+import {
+  RetentionPoliciesOperations,
+  _getRetentionPoliciesOperations,
+} from "./classic/retentionPolicies/index.js";
+import { SchedulersOperations, _getSchedulersOperations } from "./classic/schedulers/index.js";
+import { TaskHubsOperations, _getTaskHubsOperations } from "./classic/taskHubs/index.js";
+import {
+  TransparentDataEncryptionsOperations,
+  _getTransparentDataEncryptionsOperations,
+} from "./classic/transparentDataEncryptions/index.js";
+import { TokenCredential } from "@azure/core-auth";
+import { Pipeline } from "@azure/core-rest-pipeline";
 
 export type { DurableTaskClientOptionalParams } from "./api/durableTaskContext.js";
 
@@ -35,12 +41,15 @@ export class DurableTaskClient {
       userAgentOptions: { userAgentPrefix },
     });
     this.pipeline = this._client.pipeline;
+    this.transparentDataEncryptions = _getTransparentDataEncryptionsOperations(this._client);
     this.retentionPolicies = _getRetentionPoliciesOperations(this._client);
     this.taskHubs = _getTaskHubsOperations(this._client);
     this.schedulers = _getSchedulersOperations(this._client);
     this.operations = _getOperationsOperations(this._client);
   }
 
+  /** The operation groups for transparentDataEncryptions */
+  public readonly transparentDataEncryptions: TransparentDataEncryptionsOperations;
   /** The operation groups for retentionPolicies */
   public readonly retentionPolicies: RetentionPoliciesOperations;
   /** The operation groups for taskHubs */

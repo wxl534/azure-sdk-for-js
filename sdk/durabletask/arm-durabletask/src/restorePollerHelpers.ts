@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { DurableTaskClient } from "./durableTaskClient.js";
+import { DurableTaskClient } from "./durableTaskClient.js";
 import {
   _$deleteDeserialize,
-  _updateDeserialize,
   _createOrReplaceDeserialize,
+} from "./api/transparentDataEncryptions/operations.js";
+import {
+  _$deleteDeserialize as _$deleteDeserializeRetentionPolicies,
+  _updateDeserialize,
+  _createOrReplaceDeserialize as _createOrReplaceDeserializeRetentionPolicies,
 } from "./api/retentionPolicies/operations.js";
 import {
   _$deleteDeserialize as _$deleteDeserializeTaskHubs,
@@ -20,10 +24,14 @@ import {
   _createOrUpdateDeserialize as _createOrUpdateDeserializeSchedulers,
 } from "./api/schedulers/operations.js";
 import { getLongRunningPoller } from "./static-helpers/pollingHelpers.js";
-import type { OperationOptions, PathUncheckedResponse } from "@azure-rest/core-client";
-import type { AbortSignalLike } from "@azure/abort-controller";
-import type { PollerLike, OperationState, ResourceLocationConfig } from "@azure/core-lro";
-import { deserializeState } from "@azure/core-lro";
+import { OperationOptions, PathUncheckedResponse } from "@azure-rest/core-client";
+import { AbortSignalLike } from "@azure/abort-controller";
+import {
+  PollerLike,
+  OperationState,
+  deserializeState,
+  ResourceLocationConfig,
+} from "@azure/core-lro";
 
 export interface RestorePollerOptions<
   TResult,
@@ -90,12 +98,19 @@ interface DeserializationHelper {
 }
 
 const deserializeMap: Record<string, DeserializationHelper> = {
-  "DELETE /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DurableTask/schedulers/{schedulerName}/retentionPolicies/default":
+  "DELETE /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DurableTask/schedulers/{schedulerName}/transparentDataEncryptions/default":
     { deserializer: _$deleteDeserialize, expectedStatuses: ["202", "204", "200"] },
+  "PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DurableTask/schedulers/{schedulerName}/transparentDataEncryptions/default":
+    { deserializer: _createOrReplaceDeserialize, expectedStatuses: ["200", "201", "202"] },
+  "DELETE /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DurableTask/schedulers/{schedulerName}/retentionPolicies/default":
+    { deserializer: _$deleteDeserializeRetentionPolicies, expectedStatuses: ["202", "204", "200"] },
   "PATCH /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DurableTask/schedulers/{schedulerName}/retentionPolicies/default":
     { deserializer: _updateDeserialize, expectedStatuses: ["200", "202", "201"] },
   "PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DurableTask/schedulers/{schedulerName}/retentionPolicies/default":
-    { deserializer: _createOrReplaceDeserialize, expectedStatuses: ["200", "201", "202"] },
+    {
+      deserializer: _createOrReplaceDeserializeRetentionPolicies,
+      expectedStatuses: ["200", "201", "202"],
+    },
   "DELETE /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DurableTask/schedulers/{schedulerName}/taskHubs/{taskHubName}":
     { deserializer: _$deleteDeserializeTaskHubs, expectedStatuses: ["202", "204", "200"] },
   "PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DurableTask/schedulers/{schedulerName}/taskHubs/{taskHubName}":
