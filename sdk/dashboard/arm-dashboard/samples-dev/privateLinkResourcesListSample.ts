@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to list all private link resources information for this grafana resource
  *
  * @summary list all private link resources information for this grafana resource
- * x-ms-original-file: 2025-08-01/PrivateLinkResources_List.json
+ * x-ms-original-file: 2025-09-01-preview/PrivateLinkResources_List.json
  */
 async function privateLinkResourcesList(): Promise<void> {
   const credential = new DefaultAzureCredential();

@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get the properties of a specific dashboard for grafana resource.
  *
  * @summary get the properties of a specific dashboard for grafana resource.
- * x-ms-original-file: 2025-08-01/Dashboard_Get.json
+ * x-ms-original-file: 2025-09-01-preview/Dashboard_Get.json
  */
 async function dashboardGet(): Promise<void> {
   const credential = new DefaultAzureCredential();

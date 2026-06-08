@@ -1,31 +1,39 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type {
+import {
   ConfluentManagementContext,
   ConfluentManagementClientOptionalParams,
+  createConfluentManagement,
 } from "./api/index.js";
-import { createConfluentManagement } from "./api/index.js";
-import type { AccessOperations } from "./classic/access/index.js";
-import { _getAccessOperations } from "./classic/access/index.js";
-import type { ClusterOperations } from "./classic/cluster/index.js";
-import { _getClusterOperations } from "./classic/cluster/index.js";
-import type { ConnectorOperations } from "./classic/connector/index.js";
-import { _getConnectorOperations } from "./classic/connector/index.js";
-import type { EnvironmentOperations } from "./classic/environment/index.js";
-import { _getEnvironmentOperations } from "./classic/environment/index.js";
-import type { MarketplaceAgreementsOperations } from "./classic/marketplaceAgreements/index.js";
-import { _getMarketplaceAgreementsOperations } from "./classic/marketplaceAgreements/index.js";
-import type { OrganizationOperations } from "./classic/organization/index.js";
-import { _getOrganizationOperations } from "./classic/organization/index.js";
-import type { OrganizationOperationsOperations } from "./classic/organizationOperations/index.js";
-import { _getOrganizationOperationsOperations } from "./classic/organizationOperations/index.js";
-import type { TopicsOperations } from "./classic/topics/index.js";
-import { _getTopicsOperations } from "./classic/topics/index.js";
-import type { ValidationsOperations } from "./classic/validations/index.js";
-import { _getValidationsOperations } from "./classic/validations/index.js";
-import type { TokenCredential } from "@azure/core-auth";
-import type { Pipeline } from "@azure/core-rest-pipeline";
+import { AccessOperations, _getAccessOperations } from "./classic/access/index.js";
+import {
+  AccessPointResourcesOperations,
+  _getAccessPointResourcesOperations,
+} from "./classic/accessPointResources/index.js";
+import { ClusterOperations, _getClusterOperations } from "./classic/cluster/index.js";
+import { ConnectorOperations, _getConnectorOperations } from "./classic/connector/index.js";
+import { EnvironmentOperations, _getEnvironmentOperations } from "./classic/environment/index.js";
+import {
+  MarketplaceAgreementsOperations,
+  _getMarketplaceAgreementsOperations,
+} from "./classic/marketplaceAgreements/index.js";
+import {
+  NetworkGatewayResourcesOperations,
+  _getNetworkGatewayResourcesOperations,
+} from "./classic/networkGatewayResources/index.js";
+import {
+  OrganizationOperations,
+  _getOrganizationOperations,
+} from "./classic/organization/index.js";
+import {
+  OrganizationOperationsOperations,
+  _getOrganizationOperationsOperations,
+} from "./classic/organizationOperations/index.js";
+import { TopicsOperations, _getTopicsOperations } from "./classic/topics/index.js";
+import { ValidationsOperations, _getValidationsOperations } from "./classic/validations/index.js";
+import { TokenCredential } from "@azure/core-auth";
+import { Pipeline } from "@azure/core-rest-pipeline";
 
 export type { ConfluentManagementClientOptionalParams } from "./api/confluentManagementContext.js";
 
@@ -72,6 +80,8 @@ export class ConfluentManagementClient {
     this.access = _getAccessOperations(this._client);
     this.organization = _getOrganizationOperations(this._client);
     this.organizationOperations = _getOrganizationOperationsOperations(this._client);
+    this.accessPointResources = _getAccessPointResourcesOperations(this._client);
+    this.networkGatewayResources = _getNetworkGatewayResourcesOperations(this._client);
   }
 
   /** The operation groups for validations */
@@ -92,4 +102,8 @@ export class ConfluentManagementClient {
   public readonly organization: OrganizationOperations;
   /** The operation groups for organizationOperations */
   public readonly organizationOperations: OrganizationOperationsOperations;
+  /** The operation groups for accessPointResources */
+  public readonly accessPointResources: AccessPointResourcesOperations;
+  /** The operation groups for networkGatewayResources */
+  public readonly networkGatewayResources: NetworkGatewayResourcesOperations;
 }

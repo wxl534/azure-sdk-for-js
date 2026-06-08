@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update a workspace for Grafana resource.
  *
  * @summary update a workspace for Grafana resource.
- * x-ms-original-file: 2025-08-01/Grafana_Update.json
+ * x-ms-original-file: 2025-09-01-preview/Grafana_Update.json
  */
 async function grafanaUpdate(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -18,10 +18,7 @@ async function grafanaUpdate(): Promise<void> {
     properties: {
       apiKey: "Enabled",
       deterministicOutboundIP: "Enabled",
-      enterpriseConfigurations: {
-        marketplaceAutoRenew: "Enabled",
-        marketplacePlanId: "myPlanId",
-      },
+      enterpriseConfigurations: { marketplaceAutoRenew: "Enabled", marketplacePlanId: "myPlanId" },
       grafanaConfigurations: {
         security: { csrfAlwaysCheck: false },
         smtp: {

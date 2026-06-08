@@ -156,6 +156,20 @@
         "default": "./dist/commonjs/api/grafana/index.js"
       }
     },
+    "./api/dashboardDefinitions": {
+      "browser": {
+        "types": "./dist/browser/api/dashboardDefinitions/index.d.ts",
+        "default": "./dist/browser/api/dashboardDefinitions/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/api/dashboardDefinitions/index.d.ts",
+        "default": "./dist/esm/api/dashboardDefinitions/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/api/dashboardDefinitions/index.d.ts",
+        "default": "./dist/commonjs/api/dashboardDefinitions/index.js"
+      }
+    },
     "./api/managedDashboards": {
       "browser": {
         "types": "./dist/browser/api/managedDashboards/index.d.ts",
