@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update a IntegrationFabric
  *
  * @summary update a IntegrationFabric
- * x-ms-original-file: 2025-08-01/IntegrationFabrics_Update.json
+ * x-ms-original-file: 2025-09-01-preview/IntegrationFabrics_Update.json
  */
 async function integrationFabricsUpdate(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -18,10 +18,7 @@ async function integrationFabricsUpdate(): Promise<void> {
     "myResourceGroup",
     "myWorkspace",
     "sampleIntegration",
-    {
-      properties: { scenarios: ["scenario1"] },
-      tags: { Environment: "Dev 2" },
-    },
+    { properties: { scenarios: ["scenario1"] }, tags: { Environment: "Dev 2" } },
   );
   console.log(result);
 }

@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update a dashboard for Grafana resource.
  *
  * @summary update a dashboard for Grafana resource.
- * x-ms-original-file: 2025-08-01/Dashboard_Update.json
+ * x-ms-original-file: 2025-09-01-preview/Dashboard_Update.json
  */
 async function dashboardUpdate(): Promise<void> {
   const credential = new DefaultAzureCredential();
