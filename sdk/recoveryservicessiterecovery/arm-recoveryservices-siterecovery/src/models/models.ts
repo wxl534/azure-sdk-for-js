@@ -1180,6 +1180,12 @@ export interface A2AProtectedManagedDiskDetails {
   failoverDiskName?: string;
   /** The test failover name for the managed disk. */
   tfoDiskName?: string;
+  /** The network access policy for the recovery managed disk. */
+  recoveryNetworkAccessPolicy?: DiskNetworkAccessPolicy;
+  /** The recovery disk access Arm Id. */
+  recoveryDiskAccessId?: string;
+  /** The public network access setting for the recovery managed disk. */
+  recoveryPublicNetworkAccess?: DiskPublicNetworkAccess;
 }
 
 export function a2AProtectedManagedDiskDetailsSerializer(
@@ -1218,6 +1224,9 @@ export function a2AProtectedManagedDiskDetailsSerializer(
     kekKeyVaultArmId: item["kekKeyVaultArmId"],
     failoverDiskName: item["failoverDiskName"],
     tfoDiskName: item["tfoDiskName"],
+    recoveryNetworkAccessPolicy: item["recoveryNetworkAccessPolicy"],
+    recoveryDiskAccessId: item["recoveryDiskAccessId"],
+    recoveryPublicNetworkAccess: item["recoveryPublicNetworkAccess"],
   };
 }
 
@@ -1257,8 +1266,50 @@ export function a2AProtectedManagedDiskDetailsDeserializer(
     kekKeyVaultArmId: item["kekKeyVaultArmId"],
     failoverDiskName: item["failoverDiskName"],
     tfoDiskName: item["tfoDiskName"],
+    recoveryNetworkAccessPolicy: item["recoveryNetworkAccessPolicy"],
+    recoveryDiskAccessId: item["recoveryDiskAccessId"],
+    recoveryPublicNetworkAccess: item["recoveryPublicNetworkAccess"],
   };
 }
+
+/** The network access policy for managed disks. */
+export enum KnownDiskNetworkAccessPolicy {
+  /** Allow all network access. */
+  AllowAll = "AllowAll",
+  /** Allow private access through disk access resource. */
+  AllowPrivate = "AllowPrivate",
+  /** Deny all network access. */
+  DenyAll = "DenyAll",
+}
+
+/**
+ * The network access policy for managed disks. \
+ * {@link KnownDiskNetworkAccessPolicy} can be used interchangeably with DiskNetworkAccessPolicy,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **AllowAll**: Allow all network access. \
+ * **AllowPrivate**: Allow private access through disk access resource. \
+ * **DenyAll**: Deny all network access.
+ */
+export type DiskNetworkAccessPolicy = string;
+
+/** The public network access setting for managed disks. */
+export enum KnownDiskPublicNetworkAccess {
+  /** Public network access is enabled. */
+  Enabled = "Enabled",
+  /** Public network access is disabled. */
+  Disabled = "Disabled",
+}
+
+/**
+ * The public network access setting for managed disks. \
+ * {@link KnownDiskPublicNetworkAccess} can be used interchangeably with DiskPublicNetworkAccess,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Enabled**: Public network access is enabled. \
+ * **Disabled**: Public network access is disabled.
+ */
+export type DiskPublicNetworkAccess = string;
 
 export function vmNicDetailsArrayDeserializer(result: Array<VMNicDetails>): any[] {
   return result.map((item) => {
@@ -3334,6 +3385,8 @@ export interface InMageRcmProtectedDiskDetails {
   readonly logStorageAccountId?: string;
   /** The DiskEncryptionSet ARM Id. */
   readonly diskEncryptionSetId?: string;
+  /** The ConfidentialDiskEncryptionSet ARM Id. */
+  readonly confidentialDiskEncryptionSetId?: string;
   /** The ARM Id of the seed managed disk. */
   readonly seedManagedDiskId?: string;
   /** The uri of the seed blob. */
@@ -3375,6 +3428,7 @@ export function inMageRcmProtectedDiskDetailsDeserializer(
     diskState: item["diskState"],
     logStorageAccountId: item["logStorageAccountId"],
     diskEncryptionSetId: item["diskEncryptionSetId"],
+    confidentialDiskEncryptionSetId: item["confidentialDiskEncryptionSetId"],
     seedManagedDiskId: item["seedManagedDiskId"],
     seedBlobUri: item["seedBlobUri"],
     targetManagedDiskId: item["targetManagedDiskId"],
@@ -3504,7 +3558,7 @@ export interface InMageRcmMobilityAgentDetails {
   /** A value indicating whether agent is upgradeable or not. */
   readonly isUpgradeable?: string;
   /** The agent auto reinstall state. */
-  readonly agentReinstallState?: MobilityAgentReinstallType[];
+  readonly agentReinstallState?: MobilityAgentReinstallType;
   /** The last agent reinstall type. */
   readonly lastAgentReinstallType?: string;
   /** The agent reinstall job Id. */
@@ -3553,11 +3607,7 @@ export function inMageRcmMobilityAgentDetailsDeserializer(
           return p;
         }),
     isUpgradeable: item["isUpgradeable"],
-    agentReinstallState: !item["agentReinstallState"]
-      ? item["agentReinstallState"]
-      : item["agentReinstallState"].map((p: any) => {
-          return p;
-        }),
+    agentReinstallState: item["agentReinstallState"],
     lastAgentReinstallType: item["lastAgentReinstallType"],
     agentReinstallJobId: item["agentReinstallJobId"],
     agentReinstallAttemptToVersion: item["agentReinstallAttemptToVersion"],
@@ -4444,6 +4494,12 @@ export interface A2AVmManagedDiskInputDetails {
   recoveryDiskEncryptionSetId?: string;
   /** The recovery disk encryption information (for one / single pass flows). */
   diskEncryptionInfo?: DiskEncryptionInfo;
+  /** The network access policy for the recovery managed disk. */
+  recoveryNetworkAccessPolicy?: DiskNetworkAccessPolicy;
+  /** The recovery disk access Arm Id. */
+  recoveryDiskAccessId?: string;
+  /** The public network access setting for the recovery managed disk. */
+  recoveryPublicNetworkAccess?: DiskPublicNetworkAccess;
 }
 
 export function a2AVmManagedDiskInputDetailsSerializer(item: A2AVmManagedDiskInputDetails): any {
@@ -4457,6 +4513,9 @@ export function a2AVmManagedDiskInputDetailsSerializer(item: A2AVmManagedDiskInp
     diskEncryptionInfo: !item["diskEncryptionInfo"]
       ? item["diskEncryptionInfo"]
       : diskEncryptionInfoSerializer(item["diskEncryptionInfo"]),
+    recoveryNetworkAccessPolicy: item["recoveryNetworkAccessPolicy"],
+    recoveryDiskAccessId: item["recoveryDiskAccessId"],
+    recoveryPublicNetworkAccess: item["recoveryPublicNetworkAccess"],
   };
 }
 
@@ -5098,6 +5157,8 @@ export interface InMageRcmDiskInput {
   diskType: DiskAccountType;
   /** The DiskEncryptionSet ARM Id. */
   diskEncryptionSetId?: string;
+  /** The ConfidentialDiskEncryptionSet ARM Id. */
+  confidentialDiskEncryptionSetId?: string;
   /** The logical sector size (in bytes), 512 by default. */
   sectorSizeInBytes?: number;
   /** The number of IOPS allowed for Premium V2 and Ultra disks. */
@@ -5114,6 +5175,7 @@ export function inMageRcmDiskInputSerializer(item: InMageRcmDiskInput): any {
     logStorageAccountId: item["logStorageAccountId"],
     diskType: item["diskType"],
     diskEncryptionSetId: item["diskEncryptionSetId"],
+    confidentialDiskEncryptionSetId: item["confidentialDiskEncryptionSetId"],
     sectorSizeInBytes: item["sectorSizeInBytes"],
     iops: item["iops"],
     throughputInMbps: item["throughputInMbps"],
@@ -5129,6 +5191,8 @@ export interface InMageRcmDisksDefaultInput {
   diskType: DiskAccountType;
   /** The DiskEncryptionSet ARM Id. */
   diskEncryptionSetId?: string;
+  /** The ConfidentialDiskEncryptionSet ARM Id. */
+  confidentialDiskEncryptionSetId?: string;
   /** The logical sector size (in bytes), 512 by default. */
   sectorSizeInBytes?: number;
   /** The number of IOPS allowed for Premium V2 and Ultra disks. */
@@ -5144,6 +5208,7 @@ export function inMageRcmDisksDefaultInputSerializer(item: InMageRcmDisksDefault
     logStorageAccountId: item["logStorageAccountId"],
     diskType: item["diskType"],
     diskEncryptionSetId: item["diskEncryptionSetId"],
+    confidentialDiskEncryptionSetId: item["confidentialDiskEncryptionSetId"],
     sectorSizeInBytes: item["sectorSizeInBytes"],
     iops: item["iops"],
     throughputInMbps: item["throughputInMbps"],
@@ -13958,6 +14023,8 @@ export interface VMwareCbtProtectedDiskDetails {
   readonly logStorageAccountSasSecretName?: string;
   /** The DiskEncryptionSet ARM Id. */
   readonly diskEncryptionSetId?: string;
+  /** The ConfidentialDiskEncryptionSet ARM Id. */
+  readonly confidentialDiskEncryptionSetId?: string;
   /** The ARM Id of the seed managed disk. */
   readonly seedManagedDiskId?: string;
   /** The uri of the seed blob. */
@@ -13993,6 +14060,7 @@ export function vMwareCbtProtectedDiskDetailsDeserializer(
     logStorageAccountId: item["logStorageAccountId"],
     logStorageAccountSasSecretName: item["logStorageAccountSasSecretName"],
     diskEncryptionSetId: item["diskEncryptionSetId"],
+    confidentialDiskEncryptionSetId: item["confidentialDiskEncryptionSetId"],
     seedManagedDiskId: item["seedManagedDiskId"],
     seedBlobUri: item["seedBlobUri"],
     targetManagedDiskId: item["targetManagedDiskId"],
@@ -14365,6 +14433,8 @@ export interface VMwareCbtDiskInput {
   logStorageAccountSasSecretName: string;
   /** The DiskEncryptionSet ARM Id. */
   diskEncryptionSetId?: string;
+  /** The ConfidentialDiskEncryptionSet ARM Id. */
+  confidentialDiskEncryptionSetId?: string;
   /** The logical sector size (in bytes), 512 by default. */
   sectorSizeInBytes?: number;
   /** The number of IOPS allowed for Premium V2 and Ultra disks. */
@@ -14383,6 +14453,7 @@ export function vMwareCbtDiskInputSerializer(item: VMwareCbtDiskInput): any {
     logStorageAccountId: item["logStorageAccountId"],
     logStorageAccountSasSecretName: item["logStorageAccountSasSecretName"],
     diskEncryptionSetId: item["diskEncryptionSetId"],
+    confidentialDiskEncryptionSetId: item["confidentialDiskEncryptionSetId"],
     sectorSizeInBytes: item["sectorSizeInBytes"],
     iops: item["iops"],
     throughputInMbps: item["throughputInMbps"],
@@ -20193,4 +20264,8 @@ export type Severity = string;
 export enum KnownVersions {
   /** The 2025-08-01 API version. */
   V20250801 = "2025-08-01",
+  /** The 2026-01-01 API version. */
+  V20260101 = "2026-01-01",
+  /** The 2026-02-01 API version. */
+  V20260201 = "2026-02-01",
 }

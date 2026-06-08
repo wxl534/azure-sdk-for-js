@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { PostgreSQLManagementFlexibleServerContext } from "../../api/postgreSQLManagementFlexibleServerContext.js";
+import { PostgreSQLManagementFlexibleServerContext } from "../../api/postgreSQLManagementFlexibleServerContext.js";
 import {
+  startMajorVersionUpgradePrecheck,
   migrateNetworkMode,
   stop,
   start,
@@ -14,7 +15,8 @@ import {
   createOrUpdate,
   get,
 } from "../../api/servers/operations.js";
-import type {
+import {
+  ServersStartMajorVersionUpgradePrecheckOptionalParams,
   ServersMigrateNetworkModeOptionalParams,
   ServersStopOptionalParams,
   ServersStartOptionalParams,
@@ -26,15 +28,49 @@ import type {
   ServersCreateOrUpdateOptionalParams,
   ServersGetOptionalParams,
 } from "../../api/servers/options.js";
-import type { Server, ServerForPatch, MigrateNetworkStatus } from "../../models/models.js";
-import type { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
-import type { SimplePollerLike } from "../../static-helpers/simplePollerHelpers.js";
-import { getSimplePoller } from "../../static-helpers/simplePollerHelpers.js";
-import type { PollerLike, OperationState } from "@azure/core-lro";
+import {
+  Server,
+  ServerForPatch,
+  MigrateNetworkStatus,
+  StartMajorVersionUpgradePrecheckRequest,
+  StartMajorVersionUpgradePrecheckResponse,
+} from "../../models/models.js";
+import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
+import { SimplePollerLike, getSimplePoller } from "../../static-helpers/simplePollerHelpers.js";
+import { PollerLike, OperationState } from "@azure/core-lro";
 
 /** Interface representing a Servers operations. */
 export interface ServersOperations {
-  /** Migrates the network configuration of a PostgreSQL flexible server from customer owned VNET to Microsoft owned VNET with support for private endpoints, or from Microsoft owned VNET with no support for private endpoints to Microsoft owned VNET with support for private endpoints. */
+  /** Start Major Version Upgrade Prechecks. */
+  startMajorVersionUpgradePrecheck: (
+    resourceGroupName: string,
+    serverName: string,
+    body: StartMajorVersionUpgradePrecheckRequest,
+    options?: ServersStartMajorVersionUpgradePrecheckOptionalParams,
+  ) => PollerLike<
+    OperationState<StartMajorVersionUpgradePrecheckResponse>,
+    StartMajorVersionUpgradePrecheckResponse
+  >;
+  /** @deprecated use startMajorVersionUpgradePrecheck instead */
+  beginStartMajorVersionUpgradePrecheck: (
+    resourceGroupName: string,
+    serverName: string,
+    body: StartMajorVersionUpgradePrecheckRequest,
+    options?: ServersStartMajorVersionUpgradePrecheckOptionalParams,
+  ) => Promise<
+    SimplePollerLike<
+      OperationState<StartMajorVersionUpgradePrecheckResponse>,
+      StartMajorVersionUpgradePrecheckResponse
+    >
+  >;
+  /** @deprecated use startMajorVersionUpgradePrecheck instead */
+  beginStartMajorVersionUpgradePrecheckAndWait: (
+    resourceGroupName: string,
+    serverName: string,
+    body: StartMajorVersionUpgradePrecheckRequest,
+    options?: ServersStartMajorVersionUpgradePrecheckOptionalParams,
+  ) => Promise<StartMajorVersionUpgradePrecheckResponse>;
+  /** Migrates an Azure Database for PostgreSQL server from VNet integration to a Private Link network model. */
   migrateNetworkMode: (
     resourceGroupName: string,
     serverName: string,
@@ -116,11 +152,6 @@ export interface ServersOperations {
     options?: ServersListByResourceGroupOptionalParams,
   ) => PagedAsyncIterableIterator<Server>;
   /** Deletes or drops an existing server. */
-  /**
-   *  @fixme delete is a reserved word that cannot be used as an operation name.
-   *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
-   *         to the operation to override the generated name.
-   */
   delete: (
     resourceGroupName: string,
     serverName: string,
@@ -190,6 +221,42 @@ export interface ServersOperations {
 
 function _getServers(context: PostgreSQLManagementFlexibleServerContext) {
   return {
+    startMajorVersionUpgradePrecheck: (
+      resourceGroupName: string,
+      serverName: string,
+      body: StartMajorVersionUpgradePrecheckRequest,
+      options?: ServersStartMajorVersionUpgradePrecheckOptionalParams,
+    ) => startMajorVersionUpgradePrecheck(context, resourceGroupName, serverName, body, options),
+    beginStartMajorVersionUpgradePrecheck: async (
+      resourceGroupName: string,
+      serverName: string,
+      body: StartMajorVersionUpgradePrecheckRequest,
+      options?: ServersStartMajorVersionUpgradePrecheckOptionalParams,
+    ) => {
+      const poller = startMajorVersionUpgradePrecheck(
+        context,
+        resourceGroupName,
+        serverName,
+        body,
+        options,
+      );
+      await poller.submitted();
+      return getSimplePoller(poller);
+    },
+    beginStartMajorVersionUpgradePrecheckAndWait: async (
+      resourceGroupName: string,
+      serverName: string,
+      body: StartMajorVersionUpgradePrecheckRequest,
+      options?: ServersStartMajorVersionUpgradePrecheckOptionalParams,
+    ) => {
+      return await startMajorVersionUpgradePrecheck(
+        context,
+        resourceGroupName,
+        serverName,
+        body,
+        options,
+      );
+    },
     migrateNetworkMode: (
       resourceGroupName: string,
       serverName: string,

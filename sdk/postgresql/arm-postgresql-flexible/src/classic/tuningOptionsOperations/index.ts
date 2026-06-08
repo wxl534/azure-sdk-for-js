@@ -1,70 +1,74 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { PostgreSQLManagementFlexibleServerContext } from "../../api/postgreSQLManagementFlexibleServerContext.js";
-import { listRecommendations, listByServer, get } from "../../api/tuningOptions/operations.js";
-import type {
-  TuningOptionsListRecommendationsOptionalParams,
-  TuningOptionsListByServerOptionalParams,
-  TuningOptionsGetOptionalParams,
-} from "../../api/tuningOptions/options.js";
-import type {
+import { PostgreSQLManagementFlexibleServerContext } from "../../api/postgreSQLManagementFlexibleServerContext.js";
+import {
+  listRecommendations,
+  listByServer,
+  get,
+} from "../../api/tuningOptionsOperations/operations.js";
+import {
+  TuningOptionsOperationsListRecommendationsOptionalParams,
+  TuningOptionsOperationsListByServerOptionalParams,
+  TuningOptionsOperationsGetOptionalParams,
+} from "../../api/tuningOptionsOperations/options.js";
+import {
   TuningOptions,
   TuningOptionParameterEnum,
   ObjectRecommendation,
 } from "../../models/models.js";
-import type { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
+import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
 
-/** Interface representing a TuningOptions operations. */
-export interface TuningOptionsOperations {
+/** Interface representing a TuningOptionsOperations operations. */
+export interface TuningOptionsOperationsOperations {
   /** Lists available object recommendations. */
   listRecommendations: (
     resourceGroupName: string,
     serverName: string,
     tuningOption: TuningOptionParameterEnum,
-    options?: TuningOptionsListRecommendationsOptionalParams,
+    options?: TuningOptionsOperationsListRecommendationsOptionalParams,
   ) => PagedAsyncIterableIterator<ObjectRecommendation>;
   /** Lists the tuning options of a server. */
   listByServer: (
     resourceGroupName: string,
     serverName: string,
-    options?: TuningOptionsListByServerOptionalParams,
+    options?: TuningOptionsOperationsListByServerOptionalParams,
   ) => PagedAsyncIterableIterator<TuningOptions>;
   /** Gets the tuning options of a server. */
   get: (
     resourceGroupName: string,
     serverName: string,
     tuningOption: TuningOptionParameterEnum,
-    options?: TuningOptionsGetOptionalParams,
+    options?: TuningOptionsOperationsGetOptionalParams,
   ) => Promise<TuningOptions>;
 }
 
-function _getTuningOptions(context: PostgreSQLManagementFlexibleServerContext) {
+function _getTuningOptionsOperations(context: PostgreSQLManagementFlexibleServerContext) {
   return {
     listRecommendations: (
       resourceGroupName: string,
       serverName: string,
       tuningOption: TuningOptionParameterEnum,
-      options?: TuningOptionsListRecommendationsOptionalParams,
+      options?: TuningOptionsOperationsListRecommendationsOptionalParams,
     ) => listRecommendations(context, resourceGroupName, serverName, tuningOption, options),
     listByServer: (
       resourceGroupName: string,
       serverName: string,
-      options?: TuningOptionsListByServerOptionalParams,
+      options?: TuningOptionsOperationsListByServerOptionalParams,
     ) => listByServer(context, resourceGroupName, serverName, options),
     get: (
       resourceGroupName: string,
       serverName: string,
       tuningOption: TuningOptionParameterEnum,
-      options?: TuningOptionsGetOptionalParams,
+      options?: TuningOptionsOperationsGetOptionalParams,
     ) => get(context, resourceGroupName, serverName, tuningOption, options),
   };
 }
 
-export function _getTuningOptionsOperations(
+export function _getTuningOptionsOperationsOperations(
   context: PostgreSQLManagementFlexibleServerContext,
-): TuningOptionsOperations {
+): TuningOptionsOperationsOperations {
   return {
-    ..._getTuningOptions(context),
+    ..._getTuningOptionsOperations(context),
   };
 }
