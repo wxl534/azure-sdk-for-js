@@ -7,8 +7,6 @@ import {
   listDetectors,
   proxyGet,
   stopExecution,
-  suspend,
-  resume,
   listSecrets,
   stopMultipleExecutions,
   start,
@@ -24,8 +22,6 @@ import {
   JobsListDetectorsOptionalParams,
   JobsProxyGetOptionalParams,
   JobsStopExecutionOptionalParams,
-  JobsSuspendOptionalParams,
-  JobsResumeOptionalParams,
   JobsListSecretsOptionalParams,
   JobsStopMultipleExecutionsOptionalParams,
   JobsStartOptionalParams,
@@ -63,7 +59,7 @@ export interface JobsOperations {
     jobName: string,
     options?: JobsListDetectorsOptionalParams,
   ) => PagedAsyncIterableIterator<Diagnostics>;
-  /** Get the properties of a Container App Job. */
+  /** Get the properties for a given Container App Job. */
   proxyGet: (
     resourceGroupName: string,
     jobName: string,
@@ -91,42 +87,6 @@ export interface JobsOperations {
     jobExecutionName: string,
     options?: JobsStopExecutionOptionalParams,
   ) => Promise<void>;
-  /** Suspends a job */
-  suspend: (
-    resourceGroupName: string,
-    jobName: string,
-    options?: JobsSuspendOptionalParams,
-  ) => PollerLike<OperationState<Job>, Job>;
-  /** @deprecated use suspend instead */
-  beginSuspend: (
-    resourceGroupName: string,
-    jobName: string,
-    options?: JobsSuspendOptionalParams,
-  ) => Promise<SimplePollerLike<OperationState<Job>, Job>>;
-  /** @deprecated use suspend instead */
-  beginSuspendAndWait: (
-    resourceGroupName: string,
-    jobName: string,
-    options?: JobsSuspendOptionalParams,
-  ) => Promise<Job>;
-  /** Resumes a suspended job */
-  resume: (
-    resourceGroupName: string,
-    jobName: string,
-    options?: JobsResumeOptionalParams,
-  ) => PollerLike<OperationState<Job>, Job>;
-  /** @deprecated use resume instead */
-  beginResume: (
-    resourceGroupName: string,
-    jobName: string,
-    options?: JobsResumeOptionalParams,
-  ) => Promise<SimplePollerLike<OperationState<Job>, Job>>;
-  /** @deprecated use resume instead */
-  beginResumeAndWait: (
-    resourceGroupName: string,
-    jobName: string,
-    options?: JobsResumeOptionalParams,
-  ) => Promise<Job>;
   /** List secrets for a container apps job */
   listSecrets: (
     resourceGroupName: string,
@@ -290,42 +250,6 @@ function _getJobs(context: ContainerAppsAPIContext) {
       options?: JobsStopExecutionOptionalParams,
     ) => {
       return await stopExecution(context, resourceGroupName, jobName, jobExecutionName, options);
-    },
-    suspend: (resourceGroupName: string, jobName: string, options?: JobsSuspendOptionalParams) =>
-      suspend(context, resourceGroupName, jobName, options),
-    beginSuspend: async (
-      resourceGroupName: string,
-      jobName: string,
-      options?: JobsSuspendOptionalParams,
-    ) => {
-      const poller = suspend(context, resourceGroupName, jobName, options);
-      await poller.submitted();
-      return getSimplePoller(poller);
-    },
-    beginSuspendAndWait: async (
-      resourceGroupName: string,
-      jobName: string,
-      options?: JobsSuspendOptionalParams,
-    ) => {
-      return await suspend(context, resourceGroupName, jobName, options);
-    },
-    resume: (resourceGroupName: string, jobName: string, options?: JobsResumeOptionalParams) =>
-      resume(context, resourceGroupName, jobName, options),
-    beginResume: async (
-      resourceGroupName: string,
-      jobName: string,
-      options?: JobsResumeOptionalParams,
-    ) => {
-      const poller = resume(context, resourceGroupName, jobName, options);
-      await poller.submitted();
-      return getSimplePoller(poller);
-    },
-    beginResumeAndWait: async (
-      resourceGroupName: string,
-      jobName: string,
-      options?: JobsResumeOptionalParams,
-    ) => {
-      return await resume(context, resourceGroupName, jobName, options);
     },
     listSecrets: (
       resourceGroupName: string,
