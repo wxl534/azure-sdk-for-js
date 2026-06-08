@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to delete a IntegrationFabric
  *
  * @summary delete a IntegrationFabric
- * x-ms-original-file: 2025-08-01/IntegrationFabrics_Delete.json
+ * x-ms-original-file: 2025-09-01-preview/IntegrationFabrics_Delete.json
  */
 async function integrationFabricsDelete(): Promise<void> {
   const credential = new DefaultAzureCredential();
