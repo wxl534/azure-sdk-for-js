@@ -22,6 +22,9 @@ export type {
   PrivateLinkServiceConnectionState,
   PrivateEndpointServiceConnectionStatus,
   PrivateEndpointConnectionProvisioningState,
+  ManagedServiceIdentity,
+  ManagedServiceIdentityType,
+  UserAssignedIdentity,
   Resource,
   SystemData,
   CreatedByType,
@@ -40,6 +43,9 @@ export type {
   RetentionPolicyProperties,
   RetentionPolicyDetails,
   PurgeableOrchestrationState,
+  TransparentDataEncryption,
+  TransparentDataEncryptionProperties,
+  TransparentDataEncryptionKeySource,
 } from "./models.js";
 export {
   KnownOrigin,
@@ -50,7 +56,9 @@ export {
   KnownPublicNetworkAccess,
   KnownPrivateEndpointServiceConnectionStatus,
   KnownPrivateEndpointConnectionProvisioningState,
+  KnownManagedServiceIdentityType,
   KnownCreatedByType,
   KnownPurgeableOrchestrationState,
+  KnownTransparentDataEncryptionKeySource,
   KnownVersions,
 } from "./models.js";
