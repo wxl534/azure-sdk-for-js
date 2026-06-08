@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update a StandbyContainerGroupPoolResource
  *
  * @summary update a StandbyContainerGroupPoolResource
- * x-ms-original-file: 2025-10-01/StandbyContainerGroupPools_Update.json
+ * x-ms-original-file: 2026-04-01/StandbyContainerGroupPools_Update.json
  */
 async function standbyContainerGroupPoolsUpdate(): Promise<void> {
   const credential = new DefaultAzureCredential();

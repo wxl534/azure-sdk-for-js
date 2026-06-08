@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update Context Resource
  *
  * @summary create or update Context Resource
- * x-ms-original-file: 2025-06-01/Contexts_CreateOrUpdate_MaximumSet_Gen.json
+ * x-ms-original-file: 2025-08-01/Contexts_CreateOrUpdate_MaximumSet_Gen.json
  */
 async function contextsCreateOrUpdateMaximumSet(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -17,11 +17,7 @@ async function contextsCreateOrUpdateMaximumSet(): Promise<void> {
   const result = await client.contexts.createOrUpdate("rgconfigurationmanager", "testname", {
     properties: {
       capabilities: [
-        {
-          name: "tpylinjcmlnycfpofpxjtqmt",
-          description: "banbenutsngwytoqh",
-          state: "active",
-        },
+        { name: "tpylinjcmlnycfpofpxjtqmt", description: "banbenutsngwytoqh", state: "active" },
       ],
       hierarchies: [{ name: "upqe", description: "vg" }],
     },
