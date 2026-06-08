@@ -3,8 +3,6 @@
 
 import { ContainerAppsAPIContext } from "../../api/containerAppsAPIContext.js";
 import {
-  rotateMcpServerCredentials,
-  fetchMcpServerCredentials,
   listBySubscription,
   listByResourceGroup,
   $delete,
@@ -13,8 +11,6 @@ import {
   get,
 } from "../../api/containerAppsSessionPools/operations.js";
 import {
-  ContainerAppsSessionPoolsRotateMcpServerCredentialsOptionalParams,
-  ContainerAppsSessionPoolsFetchMcpServerCredentialsOptionalParams,
   ContainerAppsSessionPoolsListBySubscriptionOptionalParams,
   ContainerAppsSessionPoolsListByResourceGroupOptionalParams,
   ContainerAppsSessionPoolsDeleteOptionalParams,
@@ -22,29 +18,13 @@ import {
   ContainerAppsSessionPoolsCreateOrUpdateOptionalParams,
   ContainerAppsSessionPoolsGetOptionalParams,
 } from "../../api/containerAppsSessionPools/options.js";
-import {
-  SessionPool,
-  SessionPoolUpdatableProperties,
-  McpServerCredential,
-} from "../../models/models.js";
+import { SessionPool, SessionPoolUpdatableProperties } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
 import { SimplePollerLike, getSimplePoller } from "../../static-helpers/simplePollerHelpers.js";
 import { PollerLike, OperationState } from "@azure/core-lro";
 
 /** Interface representing a ContainerAppsSessionPools operations. */
 export interface ContainerAppsSessionPoolsOperations {
-  /** Rotate and fetch the rotated MCP server credentials of a session pool. */
-  rotateMcpServerCredentials: (
-    resourceGroupName: string,
-    sessionPoolName: string,
-    options?: ContainerAppsSessionPoolsRotateMcpServerCredentialsOptionalParams,
-  ) => Promise<McpServerCredential>;
-  /** Fetch the MCP server credentials of a session pool. */
-  fetchMcpServerCredentials: (
-    resourceGroupName: string,
-    sessionPoolName: string,
-    options?: ContainerAppsSessionPoolsFetchMcpServerCredentialsOptionalParams,
-  ) => Promise<McpServerCredential>;
   /** Get the session pools in a given subscription. */
   listBySubscription: (
     options?: ContainerAppsSessionPoolsListBySubscriptionOptionalParams,
@@ -124,16 +104,6 @@ export interface ContainerAppsSessionPoolsOperations {
 
 function _getContainerAppsSessionPools(context: ContainerAppsAPIContext) {
   return {
-    rotateMcpServerCredentials: (
-      resourceGroupName: string,
-      sessionPoolName: string,
-      options?: ContainerAppsSessionPoolsRotateMcpServerCredentialsOptionalParams,
-    ) => rotateMcpServerCredentials(context, resourceGroupName, sessionPoolName, options),
-    fetchMcpServerCredentials: (
-      resourceGroupName: string,
-      sessionPoolName: string,
-      options?: ContainerAppsSessionPoolsFetchMcpServerCredentialsOptionalParams,
-    ) => fetchMcpServerCredentials(context, resourceGroupName, sessionPoolName, options),
     listBySubscription: (options?: ContainerAppsSessionPoolsListBySubscriptionOptionalParams) =>
       listBySubscription(context, options),
     listByResourceGroup: (

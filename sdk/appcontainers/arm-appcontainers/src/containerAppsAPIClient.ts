@@ -12,10 +12,6 @@ import {
   GetCustomDomainVerificationIdOptionalParams,
 } from "./api/options.js";
 import {
-  AppResiliencyOperations,
-  _getAppResiliencyOperations,
-} from "./classic/appResiliency/index.js";
-import {
   AvailableWorkloadProfilesOperations,
   _getAvailableWorkloadProfilesOperations,
 } from "./classic/availableWorkloadProfiles/index.js";
@@ -23,16 +19,6 @@ import {
   BillingMetersOperations,
   _getBillingMetersOperations,
 } from "./classic/billingMeters/index.js";
-import {
-  BuildAuthTokenOperations,
-  _getBuildAuthTokenOperations,
-} from "./classic/buildAuthToken/index.js";
-import { BuildersOperations, _getBuildersOperations } from "./classic/builders/index.js";
-import { BuildsOperations, _getBuildsOperations } from "./classic/builds/index.js";
-import {
-  BuildsByBuilderResourceOperations,
-  _getBuildsByBuilderResourceOperations,
-} from "./classic/buildsByBuilderResource/index.js";
 import {
   CertificatesOperations,
   _getCertificatesOperations,
@@ -62,33 +48,9 @@ import {
   _getContainerAppsAuthConfigsOperations,
 } from "./classic/containerAppsAuthConfigs/index.js";
 import {
-  ContainerAppsBuildsOperations,
-  _getContainerAppsBuildsOperations,
-} from "./classic/containerAppsBuilds/index.js";
-import {
-  ContainerAppsBuildsByContainerAppOperations,
-  _getContainerAppsBuildsByContainerAppOperations,
-} from "./classic/containerAppsBuildsByContainerApp/index.js";
-import {
   ContainerAppsDiagnosticsOperations,
   _getContainerAppsDiagnosticsOperations,
 } from "./classic/containerAppsDiagnostics/index.js";
-import {
-  ContainerAppsFunctionsOperations,
-  _getContainerAppsFunctionsOperations,
-} from "./classic/containerAppsFunctions/index.js";
-import {
-  ContainerAppsLabelHistoryOperations,
-  _getContainerAppsLabelHistoryOperations,
-} from "./classic/containerAppsLabelHistory/index.js";
-import {
-  ContainerAppsPatchesOperations,
-  _getContainerAppsPatchesOperations,
-} from "./classic/containerAppsPatches/index.js";
-import {
-  ContainerAppsRevisionFunctionsOperations,
-  _getContainerAppsRevisionFunctionsOperations,
-} from "./classic/containerAppsRevisionFunctions/index.js";
 import {
   ContainerAppsRevisionReplicasOperations,
   _getContainerAppsRevisionReplicasOperations,
@@ -106,25 +68,9 @@ import {
   _getContainerAppsSourceControlsOperations,
 } from "./classic/containerAppsSourceControls/index.js";
 import {
-  DaprComponentResiliencyPoliciesOperations,
-  _getDaprComponentResiliencyPoliciesOperations,
-} from "./classic/daprComponentResiliencyPolicies/index.js";
-import {
   DaprComponentsOperations,
   _getDaprComponentsOperations,
 } from "./classic/daprComponents/index.js";
-import {
-  DaprSubscriptionsOperations,
-  _getDaprSubscriptionsOperations,
-} from "./classic/daprSubscriptions/index.js";
-import {
-  DotNetComponentsOperations,
-  _getDotNetComponentsOperations,
-} from "./classic/dotNetComponents/index.js";
-import {
-  FunctionsExtensionOperations,
-  _getFunctionsExtensionOperations,
-} from "./classic/functionsExtension/index.js";
 import {
   HttpRouteConfigOperations,
   _getHttpRouteConfigOperations,
@@ -234,15 +180,6 @@ export class ContainerAppsAPIClient {
     this.connectedEnvironmentsCertificates = _getConnectedEnvironmentsCertificatesOperations(
       this._client,
     );
-    this.buildAuthToken = _getBuildAuthTokenOperations(this._client);
-    this.buildsByBuilderResource = _getBuildsByBuilderResourceOperations(this._client);
-    this.appResiliency = _getAppResiliencyOperations(this._client);
-    this.containerAppsRevisionFunctions = _getContainerAppsRevisionFunctionsOperations(
-      this._client,
-    );
-    this.containerAppsBuildsByContainerApp = _getContainerAppsBuildsByContainerAppOperations(
-      this._client,
-    );
     this.managedEnvironmentsDiagnostics = _getManagedEnvironmentsDiagnosticsOperations(
       this._client,
     );
@@ -250,10 +187,6 @@ export class ContainerAppsAPIClient {
     this.jobs = _getJobsOperations(this._client);
     this.managedEnvironmentsStorages = _getManagedEnvironmentsStoragesOperations(this._client);
     this.maintenanceConfigurations = _getMaintenanceConfigurationsOperations(this._client);
-    this.daprSubscriptions = _getDaprSubscriptionsOperations(this._client);
-    this.daprComponentResiliencyPolicies = _getDaprComponentResiliencyPoliciesOperations(
-      this._client,
-    );
     this.managedCertificates = _getManagedCertificatesOperations(this._client);
     this.connectedEnvironmentsStorages = _getConnectedEnvironmentsStoragesOperations(this._client);
     this.daprComponents = _getDaprComponentsOperations(this._client);
@@ -263,19 +196,11 @@ export class ContainerAppsAPIClient {
     this.managedEnvironments = _getManagedEnvironmentsOperations(this._client);
     this.certificates = _getCertificatesOperations(this._client);
     this.connectedEnvironments = _getConnectedEnvironmentsOperations(this._client);
-    this.builds = _getBuildsOperations(this._client);
-    this.builders = _getBuildersOperations(this._client);
     this.containerAppsAuthConfigs = _getContainerAppsAuthConfigsOperations(this._client);
     this.logicApps = _getLogicAppsOperations(this._client);
     this.javaComponents = _getJavaComponentsOperations(this._client);
-    this.dotNetComponents = _getDotNetComponentsOperations(this._client);
     this.containerAppsRevisionReplicas = _getContainerAppsRevisionReplicasOperations(this._client);
-    this.containerAppsPatches = _getContainerAppsPatchesOperations(this._client);
-    this.containerAppsLabelHistory = _getContainerAppsLabelHistoryOperations(this._client);
-    this.functionsExtension = _getFunctionsExtensionOperations(this._client);
     this.containerAppsRevisions = _getContainerAppsRevisionsOperations(this._client);
-    this.containerAppsFunctions = _getContainerAppsFunctionsOperations(this._client);
-    this.containerAppsBuilds = _getContainerAppsBuildsOperations(this._client);
     this.containerApps = _getContainerAppsOperations(this._client);
     this.containerAppsSourceControls = _getContainerAppsSourceControlsOperations(this._client);
     this.containerAppsSessionPools = _getContainerAppsSessionPoolsOperations(this._client);
@@ -321,16 +246,6 @@ export class ContainerAppsAPIClient {
   public readonly namespaces: NamespacesOperations;
   /** The operation groups for connectedEnvironmentsCertificates */
   public readonly connectedEnvironmentsCertificates: ConnectedEnvironmentsCertificatesOperations;
-  /** The operation groups for buildAuthToken */
-  public readonly buildAuthToken: BuildAuthTokenOperations;
-  /** The operation groups for buildsByBuilderResource */
-  public readonly buildsByBuilderResource: BuildsByBuilderResourceOperations;
-  /** The operation groups for appResiliency */
-  public readonly appResiliency: AppResiliencyOperations;
-  /** The operation groups for containerAppsRevisionFunctions */
-  public readonly containerAppsRevisionFunctions: ContainerAppsRevisionFunctionsOperations;
-  /** The operation groups for containerAppsBuildsByContainerApp */
-  public readonly containerAppsBuildsByContainerApp: ContainerAppsBuildsByContainerAppOperations;
   /** The operation groups for managedEnvironmentsDiagnostics */
   public readonly managedEnvironmentsDiagnostics: ManagedEnvironmentsDiagnosticsOperations;
   /** The operation groups for containerAppsDiagnostics */
@@ -341,10 +256,6 @@ export class ContainerAppsAPIClient {
   public readonly managedEnvironmentsStorages: ManagedEnvironmentsStoragesOperations;
   /** The operation groups for maintenanceConfigurations */
   public readonly maintenanceConfigurations: MaintenanceConfigurationsOperations;
-  /** The operation groups for daprSubscriptions */
-  public readonly daprSubscriptions: DaprSubscriptionsOperations;
-  /** The operation groups for daprComponentResiliencyPolicies */
-  public readonly daprComponentResiliencyPolicies: DaprComponentResiliencyPoliciesOperations;
   /** The operation groups for managedCertificates */
   public readonly managedCertificates: ManagedCertificatesOperations;
   /** The operation groups for connectedEnvironmentsStorages */
@@ -359,32 +270,16 @@ export class ContainerAppsAPIClient {
   public readonly certificates: CertificatesOperations;
   /** The operation groups for connectedEnvironments */
   public readonly connectedEnvironments: ConnectedEnvironmentsOperations;
-  /** The operation groups for builds */
-  public readonly builds: BuildsOperations;
-  /** The operation groups for builders */
-  public readonly builders: BuildersOperations;
   /** The operation groups for containerAppsAuthConfigs */
   public readonly containerAppsAuthConfigs: ContainerAppsAuthConfigsOperations;
   /** The operation groups for logicApps */
   public readonly logicApps: LogicAppsOperations;
   /** The operation groups for javaComponents */
   public readonly javaComponents: JavaComponentsOperations;
-  /** The operation groups for dotNetComponents */
-  public readonly dotNetComponents: DotNetComponentsOperations;
   /** The operation groups for containerAppsRevisionReplicas */
   public readonly containerAppsRevisionReplicas: ContainerAppsRevisionReplicasOperations;
-  /** The operation groups for containerAppsPatches */
-  public readonly containerAppsPatches: ContainerAppsPatchesOperations;
-  /** The operation groups for containerAppsLabelHistory */
-  public readonly containerAppsLabelHistory: ContainerAppsLabelHistoryOperations;
-  /** The operation groups for functionsExtension */
-  public readonly functionsExtension: FunctionsExtensionOperations;
   /** The operation groups for containerAppsRevisions */
   public readonly containerAppsRevisions: ContainerAppsRevisionsOperations;
-  /** The operation groups for containerAppsFunctions */
-  public readonly containerAppsFunctions: ContainerAppsFunctionsOperations;
-  /** The operation groups for containerAppsBuilds */
-  public readonly containerAppsBuilds: ContainerAppsBuildsOperations;
   /** The operation groups for containerApps */
   public readonly containerApps: ContainerAppsOperations;
   /** The operation groups for containerAppsSourceControls */
