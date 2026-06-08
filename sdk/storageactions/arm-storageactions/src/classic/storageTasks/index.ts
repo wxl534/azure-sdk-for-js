@@ -3,12 +3,18 @@
 
 import { StorageActionsManagementContext } from "../../api/storageActionsManagementContext.js";
 import {
-  StorageTask,
-  StorageTaskUpdateParameters,
-  StorageTaskPreviewAction,
-} from "../../models/models.js";
+  previewActions,
+  stopAllAssignments,
+  listBySubscription,
+  listByResourceGroup,
+  $delete,
+  update,
+  create,
+  get,
+} from "../../api/storageTasks/operations.js";
 import {
   StorageTasksPreviewActionsOptionalParams,
+  StorageTasksStopAllAssignmentsOptionalParams,
   StorageTasksListBySubscriptionOptionalParams,
   StorageTasksListByResourceGroupOptionalParams,
   StorageTasksDeleteOptionalParams,
@@ -17,14 +23,10 @@ import {
   StorageTasksGetOptionalParams,
 } from "../../api/storageTasks/options.js";
 import {
-  previewActions,
-  listBySubscription,
-  listByResourceGroup,
-  $delete,
-  update,
-  create,
-  get,
-} from "../../api/storageTasks/operations.js";
+  StorageTask,
+  StorageTaskUpdateParameters,
+  StorageTaskPreviewAction,
+} from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
 import { PollerLike, OperationState } from "@azure/core-lro";
 
@@ -36,6 +38,12 @@ export interface StorageTasksOperations {
     parameters: StorageTaskPreviewAction,
     options?: StorageTasksPreviewActionsOptionalParams,
   ) => Promise<StorageTaskPreviewAction>;
+  /** Stops all active running assignments for the storage task */
+  stopAllAssignments: (
+    resourceGroupName: string,
+    storageTaskName: string,
+    options?: StorageTasksStopAllAssignmentsOptionalParams,
+  ) => PollerLike<OperationState<void>, void>;
   /** Lists all the storage tasks available under the subscription. */
   listBySubscription: (
     options?: StorageTasksListBySubscriptionOptionalParams,
@@ -46,11 +54,6 @@ export interface StorageTasksOperations {
     options?: StorageTasksListByResourceGroupOptionalParams,
   ) => PagedAsyncIterableIterator<StorageTask>;
   /** Delete the storage task resource. */
-  /**
-   *  @fixme delete is a reserved word that cannot be used as an operation name.
-   *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
-   *         to the operation to override the generated name.
-   */
   delete: (
     resourceGroupName: string,
     storageTaskName: string,
@@ -85,6 +88,11 @@ function _getStorageTasks(context: StorageActionsManagementContext) {
       parameters: StorageTaskPreviewAction,
       options?: StorageTasksPreviewActionsOptionalParams,
     ) => previewActions(context, location, parameters, options),
+    stopAllAssignments: (
+      resourceGroupName: string,
+      storageTaskName: string,
+      options?: StorageTasksStopAllAssignmentsOptionalParams,
+    ) => stopAllAssignments(context, resourceGroupName, storageTaskName, options),
     listBySubscription: (options?: StorageTasksListBySubscriptionOptionalParams) =>
       listBySubscription(context, options),
     listByResourceGroup: (

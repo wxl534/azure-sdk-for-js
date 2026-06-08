@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update an Instance Resource
  *
  * @summary update an Instance Resource
- * x-ms-original-file: 2025-06-01/Instances_Update_MaximumSet_Gen.json
+ * x-ms-original-file: 2025-08-01/Instances_Update_MaximumSet_Gen.json
  */
 async function instancesUpdateMaximumSet(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -24,10 +24,7 @@ async function instancesUpdateMaximumSet(): Promise<void> {
         solutionVersionId: "vrpzlamkvanqibtjarpxit",
         targetId: "tqkdvc",
         activeState: "active",
-        reconciliationPolicy: {
-          state: "inactive",
-          interval: "cmzlrjwnlshnkgv",
-        },
+        reconciliationPolicy: { state: "inactive", interval: "cmzlrjwnlshnkgv" },
         solutionScope: "testname",
       },
     },

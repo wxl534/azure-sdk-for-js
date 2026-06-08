@@ -1,8 +1,8 @@
 {
   "apiVersions": {
-    "Microsoft.StandbyPool": "2025-10-01"
+    "Microsoft.StandbyPool": "2026-04-01"
   },
-  "emitterVersion": "0.50.2",
+  "emitterVersion": "0.54.0-alpha.20260605.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.StandbyPool",
     "CrossLanguageDefinitionId": {
@@ -16,6 +16,7 @@
       "@azure/arm-standbypool!StandbyVirtualMachinePoolResourceProperties:interface": "Microsoft.StandbyPool.StandbyVirtualMachinePoolResourceProperties",
       "@azure/arm-standbypool!StandbyVirtualMachinePoolElasticityProfile:interface": "Microsoft.StandbyPool.StandbyVirtualMachinePoolElasticityProfile",
       "@azure/arm-standbypool!DynamicSizing:interface": "Microsoft.StandbyPool.DynamicSizing",
+      "@azure/arm-standbypool!VmStateDistribution:interface": "Microsoft.StandbyPool.VmStateDistribution",
       "@azure/arm-standbypool!TrackedResource:interface": "Azure.ResourceManager.CommonTypes.TrackedResource",
       "@azure/arm-standbypool!Resource:interface": "Azure.ResourceManager.CommonTypes.Resource",
       "@azure/arm-standbypool!SystemData:interface": "Azure.ResourceManager.CommonTypes.SystemData",

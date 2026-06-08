@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update a Workflow Version Resource
  *
  * @summary create or update a Workflow Version Resource
- * x-ms-original-file: 2025-06-01/WorkflowVersions_CreateOrUpdate_MaximumSet_Gen.json
+ * x-ms-original-file: 2025-08-01/WorkflowVersions_CreateOrUpdate_MaximumSet_Gen.json
  */
 async function workflowVersionsCreateOrUpdateMaximumSet(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -35,14 +35,10 @@ async function workflowVersionsCreateOrUpdateMaximumSet(): Promise<void> {
             ],
             taskOption: {
               concurrency: 3,
-              errorAction: {
-                mode: "stopOnAnyFailure",
-                maxToleratedFailures: 0,
-              },
+              errorAction: { mode: "stopOnAnyFailure", maxToleratedFailures: 0 },
             },
           },
         ],
-        state: "InReview",
         specification: {},
       },
       extendedLocation: { name: "szjrwimeqyiue", type: "EdgeZone" },
