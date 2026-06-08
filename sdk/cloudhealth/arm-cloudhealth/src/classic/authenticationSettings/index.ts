@@ -2,20 +2,21 @@
 // Licensed under the MIT License.
 
 import { CloudHealthContext } from "../../api/cloudHealthContext.js";
-import { AuthenticationSetting } from "../../models/models.js";
-import {
-  AuthenticationSettingsListByHealthModelOptionalParams,
-  AuthenticationSettingsDeleteOptionalParams,
-  AuthenticationSettingsCreateOrUpdateOptionalParams,
-  AuthenticationSettingsGetOptionalParams,
-} from "../../api/authenticationSettings/options.js";
 import {
   listByHealthModel,
   $delete,
   createOrUpdate,
   get,
 } from "../../api/authenticationSettings/operations.js";
+import {
+  AuthenticationSettingsListByHealthModelOptionalParams,
+  AuthenticationSettingsDeleteOptionalParams,
+  AuthenticationSettingsCreateOrUpdateOptionalParams,
+  AuthenticationSettingsGetOptionalParams,
+} from "../../api/authenticationSettings/options.js";
+import { AuthenticationSetting } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
+import { PollerLike, OperationState } from "@azure/core-lro";
 
 /** Interface representing a AuthenticationSettings operations. */
 export interface AuthenticationSettingsOperations {
@@ -26,17 +27,12 @@ export interface AuthenticationSettingsOperations {
     options?: AuthenticationSettingsListByHealthModelOptionalParams,
   ) => PagedAsyncIterableIterator<AuthenticationSetting>;
   /** Delete a AuthenticationSetting */
-  /**
-   *  @fixme delete is a reserved word that cannot be used as an operation name.
-   *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
-   *         to the operation to override the generated name.
-   */
   delete: (
     resourceGroupName: string,
     healthModelName: string,
     authenticationSettingName: string,
     options?: AuthenticationSettingsDeleteOptionalParams,
-  ) => Promise<void>;
+  ) => PollerLike<OperationState<void>, void>;
   /** Create a AuthenticationSetting */
   createOrUpdate: (
     resourceGroupName: string,
@@ -44,7 +40,7 @@ export interface AuthenticationSettingsOperations {
     authenticationSettingName: string,
     resource: AuthenticationSetting,
     options?: AuthenticationSettingsCreateOrUpdateOptionalParams,
-  ) => Promise<AuthenticationSetting>;
+  ) => PollerLike<OperationState<AuthenticationSetting>, AuthenticationSetting>;
   /** Get a AuthenticationSetting */
   get: (
     resourceGroupName: string,
