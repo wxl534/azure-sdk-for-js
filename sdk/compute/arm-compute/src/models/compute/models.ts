@@ -2,32 +2,29 @@
 // Licensed under the MIT License.
 
 import { areAllPropsUndefined } from "../../static-helpers/serialization/check-prop-undefined.js";
-import type {
+import {
   ApiError,
+  apiErrorDeserializer,
   SubResource,
+  subResourceSerializer,
+  subResourceDeserializer,
   OperatingSystemTypes,
+  subResourceArraySerializer,
+  subResourceArrayDeserializer,
   ResourceIdentityType,
+  userAssignedIdentitiesValueRecordSerializer,
+  userAssignedIdentitiesValueRecordDeserializer,
   UserAssignedIdentitiesValue,
   ExtendedLocation,
+  extendedLocationSerializer,
+  extendedLocationDeserializer,
   SubResourceReadOnly,
+  subResourceReadOnlyArrayDeserializer,
   OperatingSystemStateTypes,
   SnapshotAccessState,
   HyperVGeneration,
 } from "../common/models.js";
-import {
-  apiErrorDeserializer,
-  subResourceSerializer,
-  subResourceDeserializer,
-  subResourceArraySerializer,
-  subResourceArrayDeserializer,
-  userAssignedIdentitiesValueRecordSerializer,
-  userAssignedIdentitiesValueRecordDeserializer,
-  extendedLocationSerializer,
-  extendedLocationDeserializer,
-  subResourceReadOnlyArrayDeserializer,
-} from "../common/models.js";
-import type { TrackedResource, ProxyResource } from "../models.js";
-import { systemDataDeserializer } from "../models.js";
+import { TrackedResource, systemDataDeserializer, ProxyResource } from "../models.js";
 
 /**
  * This file contains only generated model types and their (de)serializers.
@@ -3069,10 +3066,10 @@ export function virtualMachineScaleSetExtensionArrayDeserializer(
 
 /** Describes a Virtual Machine Scale Set Extension. */
 export interface VirtualMachineScaleSetExtension extends SubResourceReadOnly {
-  /** Resource type */
-  readonly type?: string;
   /** Resource name */
   name?: string;
+  /** Resource type */
+  readonly type?: string;
   /** If a value is provided and is different from the previous value, the extension handler will be forced to update even if the extension configuration has not changed. */
   forceUpdateTag?: string;
   /** The name of the extension handler publisher. */
@@ -3103,6 +3100,7 @@ export function virtualMachineScaleSetExtensionSerializer(
   item: VirtualMachineScaleSetExtension,
 ): any {
   return {
+    name: item["name"],
     properties: areAllPropsUndefined(item, [
       "forceUpdateTag",
       "publisher",
@@ -3118,7 +3116,6 @@ export function virtualMachineScaleSetExtensionSerializer(
     ])
       ? undefined
       : _virtualMachineScaleSetExtensionPropertiesSerializer(item),
-    name: item["name"],
   };
 }
 
@@ -3127,11 +3124,11 @@ export function virtualMachineScaleSetExtensionDeserializer(
 ): VirtualMachineScaleSetExtension {
   return {
     id: item["id"],
+    name: item["name"],
+    type: item["type"],
     ...(!item["properties"]
       ? item["properties"]
       : _virtualMachineScaleSetExtensionPropertiesDeserializer(item["properties"])),
-    type: item["type"],
-    name: item["name"],
   };
 }
 
