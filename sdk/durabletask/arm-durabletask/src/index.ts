@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { AzureSupportedClouds } from "./static-helpers/cloudSettingHelpers.js";
-import { AzureClouds } from "./static-helpers/cloudSettingHelpers.js";
-import type {
+import { AzureClouds, AzureSupportedClouds } from "./static-helpers/cloudSettingHelpers.js";
+import {
   PageSettings,
   ContinuablePage,
   PagedAsyncIterableIterator,
@@ -33,6 +32,9 @@ export type {
   PrivateLinkServiceConnectionState,
   PrivateEndpointServiceConnectionStatus,
   PrivateEndpointConnectionProvisioningState,
+  ManagedServiceIdentity,
+  ManagedServiceIdentityType,
+  UserAssignedIdentity,
   Resource,
   SystemData,
   CreatedByType,
@@ -51,6 +53,9 @@ export type {
   RetentionPolicyProperties,
   RetentionPolicyDetails,
   PurgeableOrchestrationState,
+  TransparentDataEncryption,
+  TransparentDataEncryptionProperties,
+  TransparentDataEncryptionKeySource,
 } from "./models/index.js";
 export {
   KnownOrigin,
@@ -61,8 +66,10 @@ export {
   KnownPublicNetworkAccess,
   KnownPrivateEndpointServiceConnectionStatus,
   KnownPrivateEndpointConnectionProvisioningState,
+  KnownManagedServiceIdentityType,
   KnownCreatedByType,
   KnownPurgeableOrchestrationState,
+  KnownTransparentDataEncryptionKeySource,
   KnownVersions,
 } from "./models/index.js";
 export type { DurableTaskClientOptionalParams } from "./api/index.js";
@@ -75,6 +82,7 @@ export type {
   RetentionPoliciesGetOptionalParams,
 } from "./api/retentionPolicies/index.js";
 export type {
+  SchedulersRestartOptionalParams,
   SchedulersListPrivateEndpointConnectionsOptionalParams,
   SchedulersDeletePrivateEndpointConnectionOptionalParams,
   SchedulersUpdatePrivateEndpointConnectionOptionalParams,
@@ -96,11 +104,19 @@ export type {
   TaskHubsGetOptionalParams,
 } from "./api/taskHubs/index.js";
 export type {
+  TransparentDataEncryptionsListBySchedulerOptionalParams,
+  TransparentDataEncryptionsDeleteOptionalParams,
+  TransparentDataEncryptionsCreateOrReplaceOptionalParams,
+  TransparentDataEncryptionsGetOptionalParams,
+} from "./api/transparentDataEncryptions/index.js";
+export type {
   OperationsOperations,
   RetentionPoliciesOperations,
   SchedulersOperations,
   TaskHubsOperations,
+  TransparentDataEncryptionsOperations,
 } from "./classic/index.js";
 export type { PageSettings, ContinuablePage, PagedAsyncIterableIterator };
 export { AzureClouds };
 export type { AzureSupportedClouds };
+export { RestError, isRestError } from "@azure/core-rest-pipeline";

@@ -1,8 +1,8 @@
 {
   "apiVersions": {
-    "Microsoft.DurableTask": "2026-02-01"
+    "Microsoft.DurableTask": "2026-05-01-preview"
   },
-  "emitterVersion": "0.50.2",
+  "emitterVersion": "0.54.0-alpha.20260605.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.DurableTask",
     "CrossLanguageDefinitionId": {
@@ -21,6 +21,8 @@
       "@azure/arm-durabletask!PrivateLinkServiceConnectionState:interface": "Azure.ResourceManager.CommonTypes.PrivateLinkServiceConnectionState",
       "@azure/arm-durabletask!Resource:interface": "Azure.ResourceManager.CommonTypes.Resource",
       "@azure/arm-durabletask!SystemData:interface": "Azure.ResourceManager.CommonTypes.SystemData",
+      "@azure/arm-durabletask!ManagedServiceIdentity:interface": "Azure.ResourceManager.CommonTypes.ManagedServiceIdentity",
+      "@azure/arm-durabletask!UserAssignedIdentity:interface": "Azure.ResourceManager.CommonTypes.UserAssignedIdentity",
       "@azure/arm-durabletask!TrackedResource:interface": "Azure.ResourceManager.CommonTypes.TrackedResource",
       "@azure/arm-durabletask!ArmOperationStatusResourceProvisioningState:interface": "Azure.ResourceManager.ArmOperationStatus",
       "@azure/arm-durabletask!SchedulerUpdate:interface": "Microsoft.DurableTask.SchedulerUpdate",
@@ -41,6 +43,9 @@
       "@azure/arm-durabletask!RetentionPolicyProperties:interface": "Microsoft.DurableTask.RetentionPolicyProperties",
       "@azure/arm-durabletask!RetentionPolicyDetails:interface": "Microsoft.DurableTask.RetentionPolicyDetails",
       "@azure/arm-durabletask!RetentionPolicyListResult:interface": "Azure.ResourceManager.ResourceListResult",
+      "@azure/arm-durabletask!TransparentDataEncryption:interface": "Microsoft.DurableTask.TransparentDataEncryption",
+      "@azure/arm-durabletask!TransparentDataEncryptionProperties:interface": "Microsoft.DurableTask.TransparentDataEncryptionProperties",
+      "@azure/arm-durabletask!TransparentDataEncryptionListResult:interface": "Azure.ResourceManager.ResourceListResult",
       "@azure/arm-durabletask!KnownOrigin:enum": "Azure.ResourceManager.CommonTypes.Origin",
       "@azure/arm-durabletask!KnownActionType:enum": "Azure.ResourceManager.CommonTypes.ActionType",
       "@azure/arm-durabletask!KnownProvisioningState:enum": "Microsoft.DurableTask.ProvisioningState",
@@ -50,9 +55,16 @@
       "@azure/arm-durabletask!KnownPrivateEndpointServiceConnectionStatus:enum": "Azure.ResourceManager.CommonTypes.PrivateEndpointServiceConnectionStatus",
       "@azure/arm-durabletask!KnownPrivateEndpointConnectionProvisioningState:enum": "Azure.ResourceManager.CommonTypes.PrivateEndpointConnectionProvisioningState",
       "@azure/arm-durabletask!KnowncreatedByType:enum": "Azure.ResourceManager.CommonTypes.createdByType",
+      "@azure/arm-durabletask!KnownManagedServiceIdentityType:enum": "Azure.ResourceManager.CommonTypes.ManagedServiceIdentityType",
       "@azure/arm-durabletask!KnownResourceProvisioningState:enum": "Azure.ResourceManager.ResourceProvisioningState",
       "@azure/arm-durabletask!KnownPurgeableOrchestrationState:enum": "Microsoft.DurableTask.PurgeableOrchestrationState",
+      "@azure/arm-durabletask!KnownTransparentDataEncryptionKeySource:enum": "Microsoft.DurableTask.TransparentDataEncryptionKeySource",
       "@azure/arm-durabletask!KnownVersions:enum": "Microsoft.DurableTask.Versions",
+      "@azure/arm-durabletask!ManagedServiceIdentityUserAssignedIdentity:type": "Azure.ResourceManager.CommonTypes.ManagedServiceIdentity.userAssignedIdentity.anonymous",
+      "@azure/arm-durabletask!TransparentDataEncryptionsOperations#listByScheduler:member": "Microsoft.DurableTask.TransparentDataEncryptions.listByScheduler",
+      "@azure/arm-durabletask!TransparentDataEncryptionsOperations#delete:member": "Microsoft.DurableTask.TransparentDataEncryptions.delete",
+      "@azure/arm-durabletask!TransparentDataEncryptionsOperations#createOrReplace:member": "Microsoft.DurableTask.TransparentDataEncryptions.createOrReplace",
+      "@azure/arm-durabletask!TransparentDataEncryptionsOperations#get:member": "Microsoft.DurableTask.TransparentDataEncryptions.get",
       "@azure/arm-durabletask!RetentionPoliciesOperations#listByScheduler:member": "Microsoft.DurableTask.RetentionPolicies.listByScheduler",
       "@azure/arm-durabletask!RetentionPoliciesOperations#delete:member": "Microsoft.DurableTask.RetentionPolicies.delete",
       "@azure/arm-durabletask!RetentionPoliciesOperations#update:member": "Microsoft.DurableTask.RetentionPolicies.update",
@@ -62,6 +74,7 @@
       "@azure/arm-durabletask!TaskHubsOperations#delete:member": "Microsoft.DurableTask.TaskHubs.delete",
       "@azure/arm-durabletask!TaskHubsOperations#createOrUpdate:member": "Microsoft.DurableTask.TaskHubs.createOrUpdate",
       "@azure/arm-durabletask!TaskHubsOperations#get:member": "Microsoft.DurableTask.TaskHubs.get",
+      "@azure/arm-durabletask!SchedulersOperations#restart:member": "Microsoft.DurableTask.Schedulers.restart",
       "@azure/arm-durabletask!SchedulersOperations#listPrivateEndpointConnections:member": "Microsoft.DurableTask.Schedulers.listPrivateEndpointConnections",
       "@azure/arm-durabletask!SchedulersOperations#deletePrivateEndpointConnection:member": "Microsoft.DurableTask.Schedulers.deletePrivateEndpointConnection",
       "@azure/arm-durabletask!SchedulersOperations#updatePrivateEndpointConnection:member": "Microsoft.DurableTask.Schedulers.updatePrivateEndpointConnection",
