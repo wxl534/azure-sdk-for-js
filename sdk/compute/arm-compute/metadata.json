@@ -5,7 +5,7 @@
     "ComputeGallery": "2025-03-03",
     "ComputeSku": "2021-07-01"
   },
-  "emitterVersion": "0.52.2",
+  "emitterVersion": "0.54.0-alpha.20260605.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Compute",
     "CrossLanguageDefinitionId": {
@@ -992,7 +992,7 @@
       "@azure/arm-compute!VirtualMachineScaleSetsOperations#update:member": "Compute.VirtualMachineScaleSets.update",
       "@azure/arm-compute!VirtualMachineScaleSetsOperations#createOrUpdate:member": "Compute.VirtualMachineScaleSets.createOrUpdate",
       "@azure/arm-compute!VirtualMachineScaleSetsOperations#get:member": "Compute.VirtualMachineScaleSets.get",
-      "@azure/arm-compute!OperationsOperations#list:member": "Azure.ResourceManager.Legacy.Operations.list"
+      "@azure/arm-compute!OperationsOperations#list:member": "Compute.Operations.list"
     }
   }
 }
