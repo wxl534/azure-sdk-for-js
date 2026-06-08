@@ -12,6 +12,8 @@ import {
   bulkDeploySolutionParameterSerializer,
   BulkPublishSolutionParameter,
   bulkPublishSolutionParameterSerializer,
+  BulkReviewSolutionParameter,
+  bulkReviewSolutionParameterSerializer,
 } from "../../models/models.js";
 import {
   PagedAsyncIterableIterator,
@@ -20,6 +22,7 @@ import {
 import { getLongRunningPoller } from "../../static-helpers/pollingHelpers.js";
 import { expandUrlTemplate } from "../../static-helpers/urlTemplate.js";
 import {
+  SolutionTemplateVersionsBulkReviewSolutionOptionalParams,
   SolutionTemplateVersionsBulkPublishSolutionOptionalParams,
   SolutionTemplateVersionsBulkDeploySolutionOptionalParams,
   SolutionTemplateVersionsListBySolutionTemplateOptionalParams,
@@ -33,15 +36,83 @@ import {
 } from "@azure-rest/core-client";
 import { PollerLike, OperationState } from "@azure/core-lro";
 
+export function _bulkReviewSolutionSend(
+  context: Client,
+  resourceGroupName: string,
+  solutionTemplateName: string,
+  solutionTemplateVersionName: string,
+  body: BulkReviewSolutionParameter,
+  options: SolutionTemplateVersionsBulkReviewSolutionOptionalParams = { requestOptions: {} },
+): StreamableMethod {
+  const path = expandUrlTemplate(
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Edge/solutionTemplates/{solutionTemplateName}/versions/{solutionTemplateVersionName}/bulkReviewSolution{?api%2Dversion}",
+    {
+      subscriptionId: context.subscriptionId,
+      resourceGroupName: resourceGroupName,
+      solutionTemplateName: solutionTemplateName,
+      solutionTemplateVersionName: solutionTemplateVersionName,
+      "api%2Dversion": context.apiVersion ?? "2025-08-01",
+    },
+    {
+      allowReserved: options?.requestOptions?.skipUrlEncoding,
+    },
+  );
+  return context
+    .path(path)
+    .post({
+      ...operationOptionsToRequestParameters(options),
+      contentType: "application/json",
+      body: bulkReviewSolutionParameterSerializer(body),
+    });
+}
+
+export async function _bulkReviewSolutionDeserialize(result: PathUncheckedResponse): Promise<void> {
+  const expectedStatuses = ["202", "200", "201"];
+  if (!expectedStatuses.includes(result.status)) {
+    const error = createRestError(result);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
+
+    throw error;
+  }
+
+  return;
+}
+
+/** Post request for bulk review */
+export function bulkReviewSolution(
+  context: Client,
+  resourceGroupName: string,
+  solutionTemplateName: string,
+  solutionTemplateVersionName: string,
+  body: BulkReviewSolutionParameter,
+  options: SolutionTemplateVersionsBulkReviewSolutionOptionalParams = { requestOptions: {} },
+): PollerLike<OperationState<void>, void> {
+  return getLongRunningPoller(context, _bulkReviewSolutionDeserialize, ["202", "200", "201"], {
+    updateIntervalInMs: options?.updateIntervalInMs,
+    abortSignal: options?.abortSignal,
+    getInitialResponse: () =>
+      _bulkReviewSolutionSend(
+        context,
+        resourceGroupName,
+        solutionTemplateName,
+        solutionTemplateVersionName,
+        body,
+        options,
+      ),
+    resourceLocationConfig: "location",
+    apiVersion: context.apiVersion ?? "2025-08-01",
+  }) as PollerLike<OperationState<void>, void>;
+}
+
 export function _bulkPublishSolutionSend(
   context: Client,
   resourceGroupName: string,
   solutionTemplateName: string,
   solutionTemplateVersionName: string,
   body: BulkPublishSolutionParameter,
-  options: SolutionTemplateVersionsBulkPublishSolutionOptionalParams = {
-    requestOptions: {},
-  },
+  options: SolutionTemplateVersionsBulkPublishSolutionOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Edge/solutionTemplates/{solutionTemplateName}/versions/{solutionTemplateVersionName}/bulkPublishSolution{?api%2Dversion}",
@@ -50,26 +121,31 @@ export function _bulkPublishSolutionSend(
       resourceGroupName: resourceGroupName,
       solutionTemplateName: solutionTemplateName,
       solutionTemplateVersionName: solutionTemplateVersionName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2025-08-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).post({
-    ...operationOptionsToRequestParameters(options),
-    contentType: "application/json",
-    body: bulkPublishSolutionParameterSerializer(body),
-  });
+  return context
+    .path(path)
+    .post({
+      ...operationOptionsToRequestParameters(options),
+      contentType: "application/json",
+      body: bulkPublishSolutionParameterSerializer(body),
+    });
 }
 
 export async function _bulkPublishSolutionDeserialize(
   result: PathUncheckedResponse,
 ): Promise<void> {
-  const expectedStatuses = ["202", "200"];
+  const expectedStatuses = ["202", "200", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
+
     throw error;
   }
 
@@ -83,11 +159,9 @@ export function bulkPublishSolution(
   solutionTemplateName: string,
   solutionTemplateVersionName: string,
   body: BulkPublishSolutionParameter,
-  options: SolutionTemplateVersionsBulkPublishSolutionOptionalParams = {
-    requestOptions: {},
-  },
+  options: SolutionTemplateVersionsBulkPublishSolutionOptionalParams = { requestOptions: {} },
 ): PollerLike<OperationState<void>, void> {
-  return getLongRunningPoller(context, _bulkPublishSolutionDeserialize, ["202", "200"], {
+  return getLongRunningPoller(context, _bulkPublishSolutionDeserialize, ["202", "200", "201"], {
     updateIntervalInMs: options?.updateIntervalInMs,
     abortSignal: options?.abortSignal,
     getInitialResponse: () =>
@@ -100,6 +174,7 @@ export function bulkPublishSolution(
         options,
       ),
     resourceLocationConfig: "location",
+    apiVersion: context.apiVersion ?? "2025-08-01",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -109,9 +184,7 @@ export function _bulkDeploySolutionSend(
   solutionTemplateName: string,
   solutionTemplateVersionName: string,
   body: BulkDeploySolutionParameter,
-  options: SolutionTemplateVersionsBulkDeploySolutionOptionalParams = {
-    requestOptions: {},
-  },
+  options: SolutionTemplateVersionsBulkDeploySolutionOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Edge/solutionTemplates/{solutionTemplateName}/versions/{solutionTemplateVersionName}/bulkDeploySolution{?api%2Dversion}",
@@ -120,24 +193,29 @@ export function _bulkDeploySolutionSend(
       resourceGroupName: resourceGroupName,
       solutionTemplateName: solutionTemplateName,
       solutionTemplateVersionName: solutionTemplateVersionName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2025-08-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).post({
-    ...operationOptionsToRequestParameters(options),
-    contentType: "application/json",
-    body: bulkDeploySolutionParameterSerializer(body),
-  });
+  return context
+    .path(path)
+    .post({
+      ...operationOptionsToRequestParameters(options),
+      contentType: "application/json",
+      body: bulkDeploySolutionParameterSerializer(body),
+    });
 }
 
 export async function _bulkDeploySolutionDeserialize(result: PathUncheckedResponse): Promise<void> {
-  const expectedStatuses = ["202", "200"];
+  const expectedStatuses = ["202", "200", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
+
     throw error;
   }
 
@@ -151,11 +229,9 @@ export function bulkDeploySolution(
   solutionTemplateName: string,
   solutionTemplateVersionName: string,
   body: BulkDeploySolutionParameter,
-  options: SolutionTemplateVersionsBulkDeploySolutionOptionalParams = {
-    requestOptions: {},
-  },
+  options: SolutionTemplateVersionsBulkDeploySolutionOptionalParams = { requestOptions: {} },
 ): PollerLike<OperationState<void>, void> {
-  return getLongRunningPoller(context, _bulkDeploySolutionDeserialize, ["202", "200"], {
+  return getLongRunningPoller(context, _bulkDeploySolutionDeserialize, ["202", "200", "201"], {
     updateIntervalInMs: options?.updateIntervalInMs,
     abortSignal: options?.abortSignal,
     getInitialResponse: () =>
@@ -168,6 +244,7 @@ export function bulkDeploySolution(
         options,
       ),
     resourceLocationConfig: "location",
+    apiVersion: context.apiVersion ?? "2025-08-01",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -175,9 +252,7 @@ export function _listBySolutionTemplateSend(
   context: Client,
   resourceGroupName: string,
   solutionTemplateName: string,
-  options: SolutionTemplateVersionsListBySolutionTemplateOptionalParams = {
-    requestOptions: {},
-  },
+  options: SolutionTemplateVersionsListBySolutionTemplateOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Edge/solutionTemplates/{solutionTemplateName}/versions{?api%2Dversion}",
@@ -185,19 +260,18 @@ export function _listBySolutionTemplateSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       solutionTemplateName: solutionTemplateName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2025-08-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: {
-      accept: "application/json",
-      ...options.requestOptions?.headers,
-    },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _listBySolutionTemplateDeserialize(
@@ -206,7 +280,10 @@ export async function _listBySolutionTemplateDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
+
     throw error;
   }
 
@@ -218,16 +295,14 @@ export function listBySolutionTemplate(
   context: Client,
   resourceGroupName: string,
   solutionTemplateName: string,
-  options: SolutionTemplateVersionsListBySolutionTemplateOptionalParams = {
-    requestOptions: {},
-  },
+  options: SolutionTemplateVersionsListBySolutionTemplateOptionalParams = { requestOptions: {} },
 ): PagedAsyncIterableIterator<SolutionTemplateVersion> {
   return buildPagedAsyncIterator(
     context,
     () => _listBySolutionTemplateSend(context, resourceGroupName, solutionTemplateName, options),
     _listBySolutionTemplateDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2025-08-01" },
   );
 }
 
@@ -245,19 +320,18 @@ export function _getSend(
       resourceGroupName: resourceGroupName,
       solutionTemplateName: solutionTemplateName,
       solutionTemplateVersionName: solutionTemplateVersionName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2025-08-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: {
-      accept: "application/json",
-      ...options.requestOptions?.headers,
-    },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _getDeserialize(
@@ -266,7 +340,10 @@ export async function _getDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
+
     throw error;
   }
 

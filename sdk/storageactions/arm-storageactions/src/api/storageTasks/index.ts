@@ -3,6 +3,7 @@
 
 export {
   previewActions,
+  stopAllAssignments,
   listBySubscription,
   listByResourceGroup,
   $delete,
@@ -10,12 +11,13 @@ export {
   create,
   get,
 } from "./operations.js";
-export {
-  type StorageTasksPreviewActionsOptionalParams,
-  type StorageTasksListBySubscriptionOptionalParams,
-  type StorageTasksListByResourceGroupOptionalParams,
-  type StorageTasksDeleteOptionalParams,
-  type StorageTasksUpdateOptionalParams,
-  type StorageTasksCreateOptionalParams,
-  type StorageTasksGetOptionalParams,
+export type {
+  StorageTasksPreviewActionsOptionalParams,
+  StorageTasksStopAllAssignmentsOptionalParams,
+  StorageTasksListBySubscriptionOptionalParams,
+  StorageTasksListByResourceGroupOptionalParams,
+  StorageTasksDeleteOptionalParams,
+  StorageTasksUpdateOptionalParams,
+  StorageTasksCreateOptionalParams,
+  StorageTasksGetOptionalParams,
 } from "./options.js";

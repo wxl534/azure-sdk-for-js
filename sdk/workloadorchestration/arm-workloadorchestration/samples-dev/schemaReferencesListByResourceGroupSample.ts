@@ -8,14 +8,13 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to list by specified resource group
  *
  * @summary list by specified resource group
- * x-ms-original-file: 2025-06-01/SchemaReferences_ListByResourceGroup_MaximumSet_Gen.json
+ * x-ms-original-file: 2025-08-01/SchemaReferences_ListByResourceGroup_MaximumSet_Gen.json
  */
-async function schemaReferencesListByResourceGroupMaximumSet(): Promise<void> {
+async function schemaReferencesListByResourceGroupMaximumSetGeneratedByMaximumSetRule(): Promise<void> {
   const credential = new DefaultAzureCredential();
-  const subscriptionId = "00000000-0000-0000-0000-00000000000";
-  const client = new WorkloadOrchestrationManagementClient(credential, subscriptionId);
+  const client = new WorkloadOrchestrationManagementClient(credential);
   const resArray = new Array();
-  for await (const item of client.schemaReferences.listByResourceGroup("jdvtghygpz")) {
+  for await (const item of client.schemaReferences.listByResourceGroup("gt")) {
     resArray.push(item);
   }
 
@@ -23,7 +22,7 @@ async function schemaReferencesListByResourceGroupMaximumSet(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  await schemaReferencesListByResourceGroupMaximumSet();
+  await schemaReferencesListByResourceGroupMaximumSetGeneratedByMaximumSetRule();
 }
 
 main().catch(console.error);

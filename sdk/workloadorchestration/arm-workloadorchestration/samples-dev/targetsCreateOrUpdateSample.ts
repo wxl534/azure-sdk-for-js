@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update a Target Resource
  *
  * @summary create or update a Target Resource
- * x-ms-original-file: 2025-06-01/Targets_CreateOrUpdate_MaximumSet_Gen.json
+ * x-ms-original-file: 2025-08-01/Targets_CreateOrUpdate_MaximumSet_Gen.json
  */
 async function targetsCreateOrUpdateMaximumSet(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -23,27 +23,6 @@ async function targetsCreateOrUpdateMaximumSet(): Promise<void> {
       contextId:
         "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}",
       hierarchyLevel: "octqptfirejhjfavlnfqeiikqx",
-      status: {
-        lastModified: new Date("2025-06-09T10:12:04.224Z"),
-        deployed: 24,
-        expectedRunningJobId: 19,
-        runningJobId: 6,
-        status: "nnpksn",
-        statusDetails: "bslqqnfciczenaltdcmrgg",
-        generation: 21,
-        targetStatuses: [
-          {
-            name: "jpbfbxmjvr",
-            status: "gsgkxfwtyoaepwa",
-            componentStatuses: [
-              {
-                name: "lxzbkoblvaoubknkblwplf",
-                status: "txtthlvducufbblgtctegtgpzkzgyi",
-              },
-            ],
-          },
-        ],
-      },
       solutionScope: "testname",
       state: "active",
     },
