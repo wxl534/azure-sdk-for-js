@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to gets a list of ElasticSans in a subscription
  *
  * @summary gets a list of ElasticSans in a subscription
- * x-ms-original-file: 2025-09-01/ElasticSans_ListBySubscription_MaximumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/ElasticSans_ListBySubscription_MaximumSet_Gen.json
  */
 async function elasticSansListBySubscriptionMaximumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -26,7 +26,7 @@ async function elasticSansListBySubscriptionMaximumSetGen(): Promise<void> {
  * This sample demonstrates how to gets a list of ElasticSans in a subscription
  *
  * @summary gets a list of ElasticSans in a subscription
- * x-ms-original-file: 2025-09-01/ElasticSans_ListBySubscription_MinimumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/ElasticSans_ListBySubscription_MinimumSet_Gen.json
  */
 async function elasticSansListBySubscriptionMinimumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();

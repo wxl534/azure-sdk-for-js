@@ -1,8 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { XMsDeleteSnapshots, XMsForceDelete } from "../../models/models.js";
-import type { OperationOptions } from "@azure-rest/core-client";
+import {
+  XMsDeleteSnapshots,
+  XMsForceDelete,
+  DeleteType,
+  XMsAccessSoftDeletedResources,
+} from "../../models/models.js";
+import { OperationOptions } from "@azure-rest/core-client";
 
 /** Optional parameters. */
 export interface VolumesPreRestoreOptionalParams extends OperationOptions {
@@ -17,7 +22,10 @@ export interface VolumesPreBackupOptionalParams extends OperationOptions {
 }
 
 /** Optional parameters. */
-export interface VolumesListByVolumeGroupOptionalParams extends OperationOptions {}
+export interface VolumesListByVolumeGroupOptionalParams extends OperationOptions {
+  /** Optional, returns only soft deleted volumes if set to true. If set to false or if not specified, returns only active volumes. */
+  xMsAccessSoftDeletedResources?: XMsAccessSoftDeletedResources;
+}
 
 /** Optional parameters. */
 export interface VolumesDeleteOptionalParams extends OperationOptions {
@@ -27,6 +35,8 @@ export interface VolumesDeleteOptionalParams extends OperationOptions {
   xMsDeleteSnapshots?: XMsDeleteSnapshots;
   /** Optional, used to delete volume if active sessions present. Allowed value are only true or false. Default value is false. */
   xMsForceDelete?: XMsForceDelete;
+  /** Optional. Specifies that the delete operation should be a permanent delete for the soft deleted volume. The value of deleteType can only be 'permanent'. */
+  deleteType?: DeleteType;
 }
 
 /** Optional parameters. */
