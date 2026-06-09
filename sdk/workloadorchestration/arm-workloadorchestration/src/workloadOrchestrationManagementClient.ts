@@ -2,10 +2,18 @@
 // Licensed under the MIT License.
 
 import {
-  createWorkloadOrchestrationManagement,
   WorkloadOrchestrationManagementContext,
   WorkloadOrchestrationManagementClientOptionalParams,
+  createWorkloadOrchestrationManagement,
 } from "./api/index.js";
+import {
+  ConfigTemplateMetadatasOperations,
+  _getConfigTemplateMetadatasOperations,
+} from "./classic/configTemplateMetadatas/index.js";
+import {
+  ConfigTemplateSchemasOperations,
+  _getConfigTemplateSchemasOperations,
+} from "./classic/configTemplateSchemas/index.js";
 import {
   ConfigTemplateVersionsOperations,
   _getConfigTemplateVersionsOperations,
@@ -26,6 +34,14 @@ import {
 } from "./classic/dynamicSchemas/index.js";
 import { ExecutionsOperations, _getExecutionsOperations } from "./classic/executions/index.js";
 import {
+  HierarchyConfigurationMetadataVersionsOperations,
+  _getHierarchyConfigurationMetadataVersionsOperations,
+} from "./classic/hierarchyConfigurationMetadataVersions/index.js";
+import {
+  HierarchyConfigurationMetadatasOperations,
+  _getHierarchyConfigurationMetadatasOperations,
+} from "./classic/hierarchyConfigurationMetadatas/index.js";
+import {
   InstanceHistoriesOperations,
   _getInstanceHistoriesOperations,
 } from "./classic/instanceHistories/index.js";
@@ -44,6 +60,18 @@ import {
   SiteReferencesOperations,
   _getSiteReferencesOperations,
 } from "./classic/siteReferences/index.js";
+import {
+  SolutionMetadataVersionsOperations,
+  _getSolutionMetadataVersionsOperations,
+} from "./classic/solutionMetadataVersions/index.js";
+import {
+  SolutionMetadatasOperations,
+  _getSolutionMetadatasOperations,
+} from "./classic/solutionMetadatas/index.js";
+import {
+  SolutionSchemasOperations,
+  _getSolutionSchemasOperations,
+} from "./classic/solutionSchemas/index.js";
 import {
   SolutionTemplateVersionsOperations,
   _getSolutionTemplateVersionsOperations,
@@ -66,28 +94,54 @@ import { WorkflowsOperations, _getWorkflowsOperations } from "./classic/workflow
 import { TokenCredential } from "@azure/core-auth";
 import { Pipeline } from "@azure/core-rest-pipeline";
 
-export { type WorkloadOrchestrationManagementClientOptionalParams } from "./api/workloadOrchestrationManagementContext.js";
+export type { WorkloadOrchestrationManagementClientOptionalParams } from "./api/workloadOrchestrationManagementContext.js";
 
 export class WorkloadOrchestrationManagementClient {
   private _client: WorkloadOrchestrationManagementContext;
   /** The pipeline used by this client to make requests */
   public readonly pipeline: Pipeline;
 
-  /** Microsoft.Edge Resource Provider management API. */
+  constructor(
+    credential: TokenCredential,
+    options?: WorkloadOrchestrationManagementClientOptionalParams,
+  );
   constructor(
     credential: TokenCredential,
     subscriptionId: string,
-    options: WorkloadOrchestrationManagementClientOptionalParams = {},
+    options?: WorkloadOrchestrationManagementClientOptionalParams,
+  );
+  /** Microsoft.Edge Resource Provider management API. */
+  constructor(
+    credential: TokenCredential,
+    subscriptionIdOrOptions?: string | WorkloadOrchestrationManagementClientOptionalParams,
+    options?: WorkloadOrchestrationManagementClientOptionalParams,
   ) {
+    let subscriptionId: string | undefined;
+
+    if (typeof subscriptionIdOrOptions === "string") {
+      subscriptionId = subscriptionIdOrOptions;
+    } else if (typeof subscriptionIdOrOptions === "object") {
+      options = subscriptionIdOrOptions;
+    }
+
+    options = options ?? {};
     const prefixFromOptions = options?.userAgentOptions?.userAgentPrefix;
     const userAgentPrefix = prefixFromOptions
       ? `${prefixFromOptions} azsdk-js-client`
       : `azsdk-js-client`;
-    this._client = createWorkloadOrchestrationManagement(credential, subscriptionId, {
+    this._client = createWorkloadOrchestrationManagement(credential, subscriptionId ?? "", {
       ...options,
       userAgentOptions: { userAgentPrefix },
     });
     this.pipeline = this._client.pipeline;
+    this.hierarchyConfigurationMetadataVersions =
+      _getHierarchyConfigurationMetadataVersionsOperations(this._client);
+    this.hierarchyConfigurationMetadatas = _getHierarchyConfigurationMetadatasOperations(
+      this._client,
+    );
+    this.configTemplateMetadatas = _getConfigTemplateMetadatasOperations(this._client);
+    this.configTemplateSchemas = _getConfigTemplateSchemasOperations(this._client);
+    this.solutionSchemas = _getSolutionSchemasOperations(this._client);
     this.siteReferences = _getSiteReferencesOperations(this._client);
     this.contexts = _getContextsOperations(this._client);
     this.diagnostics = _getDiagnosticsOperations(this._client);
@@ -100,6 +154,8 @@ export class WorkloadOrchestrationManagementClient {
     this.instances = _getInstancesOperations(this._client);
     this.solutionTemplates = _getSolutionTemplatesOperations(this._client);
     this.solutionTemplateVersions = _getSolutionTemplateVersionsOperations(this._client);
+    this.solutionMetadataVersions = _getSolutionMetadataVersionsOperations(this._client);
+    this.solutionMetadatas = _getSolutionMetadatasOperations(this._client);
     this.solutions = _getSolutionsOperations(this._client);
     this.schemaReferences = _getSchemaReferencesOperations(this._client);
     this.dynamicSchemaVersions = _getDynamicSchemaVersionsOperations(this._client);
@@ -111,6 +167,16 @@ export class WorkloadOrchestrationManagementClient {
     this.dynamicSchemas = _getDynamicSchemasOperations(this._client);
   }
 
+  /** The operation groups for hierarchyConfigurationMetadataVersions */
+  public readonly hierarchyConfigurationMetadataVersions: HierarchyConfigurationMetadataVersionsOperations;
+  /** The operation groups for hierarchyConfigurationMetadatas */
+  public readonly hierarchyConfigurationMetadatas: HierarchyConfigurationMetadatasOperations;
+  /** The operation groups for configTemplateMetadatas */
+  public readonly configTemplateMetadatas: ConfigTemplateMetadatasOperations;
+  /** The operation groups for configTemplateSchemas */
+  public readonly configTemplateSchemas: ConfigTemplateSchemasOperations;
+  /** The operation groups for solutionSchemas */
+  public readonly solutionSchemas: SolutionSchemasOperations;
   /** The operation groups for siteReferences */
   public readonly siteReferences: SiteReferencesOperations;
   /** The operation groups for contexts */
@@ -135,6 +201,10 @@ export class WorkloadOrchestrationManagementClient {
   public readonly solutionTemplates: SolutionTemplatesOperations;
   /** The operation groups for solutionTemplateVersions */
   public readonly solutionTemplateVersions: SolutionTemplateVersionsOperations;
+  /** The operation groups for solutionMetadataVersions */
+  public readonly solutionMetadataVersions: SolutionMetadataVersionsOperations;
+  /** The operation groups for solutionMetadatas */
+  public readonly solutionMetadatas: SolutionMetadatasOperations;
   /** The operation groups for solutions */
   public readonly solutions: SolutionsOperations;
   /** The operation groups for schemaReferences */

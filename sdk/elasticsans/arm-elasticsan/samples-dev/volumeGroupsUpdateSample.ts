@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update an VolumeGroup.
  *
  * @summary update an VolumeGroup.
- * x-ms-original-file: 2025-09-01/VolumeGroups_Update_MaximumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/VolumeGroups_Update_MaximumSet_Gen.json
  */
 async function volumeGroupsUpdateMaximumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -21,6 +21,7 @@ async function volumeGroupsUpdateMaximumSetGen(): Promise<void> {
     {
       identity: { type: "None", userAssignedIdentities: { key2350: {} } },
       properties: {
+        deleteRetentionPolicy: { policyState: "Enabled", retentionPeriodDays: 14 },
         encryption: "EncryptionAtRestWithPlatformKey",
         encryptionProperties: {
           encryptionIdentity: { encryptionUserAssignedIdentity: "vgbeephfgecgg" },
@@ -45,7 +46,7 @@ async function volumeGroupsUpdateMaximumSetGen(): Promise<void> {
  * This sample demonstrates how to update an VolumeGroup.
  *
  * @summary update an VolumeGroup.
- * x-ms-original-file: 2025-09-01/VolumeGroups_Update_MinimumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/VolumeGroups_Update_MinimumSet_Gen.json
  */
 async function volumeGroupsUpdateMinimumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();

@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to delete a managed private endpoint for a grafana resource.
  *
  * @summary delete a managed private endpoint for a grafana resource.
- * x-ms-original-file: 2025-08-01/ManagedPrivateEndpoints_Delete.json
+ * x-ms-original-file: 2025-09-01-preview/ManagedPrivateEndpoints_Delete.json
  */
 async function managedPrivateEndpointDelete(): Promise<void> {
   const credential = new DefaultAzureCredential();

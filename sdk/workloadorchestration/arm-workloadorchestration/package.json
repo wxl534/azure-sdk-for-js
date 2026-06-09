@@ -129,6 +129,76 @@
         "default": "./dist/commonjs/api/index.js"
       }
     },
+    "./api/hierarchyConfigurationMetadataVersions": {
+      "browser": {
+        "types": "./dist/browser/api/hierarchyConfigurationMetadataVersions/index.d.ts",
+        "default": "./dist/browser/api/hierarchyConfigurationMetadataVersions/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/api/hierarchyConfigurationMetadataVersions/index.d.ts",
+        "default": "./dist/esm/api/hierarchyConfigurationMetadataVersions/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/api/hierarchyConfigurationMetadataVersions/index.d.ts",
+        "default": "./dist/commonjs/api/hierarchyConfigurationMetadataVersions/index.js"
+      }
+    },
+    "./api/hierarchyConfigurationMetadatas": {
+      "browser": {
+        "types": "./dist/browser/api/hierarchyConfigurationMetadatas/index.d.ts",
+        "default": "./dist/browser/api/hierarchyConfigurationMetadatas/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/api/hierarchyConfigurationMetadatas/index.d.ts",
+        "default": "./dist/esm/api/hierarchyConfigurationMetadatas/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/api/hierarchyConfigurationMetadatas/index.d.ts",
+        "default": "./dist/commonjs/api/hierarchyConfigurationMetadatas/index.js"
+      }
+    },
+    "./api/configTemplateMetadatas": {
+      "browser": {
+        "types": "./dist/browser/api/configTemplateMetadatas/index.d.ts",
+        "default": "./dist/browser/api/configTemplateMetadatas/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/api/configTemplateMetadatas/index.d.ts",
+        "default": "./dist/esm/api/configTemplateMetadatas/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/api/configTemplateMetadatas/index.d.ts",
+        "default": "./dist/commonjs/api/configTemplateMetadatas/index.js"
+      }
+    },
+    "./api/configTemplateSchemas": {
+      "browser": {
+        "types": "./dist/browser/api/configTemplateSchemas/index.d.ts",
+        "default": "./dist/browser/api/configTemplateSchemas/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/api/configTemplateSchemas/index.d.ts",
+        "default": "./dist/esm/api/configTemplateSchemas/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/api/configTemplateSchemas/index.d.ts",
+        "default": "./dist/commonjs/api/configTemplateSchemas/index.js"
+      }
+    },
+    "./api/solutionSchemas": {
+      "browser": {
+        "types": "./dist/browser/api/solutionSchemas/index.d.ts",
+        "default": "./dist/browser/api/solutionSchemas/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/api/solutionSchemas/index.d.ts",
+        "default": "./dist/esm/api/solutionSchemas/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/api/solutionSchemas/index.d.ts",
+        "default": "./dist/commonjs/api/solutionSchemas/index.js"
+      }
+    },
     "./api/siteReferences": {
       "browser": {
         "types": "./dist/browser/api/siteReferences/index.d.ts",
@@ -295,6 +365,34 @@
       "require": {
         "types": "./dist/commonjs/api/solutionTemplateVersions/index.d.ts",
         "default": "./dist/commonjs/api/solutionTemplateVersions/index.js"
+      }
+    },
+    "./api/solutionMetadataVersions": {
+      "browser": {
+        "types": "./dist/browser/api/solutionMetadataVersions/index.d.ts",
+        "default": "./dist/browser/api/solutionMetadataVersions/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/api/solutionMetadataVersions/index.d.ts",
+        "default": "./dist/esm/api/solutionMetadataVersions/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/api/solutionMetadataVersions/index.d.ts",
+        "default": "./dist/commonjs/api/solutionMetadataVersions/index.js"
+      }
+    },
+    "./api/solutionMetadatas": {
+      "browser": {
+        "types": "./dist/browser/api/solutionMetadatas/index.d.ts",
+        "default": "./dist/browser/api/solutionMetadatas/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/api/solutionMetadatas/index.d.ts",
+        "default": "./dist/esm/api/solutionMetadatas/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/api/solutionMetadatas/index.d.ts",
+        "default": "./dist/commonjs/api/solutionMetadatas/index.js"
       }
     },
     "./api/solutions": {

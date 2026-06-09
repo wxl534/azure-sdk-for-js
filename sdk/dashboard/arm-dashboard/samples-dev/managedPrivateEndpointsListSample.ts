@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to list all managed private endpoints of a grafana resource.
  *
  * @summary list all managed private endpoints of a grafana resource.
- * x-ms-original-file: 2025-08-01/ManagedPrivateEndpoints_List.json
+ * x-ms-original-file: 2025-09-01-preview/ManagedPrivateEndpoints_List.json
  */
 async function managedPrivateEndpointList(): Promise<void> {
   const credential = new DefaultAzureCredential();

@@ -34,16 +34,18 @@ export function _jobExecutionSend(
       resourceGroupName: resourceGroupName,
       jobName: jobName,
       jobExecutionName: jobExecutionName,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-01-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _jobExecutionDeserialize(
@@ -52,7 +54,9 @@ export async function _jobExecutionDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = defaultErrorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = defaultErrorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -86,16 +90,18 @@ export function _getCustomDomainVerificationIdSend(
     "/subscriptions/{subscriptionId}/providers/Microsoft.App/getCustomDomainVerificationId{?api%2Dversion}",
     {
       subscriptionId: context.subscriptionId,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-01-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).post({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "text/plain", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .post({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _getCustomDomainVerificationIdDeserialize(
@@ -104,7 +110,9 @@ export async function _getCustomDomainVerificationIdDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = defaultErrorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = defaultErrorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
