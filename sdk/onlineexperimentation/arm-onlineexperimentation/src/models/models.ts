@@ -1,6 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+/**
+ * This file contains only generated model types and their (de)serializers.
+ * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+ */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** A list of REST API operations supported by an Azure Resource Provider. It contains an URL link to get the next set of results. */
 export interface _OperationListResult {
   /** The Operation items on this page */
@@ -46,7 +52,7 @@ export function operationDeserializer(item: any): Operation {
   };
 }
 
-/** Localized display information for and operation. */
+/** Localized display information for an operation. */
 export interface OperationDisplay {
   /** The localized friendly form of the resource provider name, e.g. "Microsoft Monitoring Insights" or "Microsoft Compute". */
   readonly provider?: string;
@@ -158,21 +164,14 @@ export interface ErrorAdditionalInfo {
   /** The additional info type. */
   readonly type?: string;
   /** The additional info. */
-  readonly info?: Record<string, any>;
+  readonly info?: any;
 }
 
 export function errorAdditionalInfoDeserializer(item: any): ErrorAdditionalInfo {
   return {
     type: item["type"],
-    info: !item["info"] ? item["info"] : _errorAdditionalInfoInfoDeserializer(item["info"]),
+    info: item["info"],
   };
-}
-
-/** model interface _ErrorAdditionalInfoInfo */
-export interface _ErrorAdditionalInfoInfo {}
-
-export function _errorAdditionalInfoInfoDeserializer(item: any): _ErrorAdditionalInfoInfo {
-  return item;
 }
 
 /** An online experimentation workspace resource. */
@@ -205,7 +204,9 @@ export function onlineExperimentationWorkspaceDeserializer(
   item: any,
 ): OnlineExperimentationWorkspace {
   return {
-    tags: item["tags"],
+    tags: !item["tags"]
+      ? item["tags"]
+      : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
     location: item["location"],
     id: item["id"],
     name: item["name"],
@@ -239,6 +240,14 @@ export interface OnlineExperimentationWorkspaceProperties {
   encryption?: ResourceEncryptionConfiguration;
   /** The data plane endpoint for the online experimentation workspace resource. */
   readonly endpoint?: string;
+  /**
+   * Public Network Access Control for the online experimentation resource. Defaults to Enabled if not set.
+   * - Enabled: The resource can be accessed from the public internet.
+   * - Disabled: The resource can only be accessed from a private endpoint.
+   */
+  publicNetworkAccess?: PublicNetworkAccessType;
+  /** The private endpoint connections associated with the online experimentation workspace resource. */
+  readonly privateEndpointConnections?: PrivateEndpointConnection[];
 }
 
 export function onlineExperimentationWorkspacePropertiesSerializer(
@@ -251,6 +260,7 @@ export function onlineExperimentationWorkspacePropertiesSerializer(
     encryption: !item["encryption"]
       ? item["encryption"]
       : resourceEncryptionConfigurationSerializer(item["encryption"]),
+    publicNetworkAccess: item["publicNetworkAccess"],
   };
 }
 
@@ -267,6 +277,10 @@ export function onlineExperimentationWorkspacePropertiesDeserializer(
       ? item["encryption"]
       : resourceEncryptionConfigurationDeserializer(item["encryption"]),
     endpoint: item["endpoint"],
+    publicNetworkAccess: item["publicNetworkAccess"],
+    privateEndpointConnections: !item["privateEndpointConnections"]
+      ? item["privateEndpointConnections"]
+      : privateEndpointConnectionArrayDeserializer(item["privateEndpointConnections"]),
   };
 }
 
@@ -387,6 +401,203 @@ export enum KnownKeyEncryptionKeyIdentityType {
  */
 export type KeyEncryptionKeyIdentityType = string;
 
+/** The public network access type for an online experimentation resource. */
+export enum KnownPublicNetworkAccessType {
+  /** Enabled: The resource can be accessed from the public internet */
+  Enabled = "Enabled",
+  /** Disabled: The resource can only be accessed from a private endpoint. */
+  Disabled = "Disabled",
+}
+
+/**
+ * The public network access type for an online experimentation resource. \
+ * {@link KnownPublicNetworkAccessType} can be used interchangeably with PublicNetworkAccessType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Enabled**: Enabled: The resource can be accessed from the public internet \
+ * **Disabled**: Disabled: The resource can only be accessed from a private endpoint.
+ */
+export type PublicNetworkAccessType = string;
+
+export function privateEndpointConnectionArraySerializer(
+  result: Array<PrivateEndpointConnection>,
+): any[] {
+  return result.map((item) => {
+    return privateEndpointConnectionSerializer(item);
+  });
+}
+
+export function privateEndpointConnectionArrayDeserializer(
+  result: Array<PrivateEndpointConnection>,
+): any[] {
+  return result.map((item) => {
+    return privateEndpointConnectionDeserializer(item);
+  });
+}
+
+/** Private endpoint connection resource for an online experimentation workspace resource. */
+export interface PrivateEndpointConnection extends ProxyResource {
+  /** The resource-specific properties for this resource. */
+  properties?: PrivateEndpointConnectionProperties;
+}
+
+export function privateEndpointConnectionSerializer(item: PrivateEndpointConnection): any {
+  return {
+    properties: !item["properties"]
+      ? item["properties"]
+      : privateEndpointConnectionPropertiesSerializer(item["properties"]),
+  };
+}
+
+export function privateEndpointConnectionDeserializer(item: any): PrivateEndpointConnection {
+  return {
+    id: item["id"],
+    name: item["name"],
+    type: item["type"],
+    systemData: !item["systemData"]
+      ? item["systemData"]
+      : systemDataDeserializer(item["systemData"]),
+    properties: !item["properties"]
+      ? item["properties"]
+      : privateEndpointConnectionPropertiesDeserializer(item["properties"]),
+  };
+}
+
+/** Properties of the private endpoint connection. */
+export interface PrivateEndpointConnectionProperties {
+  /** The group ids for the private endpoint resource. */
+  readonly groupIds?: string[];
+  /** The private endpoint resource. */
+  privateEndpoint?: PrivateEndpoint;
+  /** A collection of information about the state of the connection between service consumer and provider. */
+  privateLinkServiceConnectionState: PrivateLinkServiceConnectionState;
+  /** The provisioning state of the private endpoint connection resource. */
+  readonly provisioningState?: PrivateEndpointConnectionProvisioningState;
+}
+
+export function privateEndpointConnectionPropertiesSerializer(
+  item: PrivateEndpointConnectionProperties,
+): any {
+  return {
+    privateEndpoint: !item["privateEndpoint"]
+      ? item["privateEndpoint"]
+      : privateEndpointSerializer(item["privateEndpoint"]),
+    privateLinkServiceConnectionState: privateLinkServiceConnectionStateSerializer(
+      item["privateLinkServiceConnectionState"],
+    ),
+  };
+}
+
+export function privateEndpointConnectionPropertiesDeserializer(
+  item: any,
+): PrivateEndpointConnectionProperties {
+  return {
+    groupIds: !item["groupIds"]
+      ? item["groupIds"]
+      : item["groupIds"].map((p: any) => {
+          return p;
+        }),
+    privateEndpoint: !item["privateEndpoint"]
+      ? item["privateEndpoint"]
+      : privateEndpointDeserializer(item["privateEndpoint"]),
+    privateLinkServiceConnectionState: privateLinkServiceConnectionStateDeserializer(
+      item["privateLinkServiceConnectionState"],
+    ),
+    provisioningState: item["provisioningState"],
+  };
+}
+
+/** The private endpoint resource. */
+export interface PrivateEndpoint {
+  /** The resource identifier of the private endpoint */
+  readonly id?: string;
+}
+
+export function privateEndpointSerializer(_item: PrivateEndpoint): any {
+  return {};
+}
+
+export function privateEndpointDeserializer(item: any): PrivateEndpoint {
+  return {
+    id: item["id"],
+  };
+}
+
+/** A collection of information about the state of the connection between service consumer and provider. */
+export interface PrivateLinkServiceConnectionState {
+  /** Indicates whether the connection has been Approved/Rejected/Removed by the owner of the service. */
+  status?: PrivateEndpointServiceConnectionStatus;
+  /** The reason for approval/rejection of the connection. */
+  description?: string;
+  /** A message indicating if changes on the service provider require any updates on the consumer. */
+  actionsRequired?: string;
+}
+
+export function privateLinkServiceConnectionStateSerializer(
+  item: PrivateLinkServiceConnectionState,
+): any {
+  return {
+    status: item["status"],
+    description: item["description"],
+    actionsRequired: item["actionsRequired"],
+  };
+}
+
+export function privateLinkServiceConnectionStateDeserializer(
+  item: any,
+): PrivateLinkServiceConnectionState {
+  return {
+    status: item["status"],
+    description: item["description"],
+    actionsRequired: item["actionsRequired"],
+  };
+}
+
+/** The private endpoint connection status. */
+export enum KnownPrivateEndpointServiceConnectionStatus {
+  /** Connection waiting for approval or rejection */
+  Pending = "Pending",
+  /** Connection approved */
+  Approved = "Approved",
+  /** Connection Rejected */
+  Rejected = "Rejected",
+}
+
+/**
+ * The private endpoint connection status. \
+ * {@link KnownPrivateEndpointServiceConnectionStatus} can be used interchangeably with PrivateEndpointServiceConnectionStatus,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Pending**: Connection waiting for approval or rejection \
+ * **Approved**: Connection approved \
+ * **Rejected**: Connection Rejected
+ */
+export type PrivateEndpointServiceConnectionStatus = string;
+
+/** The current provisioning state. */
+export enum KnownPrivateEndpointConnectionProvisioningState {
+  /** Connection has been provisioned */
+  Succeeded = "Succeeded",
+  /** Connection is being created */
+  Creating = "Creating",
+  /** Connection is being deleted */
+  Deleting = "Deleting",
+  /** Connection provisioning has failed */
+  Failed = "Failed",
+}
+
+/**
+ * The current provisioning state. \
+ * {@link KnownPrivateEndpointConnectionProvisioningState} can be used interchangeably with PrivateEndpointConnectionProvisioningState,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Succeeded**: Connection has been provisioned \
+ * **Creating**: Connection is being created \
+ * **Deleting**: Connection is being deleted \
+ * **Failed**: Connection provisioning has failed
+ */
+export type PrivateEndpointConnectionProvisioningState = string;
+
 /** Managed service identity (system assigned and/or user assigned identities) */
 export interface ManagedServiceIdentity {
   /** The service principal ID of the system assigned identity. This property will only be provided for a system assigned identity. */
@@ -396,14 +607,11 @@ export interface ManagedServiceIdentity {
   /** The type of managed identity assigned to this resource. */
   type: ManagedServiceIdentityType;
   /** The identities assigned to this resource by the user. */
-  userAssignedIdentities?: Record<string, UserAssignedIdentity | null>;
+  userAssignedIdentities?: Record<string, UserAssignedIdentity>;
 }
 
 export function managedServiceIdentitySerializer(item: ManagedServiceIdentity): any {
-  return {
-    type: item["type"],
-    userAssignedIdentities: item["userAssignedIdentities"],
-  };
+  return { type: item["type"], userAssignedIdentities: item["userAssignedIdentities"] };
 }
 
 export function managedServiceIdentityDeserializer(item: any): ManagedServiceIdentity {
@@ -411,7 +619,14 @@ export function managedServiceIdentityDeserializer(item: any): ManagedServiceIde
     principalId: item["principalId"],
     tenantId: item["tenantId"],
     type: item["type"],
-    userAssignedIdentities: item["userAssignedIdentities"],
+    userAssignedIdentities: !item["userAssignedIdentities"]
+      ? item["userAssignedIdentities"]
+      : Object.fromEntries(
+          Object.entries(item["userAssignedIdentities"]).map(([k, p]: [string, any]) => [
+            k,
+            !p ? p : userAssignedIdentityDeserializer(p),
+          ]),
+        ),
   };
 }
 
@@ -447,8 +662,8 @@ export interface UserAssignedIdentity {
   readonly clientId?: string;
 }
 
-export function userAssignedIdentitySerializer(item: UserAssignedIdentity): any {
-  return item;
+export function userAssignedIdentitySerializer(_item: UserAssignedIdentity): any {
+  return {};
 }
 
 export function userAssignedIdentityDeserializer(item: any): UserAssignedIdentity {
@@ -529,19 +744,14 @@ export enum KnownOnlineExperimentationWorkspaceSkuTier {
  */
 export type OnlineExperimentationWorkspaceSkuTier = string;
 
-/** The resource model definition for an Azure Resource Manager tracked top level resource which has 'tags' and a 'location' */
-export interface TrackedResource extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
-  location: string;
+/** The resource model definition for a Azure Resource Manager proxy resource. It will not have tags and a location */
+export interface ProxyResource extends Resource {}
+
+export function proxyResourceSerializer(_item: ProxyResource): any {
+  return {};
 }
 
-export function trackedResourceSerializer(item: TrackedResource): any {
-  return { tags: item["tags"], location: item["location"] };
-}
-
-export function trackedResourceDeserializer(item: any): TrackedResource {
+export function proxyResourceDeserializer(item: any): ProxyResource {
   return {
     id: item["id"],
     name: item["name"],
@@ -549,8 +759,6 @@ export function trackedResourceDeserializer(item: any): TrackedResource {
     systemData: !item["systemData"]
       ? item["systemData"]
       : systemDataDeserializer(item["systemData"]),
-    tags: item["tags"],
-    location: item["location"],
   };
 }
 
@@ -566,8 +774,8 @@ export interface Resource {
   readonly systemData?: SystemData;
 }
 
-export function resourceSerializer(item: Resource): any {
-  return item;
+export function resourceSerializer(_item: Resource): any {
+  return {};
 }
 
 export function resourceDeserializer(item: any): Resource {
@@ -624,7 +832,7 @@ export enum KnownCreatedByType {
 
 /**
  * The kind of entity that created the resource. \
- * {@link KnowncreatedByType} can be used interchangeably with createdByType,
+ * {@link KnownCreatedByType} can be used interchangeably with CreatedByType,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
  * **User**: The entity was created by a user. \
@@ -633,6 +841,33 @@ export enum KnownCreatedByType {
  * **Key**: The entity was created by a key.
  */
 export type CreatedByType = string;
+
+/** The resource model definition for an Azure Resource Manager tracked top level resource which has 'tags' and a 'location' */
+export interface TrackedResource extends Resource {
+  /** Resource tags. */
+  tags?: Record<string, string>;
+  /** The geo-location where the resource lives */
+  location: string;
+}
+
+export function trackedResourceSerializer(item: TrackedResource): any {
+  return { tags: item["tags"], location: item["location"] };
+}
+
+export function trackedResourceDeserializer(item: any): TrackedResource {
+  return {
+    id: item["id"],
+    name: item["name"],
+    type: item["type"],
+    systemData: !item["systemData"]
+      ? item["systemData"]
+      : systemDataDeserializer(item["systemData"]),
+    tags: !item["tags"]
+      ? item["tags"]
+      : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
+    location: item["location"],
+  };
+}
 
 /** Partial update of an online experimentation workspace resource. */
 export interface OnlineExperimentationWorkspacePatch {
@@ -647,6 +882,7 @@ export interface OnlineExperimentationWorkspacePatch {
     logAnalyticsWorkspaceResourceId?: string;
     logsExporterStorageAccountResourceId?: string;
     encryption?: ResourceEncryptionConfiguration;
+    publicNetworkAccess?: PublicNetworkAccessType;
   };
 }
 
@@ -673,6 +909,12 @@ export interface _OnlineExperimentationWorkspacePatchProperties {
   logsExporterStorageAccountResourceId?: string;
   /** The encryption configuration for the online experimentation workspace resource. */
   encryption?: ResourceEncryptionConfiguration;
+  /**
+   * Public Network Access Control for the online experimentation resource. Defaults to Enabled if set to null.
+   * - Enabled: The resource can be accessed from the public internet.
+   * - Disabled: The resource can only be accessed from a private endpoint.
+   */
+  publicNetworkAccess?: PublicNetworkAccessType;
 }
 
 export function _onlineExperimentationWorkspacePatchPropertiesSerializer(
@@ -684,6 +926,7 @@ export function _onlineExperimentationWorkspacePatchPropertiesSerializer(
     encryption: !item["encryption"]
       ? item["encryption"]
       : resourceEncryptionConfigurationSerializer(item["encryption"]),
+    publicNetworkAccess: item["publicNetworkAccess"],
   };
 }
 
@@ -720,8 +963,98 @@ export function onlineExperimentationWorkspaceArrayDeserializer(
   });
 }
 
+/** The response of a PrivateEndpointConnection list operation. */
+export interface _PrivateEndpointConnectionListResult {
+  /** The PrivateEndpointConnection items on this page */
+  value: PrivateEndpointConnection[];
+  /** The link to the next page of items */
+  nextLink?: string;
+}
+
+export function _privateEndpointConnectionListResultDeserializer(
+  item: any,
+): _PrivateEndpointConnectionListResult {
+  return {
+    value: privateEndpointConnectionArrayDeserializer(item["value"]),
+    nextLink: item["nextLink"],
+  };
+}
+
+/** A private link resource. */
+export interface PrivateLinkResource extends ProxyResource {
+  /** The resource-specific properties for this resource. */
+  properties?: PrivateLinkResourceProperties;
+}
+
+export function privateLinkResourceDeserializer(item: any): PrivateLinkResource {
+  return {
+    id: item["id"],
+    name: item["name"],
+    type: item["type"],
+    systemData: !item["systemData"]
+      ? item["systemData"]
+      : systemDataDeserializer(item["systemData"]),
+    properties: !item["properties"]
+      ? item["properties"]
+      : privateLinkResourcePropertiesDeserializer(item["properties"]),
+  };
+}
+
+/** Properties of a private link resource. */
+export interface PrivateLinkResourceProperties {
+  /** The private link resource group id. */
+  readonly groupId?: string;
+  /** The private link resource required member names. */
+  readonly requiredMembers?: string[];
+  /** The private link resource private link DNS zone name. */
+  requiredZoneNames?: string[];
+}
+
+export function privateLinkResourcePropertiesDeserializer(
+  item: any,
+): PrivateLinkResourceProperties {
+  return {
+    groupId: item["groupId"],
+    requiredMembers: !item["requiredMembers"]
+      ? item["requiredMembers"]
+      : item["requiredMembers"].map((p: any) => {
+          return p;
+        }),
+    requiredZoneNames: !item["requiredZoneNames"]
+      ? item["requiredZoneNames"]
+      : item["requiredZoneNames"].map((p: any) => {
+          return p;
+        }),
+  };
+}
+
+/** The response of a PrivateLinkResource list operation. */
+export interface _PrivateLinkResourceListResult {
+  /** The PrivateLinkResource items on this page */
+  value: PrivateLinkResource[];
+  /** The link to the next page of items */
+  nextLink?: string;
+}
+
+export function _privateLinkResourceListResultDeserializer(
+  item: any,
+): _PrivateLinkResourceListResult {
+  return {
+    value: privateLinkResourceArrayDeserializer(item["value"]),
+    nextLink: item["nextLink"],
+  };
+}
+
+export function privateLinkResourceArrayDeserializer(result: Array<PrivateLinkResource>): any[] {
+  return result.map((item) => {
+    return privateLinkResourceDeserializer(item);
+  });
+}
+
 /** The available API versions. */
 export enum KnownVersions {
   /** 2025-05-31-preview version */
   V20250531Preview = "2025-05-31-preview",
+  /** 2025-08-01-preview version */
+  V20250801Preview = "2025-08-01-preview",
 }

@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get a ElasticSan.
  *
  * @summary get a ElasticSan.
- * x-ms-original-file: 2025-09-01/ElasticSans_Get_MaximumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/ElasticSans_Get_MaximumSet_Gen.json
  */
 async function elasticSansGetMaximumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -22,7 +22,7 @@ async function elasticSansGetMaximumSetGen(): Promise<void> {
  * This sample demonstrates how to get a ElasticSan.
  *
  * @summary get a ElasticSan.
- * x-ms-original-file: 2025-09-01/ElasticSans_Get_MinimumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/ElasticSans_Get_MinimumSet_Gen.json
  */
 async function elasticSansGetMinimumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();

@@ -14,6 +14,7 @@ export type {
   StandbyVirtualMachinePoolElasticityProfile,
   DynamicSizing,
   VirtualMachineState,
+  VmStateDistribution,
   ProvisioningState,
   TrackedResource,
   Resource,
