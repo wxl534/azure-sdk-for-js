@@ -178,6 +178,8 @@ export function errorAdditionalInfoDeserializer(item: any): ErrorAdditionalInfo 
 export interface Scheduler extends TrackedResource {
   /** The resource-specific properties for this resource. */
   properties?: SchedulerProperties;
+  /** The managed service identities assigned to this resource. */
+  identity?: ManagedServiceIdentity;
 }
 
 export function schedulerSerializer(item: Scheduler): any {
@@ -187,6 +189,9 @@ export function schedulerSerializer(item: Scheduler): any {
     properties: !item["properties"]
       ? item["properties"]
       : schedulerPropertiesSerializer(item["properties"]),
+    identity: !item["identity"]
+      ? item["identity"]
+      : managedServiceIdentitySerializer(item["identity"]),
   };
 }
 
@@ -205,6 +210,9 @@ export function schedulerDeserializer(item: any): Scheduler {
     properties: !item["properties"]
       ? item["properties"]
       : schedulerPropertiesDeserializer(item["properties"]),
+    identity: !item["identity"]
+      ? item["identity"]
+      : managedServiceIdentityDeserializer(item["identity"]),
   };
 }
 
@@ -452,8 +460,8 @@ export interface PrivateEndpoint {
   readonly id?: string;
 }
 
-export function privateEndpointSerializer(item: PrivateEndpoint): any {
-  return item;
+export function privateEndpointSerializer(_item: PrivateEndpoint): any {
+  return {};
 }
 
 export function privateEndpointDeserializer(item: any): PrivateEndpoint {
@@ -537,6 +545,81 @@ export enum KnownPrivateEndpointConnectionProvisioningState {
  */
 export type PrivateEndpointConnectionProvisioningState = string;
 
+/** Managed service identity (system assigned and/or user assigned identities) */
+export interface ManagedServiceIdentity {
+  /** The service principal ID of the system assigned identity. This property will only be provided for a system assigned identity. */
+  readonly principalId?: string;
+  /** The tenant ID of the system assigned identity. This property will only be provided for a system assigned identity. */
+  readonly tenantId?: string;
+  /** The type of managed identity assigned to this resource. */
+  type: ManagedServiceIdentityType;
+  /** The identities assigned to this resource by the user. */
+  userAssignedIdentities?: Record<string, UserAssignedIdentity>;
+}
+
+export function managedServiceIdentitySerializer(item: ManagedServiceIdentity): any {
+  return { type: item["type"], userAssignedIdentities: item["userAssignedIdentities"] };
+}
+
+export function managedServiceIdentityDeserializer(item: any): ManagedServiceIdentity {
+  return {
+    principalId: item["principalId"],
+    tenantId: item["tenantId"],
+    type: item["type"],
+    userAssignedIdentities: !item["userAssignedIdentities"]
+      ? item["userAssignedIdentities"]
+      : Object.fromEntries(
+          Object.entries(item["userAssignedIdentities"]).map(([k, p]: [string, any]) => [
+            k,
+            !p ? p : userAssignedIdentityDeserializer(p),
+          ]),
+        ),
+  };
+}
+
+/** Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed). */
+export enum KnownManagedServiceIdentityType {
+  /** No managed identity. */
+  None = "None",
+  /** System assigned managed identity. */
+  SystemAssigned = "SystemAssigned",
+  /** User assigned managed identity. */
+  UserAssigned = "UserAssigned",
+  /** System and user assigned managed identity. */
+  SystemAssignedUserAssigned = "SystemAssigned,UserAssigned",
+}
+
+/**
+ * Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed). \
+ * {@link KnownManagedServiceIdentityType} can be used interchangeably with ManagedServiceIdentityType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **None**: No managed identity. \
+ * **SystemAssigned**: System assigned managed identity. \
+ * **UserAssigned**: User assigned managed identity. \
+ * **SystemAssigned,UserAssigned**: System and user assigned managed identity.
+ */
+export type ManagedServiceIdentityType = string;
+
+/** User assigned identity properties */
+export interface UserAssignedIdentity {
+  /** The principal ID of the assigned identity. */
+  readonly principalId?: string;
+  /** The client ID of the assigned identity. */
+  readonly clientId?: string;
+}
+
+export function userAssignedIdentitySerializer(_item: UserAssignedIdentity): any {
+  return {};
+}
+
+export function userAssignedIdentityDeserializer(item: any): UserAssignedIdentity {
+  return {
+    principalId: item["principalId"],
+    clientId: item["clientId"],
+  };
+}
+
 /** Common fields that are returned in the response for all Azure Resource Manager resources */
 export interface Resource {
   /** Fully qualified resource ID for the resource. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName} */
@@ -549,8 +632,8 @@ export interface Resource {
   readonly systemData?: SystemData;
 }
 
-export function resourceSerializer(item: Resource): any {
-  return item;
+export function resourceSerializer(_item: Resource): any {
+  return {};
 }
 
 export function resourceDeserializer(item: any): Resource {
@@ -650,6 +733,8 @@ export interface SchedulerUpdate {
   properties?: SchedulerPropertiesUpdate;
   /** Resource tags. */
   tags?: Record<string, string>;
+  /** The managed service identities assigned to this resource. */
+  identity?: ManagedServiceIdentity;
 }
 
 export function schedulerUpdateSerializer(item: SchedulerUpdate): any {
@@ -658,6 +743,9 @@ export function schedulerUpdateSerializer(item: SchedulerUpdate): any {
       ? item["properties"]
       : schedulerPropertiesUpdateSerializer(item["properties"]),
     tags: item["tags"],
+    identity: !item["identity"]
+      ? item["identity"]
+      : managedServiceIdentitySerializer(item["identity"]),
   };
 }
 
@@ -889,24 +977,37 @@ export interface TaskHubProperties {
   readonly provisioningState?: ProvisioningState;
   /** URL of the durable task scheduler dashboard */
   readonly dashboardUrl?: string;
+  /** A set of Task Hub capabilities that can be enabled or disabled for a Task Hub */
+  capabilities?: string[];
 }
 
 export function taskHubPropertiesSerializer(item: TaskHubProperties): any {
-  return item;
+  return {
+    capabilities: !item["capabilities"]
+      ? item["capabilities"]
+      : item["capabilities"].map((p: any) => {
+          return p;
+        }),
+  };
 }
 
 export function taskHubPropertiesDeserializer(item: any): TaskHubProperties {
   return {
     provisioningState: item["provisioningState"],
     dashboardUrl: item["dashboardUrl"],
+    capabilities: !item["capabilities"]
+      ? item["capabilities"]
+      : item["capabilities"].map((p: any) => {
+          return p;
+        }),
   };
 }
 
 /** The resource model definition for a Azure Resource Manager proxy resource. It will not have tags and a location */
 export interface ProxyResource extends Resource {}
 
-export function proxyResourceSerializer(item: ProxyResource): any {
-  return item;
+export function proxyResourceSerializer(_item: ProxyResource): any {
+  return {};
 }
 
 export function proxyResourceDeserializer(item: any): ProxyResource {
@@ -1089,10 +1190,121 @@ export function retentionPolicyArrayDeserializer(result: Array<RetentionPolicy>)
   });
 }
 
+/** A transparent data encryption resource belonging to the scheduler */
+export interface TransparentDataEncryption extends ProxyResource {
+  /** The resource-specific properties for this resource. */
+  properties?: TransparentDataEncryptionProperties;
+}
+
+export function transparentDataEncryptionSerializer(item: TransparentDataEncryption): any {
+  return {
+    properties: !item["properties"]
+      ? item["properties"]
+      : transparentDataEncryptionPropertiesSerializer(item["properties"]),
+  };
+}
+
+export function transparentDataEncryptionDeserializer(item: any): TransparentDataEncryption {
+  return {
+    id: item["id"],
+    name: item["name"],
+    type: item["type"],
+    systemData: !item["systemData"]
+      ? item["systemData"]
+      : systemDataDeserializer(item["systemData"]),
+    properties: !item["properties"]
+      ? item["properties"]
+      : transparentDataEncryptionPropertiesDeserializer(item["properties"]),
+  };
+}
+
+/** The transparent data encryption settings for the resource */
+export interface TransparentDataEncryptionProperties {
+  /** The status of the last operation */
+  readonly provisioningState?: ProvisioningState;
+  /** The key source for the transparent data encryption */
+  keySource: TransparentDataEncryptionKeySource;
+  /** The URI of the key in Key Vault to be used for transparent data encryption */
+  keyVaultKeyUri?: string;
+}
+
+export function transparentDataEncryptionPropertiesSerializer(
+  item: TransparentDataEncryptionProperties,
+): any {
+  return { keySource: item["keySource"], keyVaultKeyUri: item["keyVaultKeyUri"] };
+}
+
+export function transparentDataEncryptionPropertiesDeserializer(
+  item: any,
+): TransparentDataEncryptionProperties {
+  return {
+    provisioningState: item["provisioningState"],
+    keySource: item["keySource"],
+    keyVaultKeyUri: item["keyVaultKeyUri"],
+  };
+}
+
+/** The key source for the transparent data encryption */
+export enum KnownTransparentDataEncryptionKeySource {
+  /** The key source is Microsoft-managed */
+  MicrosoftManaged = "MicrosoftManaged",
+  /** The key source is customer-managed */
+  CustomerManaged = "CustomerManaged",
+}
+
+/**
+ * The key source for the transparent data encryption \
+ * {@link KnownTransparentDataEncryptionKeySource} can be used interchangeably with TransparentDataEncryptionKeySource,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **MicrosoftManaged**: The key source is Microsoft-managed \
+ * **CustomerManaged**: The key source is customer-managed
+ */
+export type TransparentDataEncryptionKeySource = string;
+
+/** The response of a TransparentDataEncryption list operation. */
+export interface _TransparentDataEncryptionListResult {
+  /** The TransparentDataEncryption items on this page */
+  value: TransparentDataEncryption[];
+  /** The link to the next page of items */
+  nextLink?: string;
+}
+
+export function _transparentDataEncryptionListResultDeserializer(
+  item: any,
+): _TransparentDataEncryptionListResult {
+  return {
+    value: transparentDataEncryptionArrayDeserializer(item["value"]),
+    nextLink: item["nextLink"],
+  };
+}
+
+export function transparentDataEncryptionArraySerializer(
+  result: Array<TransparentDataEncryption>,
+): any[] {
+  return result.map((item) => {
+    return transparentDataEncryptionSerializer(item);
+  });
+}
+
+export function transparentDataEncryptionArrayDeserializer(
+  result: Array<TransparentDataEncryption>,
+): any[] {
+  return result.map((item) => {
+    return transparentDataEncryptionDeserializer(item);
+  });
+}
+
 /** API Versions */
 export enum KnownVersions {
+  /** 2024-10-01-preview */
+  V20241001Preview = "2024-10-01-preview",
+  /** 2025-04-01-preview */
+  V20250401Preview = "2025-04-01-preview",
   /** 2025-11-01 */
   V20251101 = "2025-11-01",
   /** 2026-02-01 */
   V20260201 = "2026-02-01",
+  /** 2026-05-01-preview */
+  V20260501Preview = "2026-05-01-preview",
 }

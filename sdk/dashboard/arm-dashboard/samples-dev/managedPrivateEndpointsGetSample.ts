@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get a specific managed private endpoint of a grafana resource.
  *
  * @summary get a specific managed private endpoint of a grafana resource.
- * x-ms-original-file: 2025-08-01/ManagedPrivateEndpoints_Get.json
+ * x-ms-original-file: 2025-09-01-preview/ManagedPrivateEndpoints_Get.json
  */
 async function managedPrivateEndpointGet(): Promise<void> {
   const credential = new DefaultAzureCredential();

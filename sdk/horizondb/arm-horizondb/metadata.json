@@ -2,7 +2,7 @@
   "apiVersions": {
     "Microsoft.HorizonDb": "2026-01-20-preview"
   },
-  "emitterVersion": "0.51.0",
+  "emitterVersion": "0.54.0-alpha.20260608.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.HorizonDb",
     "CrossLanguageDefinitionId": {

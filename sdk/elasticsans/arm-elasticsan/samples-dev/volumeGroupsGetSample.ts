@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get an VolumeGroups.
  *
  * @summary get an VolumeGroups.
- * x-ms-original-file: 2025-09-01/VolumeGroups_Get_MaximumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/VolumeGroups_Get_MaximumSet_Gen.json
  */
 async function volumeGroupsGetMaximumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -26,7 +26,7 @@ async function volumeGroupsGetMaximumSetGen(): Promise<void> {
  * This sample demonstrates how to get an VolumeGroups.
  *
  * @summary get an VolumeGroups.
- * x-ms-original-file: 2025-09-01/VolumeGroups_Get_MinimumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/VolumeGroups_Get_MinimumSet_Gen.json
  */
 async function volumeGroupsGetMinimumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();

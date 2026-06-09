@@ -20,18 +20,6 @@ export interface JobsStopExecutionOptionalParams extends OperationOptions {
 }
 
 /** Optional parameters. */
-export interface JobsSuspendOptionalParams extends OperationOptions {
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
-}
-
-/** Optional parameters. */
-export interface JobsResumeOptionalParams extends OperationOptions {
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
-}
-
-/** Optional parameters. */
 export interface JobsListSecretsOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */

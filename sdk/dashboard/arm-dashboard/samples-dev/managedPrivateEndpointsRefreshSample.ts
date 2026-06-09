@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to refresh and sync managed private endpoints of a grafana resource to latest state.
  *
  * @summary refresh and sync managed private endpoints of a grafana resource to latest state.
- * x-ms-original-file: 2025-08-01/ManagedPrivateEndpoints_Refresh.json
+ * x-ms-original-file: 2025-09-01-preview/ManagedPrivateEndpoints_Refresh.json
  */
 async function managedPrivateEndpointRefresh(): Promise<void> {
   const credential = new DefaultAzureCredential();

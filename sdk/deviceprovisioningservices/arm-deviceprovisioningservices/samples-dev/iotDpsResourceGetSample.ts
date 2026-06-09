@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get the metadata of the provisioning service without SAS keys.
  *
  * @summary get the metadata of the provisioning service without SAS keys.
- * x-ms-original-file: 2025-02-01-preview/DPSGet.json
+ * x-ms-original-file: 2026-03-01-preview/DPSGet.json
  */
 async function dpsGet(): Promise<void> {
   const credential = new DefaultAzureCredential();

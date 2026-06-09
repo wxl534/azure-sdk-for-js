@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update an existing provisioning service's tags. to update other fields use the CreateOrUpdate method
  *
  * @summary update an existing provisioning service's tags. to update other fields use the CreateOrUpdate method
- * x-ms-original-file: 2025-02-01-preview/DPSPatch.json
+ * x-ms-original-file: 2026-03-01-preview/DPSPatch.json
  */
 async function dpsPatch(): Promise<void> {
   const credential = new DefaultAzureCredential();

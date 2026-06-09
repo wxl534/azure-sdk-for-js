@@ -1,28 +1,30 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { RecoveryServicesBackupContext as Client } from "../index.js";
-import type {
-  ProtectionIntentResource,
-  PreValidateEnableBackupRequest,
-  PreValidateEnableBackupResponse,
-} from "../../models/models.js";
+import { RecoveryServicesBackupContext as Client } from "../index.js";
 import {
   errorResponseDeserializer,
+  ProtectionIntentResource,
   protectionIntentResourceSerializer,
   protectionIntentResourceDeserializer,
+  PreValidateEnableBackupRequest,
   preValidateEnableBackupRequestSerializer,
+  PreValidateEnableBackupResponse,
   preValidateEnableBackupResponseDeserializer,
 } from "../../models/models.js";
 import { expandUrlTemplate } from "../../static-helpers/urlTemplate.js";
-import type {
+import {
   ProtectionIntentValidateOptionalParams,
   ProtectionIntentDeleteOptionalParams,
   ProtectionIntentCreateOrUpdateOptionalParams,
   ProtectionIntentGetOptionalParams,
 } from "./options.js";
-import type { StreamableMethod, PathUncheckedResponse } from "@azure-rest/core-client";
-import { createRestError, operationOptionsToRequestParameters } from "@azure-rest/core-client";
+import {
+  StreamableMethod,
+  PathUncheckedResponse,
+  createRestError,
+  operationOptionsToRequestParameters,
+} from "@azure-rest/core-client";
 
 export function _validateSend(
   context: Client,
@@ -35,18 +37,20 @@ export function _validateSend(
     {
       azureRegion: azureRegion,
       subscriptionId: context.subscriptionId,
-      "api%2Dversion": context.apiVersion ?? "2026-01-31-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-02-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).post({
-    ...operationOptionsToRequestParameters(options),
-    contentType: "application/json",
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-    body: preValidateEnableBackupRequestSerializer(parameters),
-  });
+  return context
+    .path(path)
+    .post({
+      ...operationOptionsToRequestParameters(options),
+      contentType: "application/json",
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+      body: preValidateEnableBackupRequestSerializer(parameters),
+    });
 }
 
 export async function _validateDeserialize(
@@ -55,7 +59,9 @@ export async function _validateDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -95,7 +101,7 @@ export function _$deleteSend(
       vaultName: vaultName,
       fabricName: fabricName,
       intentObjectName: intentObjectName,
-      "api%2Dversion": context.apiVersion ?? "2026-01-31-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-02-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -108,7 +114,9 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -153,18 +161,20 @@ export function _createOrUpdateSend(
       vaultName: vaultName,
       fabricName: fabricName,
       intentObjectName: intentObjectName,
-      "api%2Dversion": context.apiVersion ?? "2026-01-31-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-02-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).put({
-    ...operationOptionsToRequestParameters(options),
-    contentType: "application/json",
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-    body: protectionIntentResourceSerializer(parameters),
-  });
+  return context
+    .path(path)
+    .put({
+      ...operationOptionsToRequestParameters(options),
+      contentType: "application/json",
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+      body: protectionIntentResourceSerializer(parameters),
+    });
 }
 
 export async function _createOrUpdateDeserialize(
@@ -173,7 +183,9 @@ export async function _createOrUpdateDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -219,16 +231,18 @@ export function _getSend(
       vaultName: vaultName,
       fabricName: fabricName,
       intentObjectName: intentObjectName,
-      "api%2Dversion": context.apiVersion ?? "2026-01-31-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-02-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _getDeserialize(
@@ -237,7 +251,9 @@ export async function _getDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }

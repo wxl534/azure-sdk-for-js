@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to manual approve private endpoint connection
  *
  * @summary manual approve private endpoint connection
- * x-ms-original-file: 2025-08-01/PrivateEndpointConnections_Approve.json
+ * x-ms-original-file: 2025-09-01-preview/PrivateEndpointConnections_Approve.json
  */
 async function privateEndpointConnectionsApprove(): Promise<void> {
   const credential = new DefaultAzureCredential();

@@ -2,20 +2,21 @@
 // Licensed under the MIT License.
 
 import { CloudHealthContext } from "../../api/cloudHealthContext.js";
-import { DiscoveryRule } from "../../models/models.js";
-import {
-  DiscoveryRulesListByHealthModelOptionalParams,
-  DiscoveryRulesDeleteOptionalParams,
-  DiscoveryRulesCreateOrUpdateOptionalParams,
-  DiscoveryRulesGetOptionalParams,
-} from "../../api/discoveryRules/options.js";
 import {
   listByHealthModel,
   $delete,
   createOrUpdate,
   get,
 } from "../../api/discoveryRules/operations.js";
+import {
+  DiscoveryRulesListByHealthModelOptionalParams,
+  DiscoveryRulesDeleteOptionalParams,
+  DiscoveryRulesCreateOrUpdateOptionalParams,
+  DiscoveryRulesGetOptionalParams,
+} from "../../api/discoveryRules/options.js";
+import { DiscoveryRule, DiscoveryRuleResourceCreate } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
+import { PollerLike, OperationState } from "@azure/core-lro";
 
 /** Interface representing a DiscoveryRules operations. */
 export interface DiscoveryRulesOperations {
@@ -26,25 +27,20 @@ export interface DiscoveryRulesOperations {
     options?: DiscoveryRulesListByHealthModelOptionalParams,
   ) => PagedAsyncIterableIterator<DiscoveryRule>;
   /** Delete a DiscoveryRule */
-  /**
-   *  @fixme delete is a reserved word that cannot be used as an operation name.
-   *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
-   *         to the operation to override the generated name.
-   */
   delete: (
     resourceGroupName: string,
     healthModelName: string,
     discoveryRuleName: string,
     options?: DiscoveryRulesDeleteOptionalParams,
-  ) => Promise<void>;
+  ) => PollerLike<OperationState<void>, void>;
   /** Create a DiscoveryRule */
   createOrUpdate: (
     resourceGroupName: string,
     healthModelName: string,
     discoveryRuleName: string,
-    resource: DiscoveryRule,
+    resource: DiscoveryRuleResourceCreate,
     options?: DiscoveryRulesCreateOrUpdateOptionalParams,
-  ) => Promise<DiscoveryRule>;
+  ) => PollerLike<OperationState<DiscoveryRule>, DiscoveryRule>;
   /** Get a DiscoveryRule */
   get: (
     resourceGroupName: string,
@@ -71,7 +67,7 @@ function _getDiscoveryRules(context: CloudHealthContext) {
       resourceGroupName: string,
       healthModelName: string,
       discoveryRuleName: string,
-      resource: DiscoveryRule,
+      resource: DiscoveryRuleResourceCreate,
       options?: DiscoveryRulesCreateOrUpdateOptionalParams,
     ) =>
       createOrUpdate(

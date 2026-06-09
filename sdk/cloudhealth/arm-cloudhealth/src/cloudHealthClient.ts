@@ -2,36 +2,36 @@
 // Licensed under the MIT License.
 
 import {
-  createCloudHealth,
   CloudHealthContext,
   CloudHealthClientOptionalParams,
+  createCloudHealth,
 } from "./api/index.js";
-import {
-  DiscoveryRulesOperations,
-  _getDiscoveryRulesOperations,
-} from "./classic/discoveryRules/index.js";
-import {
-  RelationshipsOperations,
-  _getRelationshipsOperations,
-} from "./classic/relationships/index.js";
-import { EntitiesOperations, _getEntitiesOperations } from "./classic/entities/index.js";
 import {
   AuthenticationSettingsOperations,
   _getAuthenticationSettingsOperations,
 } from "./classic/authenticationSettings/index.js";
 import {
-  SignalDefinitionsOperations,
-  _getSignalDefinitionsOperations,
-} from "./classic/signalDefinitions/index.js";
+  DiscoveryRulesOperations,
+  _getDiscoveryRulesOperations,
+} from "./classic/discoveryRules/index.js";
+import { EntitiesOperations, _getEntitiesOperations } from "./classic/entities/index.js";
 import {
   HealthModelsOperations,
   _getHealthModelsOperations,
 } from "./classic/healthModels/index.js";
 import { OperationsOperations, _getOperationsOperations } from "./classic/operations/index.js";
-import { Pipeline } from "@azure/core-rest-pipeline";
+import {
+  RelationshipsOperations,
+  _getRelationshipsOperations,
+} from "./classic/relationships/index.js";
+import {
+  SignalDefinitionsOperations,
+  _getSignalDefinitionsOperations,
+} from "./classic/signalDefinitions/index.js";
 import { TokenCredential } from "@azure/core-auth";
+import { Pipeline } from "@azure/core-rest-pipeline";
 
-export { type CloudHealthClientOptionalParams } from "./api/cloudHealthContext.js";
+export type { CloudHealthClientOptionalParams } from "./api/cloudHealthContext.js";
 
 export class CloudHealthClient {
   private _client: CloudHealthContext;

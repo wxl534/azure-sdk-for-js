@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update Execution Resource
  *
  * @summary create or update Execution Resource
- * x-ms-original-file: 2025-06-01/Executions_CreateOrUpdate_MaximumSet_Gen.json
+ * x-ms-original-file: 2025-08-01/Executions_CreateOrUpdate_MaximumSet_Gen.json
  */
 async function executionsCreateOrUpdateMaximumSetGeneratedByMaximumSetRule(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -21,27 +21,7 @@ async function executionsCreateOrUpdateMaximumSetGeneratedByMaximumSetRule(): Pr
     "abcde",
     "abcde",
     {
-      properties: {
-        specification: {},
-        status: {
-          status: 999,
-          stageHistory: [
-            {
-              status: 999,
-              statusMessage: "wfymzartwvvqrgrmdwyhfaftszoc",
-              stage: "gsostfpgjcsoeky",
-              nextstage: "wjxvqbrocjxzhzfgmgbzt",
-              errorMessage: "xsvwgovyatvlacmp",
-              isActive: "active",
-              inputs: {},
-              outputs: {},
-            },
-          ],
-          updateTime: new Date("2025-02-17T13:55:20.922Z"),
-          statusMessage: "ebhukpnhnbu",
-        },
-        workflowVersionId: "souenlqwltljsojdcbpc",
-      },
+      properties: { specification: {}, workflowVersionId: "souenlqwltljsojdcbpc" },
       extendedLocation: { name: "ugf", type: "EdgeZone" },
     },
   );
