@@ -3,6 +3,12 @@
 
 import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
 
+/**
+ * This file contains only generated model types and their (de)serializers.
+ * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+ */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** model interface _OperationListResult */
 export interface _OperationListResult {
   /** [Placeholder] Description for value property */
@@ -159,8 +165,8 @@ export function certificatePropertiesDeserializer(item: any): CertificatePropert
 /** The resource model definition for a Azure Resource Manager proxy resource. It will not have tags and a location */
 export interface ProxyResource extends Resource {}
 
-export function proxyResourceSerializer(item: ProxyResource): any {
-  return item;
+export function proxyResourceSerializer(_item: ProxyResource): any {
+  return {};
 }
 
 export function proxyResourceDeserializer(item: any): ProxyResource {
@@ -186,8 +192,8 @@ export interface Resource {
   readonly systemData?: SystemData;
 }
 
-export function resourceSerializer(item: Resource): any {
-  return item;
+export function resourceSerializer(_item: Resource): any {
+  return {};
 }
 
 export function resourceDeserializer(item: any): Resource {
@@ -255,12 +261,12 @@ export enum KnownCreatedByType {
 export type CreatedByType = string;
 
 /** The JSON-serialized array of Certificate objects. */
-export interface _CertificateListDescription {
+export interface CertificateListDescription {
   /** The array of Certificate objects. */
   value?: CertificateResponse[];
 }
 
-export function _certificateListDescriptionDeserializer(item: any): _CertificateListDescription {
+export function certificateListDescriptionDeserializer(item: any): CertificateListDescription {
   return {
     value: !item["value"] ? item["value"] : certificateResponseArrayDeserializer(item["value"]),
   };
@@ -422,7 +428,9 @@ export function provisioningServiceDescriptionDeserializer(
   item: any,
 ): ProvisioningServiceDescription {
   return {
-    tags: item["tags"],
+    tags: !item["tags"]
+      ? item["tags"]
+      : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
     location: item["location"],
     id: item["id"],
     name: item["name"],
@@ -671,9 +679,7 @@ export interface PrivateEndpointConnection extends ProxyResource {
 }
 
 export function privateEndpointConnectionSerializer(item: PrivateEndpointConnection): any {
-  return {
-    properties: privateEndpointConnectionPropertiesSerializer(item["properties"]),
-  };
+  return { properties: privateEndpointConnectionPropertiesSerializer(item["properties"]) };
 }
 
 export function privateEndpointConnectionDeserializer(item: any): PrivateEndpointConnection {
@@ -728,8 +734,8 @@ export interface PrivateEndpoint {
   readonly id?: string;
 }
 
-export function privateEndpointSerializer(item: PrivateEndpoint): any {
-  return item;
+export function privateEndpointSerializer(_item: PrivateEndpoint): any {
+  return {};
 }
 
 export function privateEndpointDeserializer(item: any): PrivateEndpoint {
@@ -816,8 +822,14 @@ export interface IotHubDefinitionDescription {
   allocationWeight?: number;
   /** Host name of the IoT hub. */
   readonly name?: string;
-  /** Connection string of the IoT hub. */
-  connectionString: string;
+  /** Host name of the IoT hub. This is required when connectionString is not provided. */
+  hostName?: string;
+  /** IotHub MI authentication type: KeyBased, UserAssigned, SystemAssigned. */
+  authenticationType?: IotHubAuthenticationType;
+  /** The selected user-assigned identity resource Id associated with IoT hub. This is required when authenticationType is UserAssigned. */
+  selectedUserAssignedIdentityResourceId?: string;
+  /** Connection string of the IoT hub. This is required when authenticationType is KeyBased. */
+  connectionString?: string;
   /** ARM region of the IoT hub. */
   location: string;
 }
@@ -826,6 +838,9 @@ export function iotHubDefinitionDescriptionSerializer(item: IotHubDefinitionDesc
   return {
     applyAllocationPolicy: item["applyAllocationPolicy"],
     allocationWeight: item["allocationWeight"],
+    hostName: item["hostName"],
+    authenticationType: item["authenticationType"],
+    selectedUserAssignedIdentityResourceId: item["selectedUserAssignedIdentityResourceId"],
     connectionString: item["connectionString"],
     location: item["location"],
   };
@@ -836,10 +851,34 @@ export function iotHubDefinitionDescriptionDeserializer(item: any): IotHubDefini
     applyAllocationPolicy: item["applyAllocationPolicy"],
     allocationWeight: item["allocationWeight"],
     name: item["name"],
+    hostName: item["hostName"],
+    authenticationType: item["authenticationType"],
+    selectedUserAssignedIdentityResourceId: item["selectedUserAssignedIdentityResourceId"],
     connectionString: item["connectionString"],
     location: item["location"],
   };
 }
+
+/** IotHub MI authentication type: KeyBased, UserAssigned, SystemAssigned. */
+export enum KnownIotHubAuthenticationType {
+  /** Key Based authentication type. */
+  KeyBased = "KeyBased",
+  /** User assigned authentication type. */
+  UserAssigned = "UserAssigned",
+  /** System assigned authentication type. */
+  SystemAssigned = "SystemAssigned",
+}
+
+/**
+ * IotHub MI authentication type: KeyBased, UserAssigned, SystemAssigned. \
+ * {@link KnownIotHubAuthenticationType} can be used interchangeably with IotHubAuthenticationType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **KeyBased**: Key Based authentication type. \
+ * **UserAssigned**: User assigned authentication type. \
+ * **SystemAssigned**: System assigned authentication type.
+ */
+export type IotHubAuthenticationType = string;
 
 /** Description of the Device Registry namespace that is linked to the provisioning service. */
 export interface DeviceRegistryNamespaceDescription {
@@ -1111,8 +1150,8 @@ export interface UserAssignedIdentity {
   readonly clientId?: string;
 }
 
-export function userAssignedIdentitySerializer(item: UserAssignedIdentity): any {
-  return item;
+export function userAssignedIdentitySerializer(_item: UserAssignedIdentity): any {
+  return {};
 }
 
 export function userAssignedIdentityDeserializer(item: any): UserAssignedIdentity {
@@ -1142,7 +1181,9 @@ export function trackedResourceDeserializer(item: any): TrackedResource {
     systemData: !item["systemData"]
       ? item["systemData"]
       : systemDataDeserializer(item["systemData"]),
-    tags: item["tags"],
+    tags: !item["tags"]
+      ? item["tags"]
+      : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
     location: item["location"],
   };
 }
@@ -1354,12 +1395,12 @@ export function groupIdInformationPropertiesDeserializer(item: any): GroupIdInfo
 }
 
 /** The available private link resources for a provisioning service */
-export interface _PrivateLinkResources {
+export interface PrivateLinkResources {
   /** The list of available private link resources for a provisioning service */
   value?: GroupIdInformation[];
 }
 
-export function _privateLinkResourcesDeserializer(item: any): _PrivateLinkResources {
+export function privateLinkResourcesDeserializer(item: any): PrivateLinkResources {
   return {
     value: !item["value"] ? item["value"] : groupIdInformationArrayDeserializer(item["value"]),
   };
@@ -1432,6 +1473,8 @@ export type CertificatePurpose = string;
 export enum KnownVersions {
   /** The 2025-02-01-preview API version. */
   V20250201Preview = "2025-02-01-preview",
+  /** The 2026-03-01-preview API version. */
+  V20260301Preview = "2026-03-01-preview",
 }
 
 export function privateEndpointConnectionArraySerializer_1(
