@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to list IntegrationFabric resources by ManagedGrafana
  *
  * @summary list IntegrationFabric resources by ManagedGrafana
- * x-ms-original-file: 2025-08-01/IntegrationFabrics_List.json
+ * x-ms-original-file: 2025-09-01-preview/IntegrationFabrics_List.json
  */
 async function integrationFabricsList(): Promise<void> {
   const credential = new DefaultAzureCredential();

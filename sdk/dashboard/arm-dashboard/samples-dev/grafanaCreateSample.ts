@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update a workspace for Grafana resource. This API is idempotent, so user can either create a new grafana or update an existing grafana.
  *
  * @summary create or update a workspace for Grafana resource. This API is idempotent, so user can either create a new grafana or update an existing grafana.
- * x-ms-original-file: 2025-08-01/Grafana_Create.json
+ * x-ms-original-file: 2025-09-01-preview/Grafana_Create.json
  */
 async function grafanaCreate(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -20,10 +20,7 @@ async function grafanaCreate(): Promise<void> {
     properties: {
       apiKey: "Enabled",
       deterministicOutboundIP: "Enabled",
-      enterpriseConfigurations: {
-        marketplaceAutoRenew: "Enabled",
-        marketplacePlanId: "myPlanId",
-      },
+      enterpriseConfigurations: { marketplaceAutoRenew: "Enabled", marketplacePlanId: "myPlanId" },
       grafanaConfigurations: {
         security: { csrfAlwaysCheck: false },
         smtp: {

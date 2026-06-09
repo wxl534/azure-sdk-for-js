@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update a dashboard for grafana resource. This API is idempotent, so user can either create a new dashboard or update an existing dashboard.
  *
  * @summary create or update a dashboard for grafana resource. This API is idempotent, so user can either create a new dashboard or update an existing dashboard.
- * x-ms-original-file: 2025-08-01/Dashboard_Create.json
+ * x-ms-original-file: 2025-09-01-preview/Dashboard_Create.json
  */
 async function dashboardCreate(): Promise<void> {
   const credential = new DefaultAzureCredential();

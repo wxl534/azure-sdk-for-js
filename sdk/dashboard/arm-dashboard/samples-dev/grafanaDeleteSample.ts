@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to delete a workspace for Grafana resource.
  *
  * @summary delete a workspace for Grafana resource.
- * x-ms-original-file: 2025-08-01/Grafana_Delete.json
+ * x-ms-original-file: 2025-09-01-preview/Grafana_Delete.json
  */
 async function grafanaDelete(): Promise<void> {
   const credential = new DefaultAzureCredential();
