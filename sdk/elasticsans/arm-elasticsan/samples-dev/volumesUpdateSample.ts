@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update an Volume.
  *
  * @summary update an Volume.
- * x-ms-original-file: 2025-09-01/Volumes_Update_MaximumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/Volumes_Update_MaximumSet_Gen.json
  */
 async function volumesUpdateMaximumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -28,7 +28,7 @@ async function volumesUpdateMaximumSetGen(): Promise<void> {
  * This sample demonstrates how to update an Volume.
  *
  * @summary update an Volume.
- * x-ms-original-file: 2025-09-01/Volumes_Update_MinimumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/Volumes_Update_MinimumSet_Gen.json
  */
 async function volumesUpdateMinimumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();
