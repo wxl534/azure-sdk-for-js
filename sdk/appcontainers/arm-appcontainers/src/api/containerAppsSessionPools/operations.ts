@@ -11,8 +11,6 @@ import {
   sessionPoolUpdatablePropertiesSerializer,
   _SessionPoolCollection,
   _sessionPoolCollectionDeserializer,
-  McpServerCredential,
-  mcpServerCredentialDeserializer,
 } from "../../models/models.js";
 import {
   PagedAsyncIterableIterator,
@@ -21,8 +19,6 @@ import {
 import { getLongRunningPoller } from "../../static-helpers/pollingHelpers.js";
 import { expandUrlTemplate } from "../../static-helpers/urlTemplate.js";
 import {
-  ContainerAppsSessionPoolsRotateMcpServerCredentialsOptionalParams,
-  ContainerAppsSessionPoolsFetchMcpServerCredentialsOptionalParams,
   ContainerAppsSessionPoolsListBySubscriptionOptionalParams,
   ContainerAppsSessionPoolsListByResourceGroupOptionalParams,
   ContainerAppsSessionPoolsDeleteOptionalParams,
@@ -38,122 +34,6 @@ import {
 } from "@azure-rest/core-client";
 import { PollerLike, OperationState } from "@azure/core-lro";
 
-export function _rotateMcpServerCredentialsSend(
-  context: Client,
-  resourceGroupName: string,
-  sessionPoolName: string,
-  options: ContainerAppsSessionPoolsRotateMcpServerCredentialsOptionalParams = {
-    requestOptions: {},
-  },
-): StreamableMethod {
-  const path = expandUrlTemplate(
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/sessionPools/{sessionPoolName}/rotateMcpServerCredentials{?api%2Dversion}",
-    {
-      subscriptionId: context.subscriptionId,
-      resourceGroupName: resourceGroupName,
-      sessionPoolName: sessionPoolName,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
-    },
-    {
-      allowReserved: options?.requestOptions?.skipUrlEncoding,
-    },
-  );
-  return context.path(path).post({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
-}
-
-export async function _rotateMcpServerCredentialsDeserialize(
-  result: PathUncheckedResponse,
-): Promise<McpServerCredential> {
-  const expectedStatuses = ["200"];
-  if (!expectedStatuses.includes(result.status)) {
-    const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
-
-    throw error;
-  }
-
-  return mcpServerCredentialDeserializer(result.body);
-}
-
-/** Rotate and fetch the rotated MCP server credentials of a session pool. */
-export async function rotateMcpServerCredentials(
-  context: Client,
-  resourceGroupName: string,
-  sessionPoolName: string,
-  options: ContainerAppsSessionPoolsRotateMcpServerCredentialsOptionalParams = {
-    requestOptions: {},
-  },
-): Promise<McpServerCredential> {
-  const result = await _rotateMcpServerCredentialsSend(
-    context,
-    resourceGroupName,
-    sessionPoolName,
-    options,
-  );
-  return _rotateMcpServerCredentialsDeserialize(result);
-}
-
-export function _fetchMcpServerCredentialsSend(
-  context: Client,
-  resourceGroupName: string,
-  sessionPoolName: string,
-  options: ContainerAppsSessionPoolsFetchMcpServerCredentialsOptionalParams = {
-    requestOptions: {},
-  },
-): StreamableMethod {
-  const path = expandUrlTemplate(
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/sessionPools/{sessionPoolName}/fetchMcpServerCredentials{?api%2Dversion}",
-    {
-      subscriptionId: context.subscriptionId,
-      resourceGroupName: resourceGroupName,
-      sessionPoolName: sessionPoolName,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
-    },
-    {
-      allowReserved: options?.requestOptions?.skipUrlEncoding,
-    },
-  );
-  return context.path(path).post({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
-}
-
-export async function _fetchMcpServerCredentialsDeserialize(
-  result: PathUncheckedResponse,
-): Promise<McpServerCredential> {
-  const expectedStatuses = ["200"];
-  if (!expectedStatuses.includes(result.status)) {
-    const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
-
-    throw error;
-  }
-
-  return mcpServerCredentialDeserializer(result.body);
-}
-
-/** Fetch the MCP server credentials of a session pool. */
-export async function fetchMcpServerCredentials(
-  context: Client,
-  resourceGroupName: string,
-  sessionPoolName: string,
-  options: ContainerAppsSessionPoolsFetchMcpServerCredentialsOptionalParams = {
-    requestOptions: {},
-  },
-): Promise<McpServerCredential> {
-  const result = await _fetchMcpServerCredentialsSend(
-    context,
-    resourceGroupName,
-    sessionPoolName,
-    options,
-  );
-  return _fetchMcpServerCredentialsDeserialize(result);
-}
-
 export function _listBySubscriptionSend(
   context: Client,
   options: ContainerAppsSessionPoolsListBySubscriptionOptionalParams = { requestOptions: {} },
@@ -162,16 +42,18 @@ export function _listBySubscriptionSend(
     "/subscriptions/{subscriptionId}/providers/Microsoft.App/sessionPools{?api%2Dversion}",
     {
       subscriptionId: context.subscriptionId,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-01-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _listBySubscriptionDeserialize(
@@ -180,7 +62,9 @@ export async function _listBySubscriptionDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -198,11 +82,7 @@ export function listBySubscription(
     () => _listBySubscriptionSend(context, options),
     _listBySubscriptionDeserialize,
     ["200"],
-    {
-      itemName: "value",
-      nextLinkName: "nextLink",
-      apiVersion: context.apiVersion ?? "2025-10-02-preview",
-    },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2026-01-01" },
   );
 }
 
@@ -216,16 +96,18 @@ export function _listByResourceGroupSend(
     {
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-01-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _listByResourceGroupDeserialize(
@@ -234,7 +116,9 @@ export async function _listByResourceGroupDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -253,11 +137,7 @@ export function listByResourceGroup(
     () => _listByResourceGroupSend(context, resourceGroupName, options),
     _listByResourceGroupDeserialize,
     ["200"],
-    {
-      itemName: "value",
-      nextLinkName: "nextLink",
-      apiVersion: context.apiVersion ?? "2025-10-02-preview",
-    },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2026-01-01" },
   );
 }
 
@@ -273,7 +153,7 @@ export function _$deleteSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       sessionPoolName: sessionPoolName,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-01-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -286,7 +166,9 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
   const expectedStatuses = ["202", "204", "200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -306,7 +188,7 @@ export function $delete(
     abortSignal: options?.abortSignal,
     getInitialResponse: () => _$deleteSend(context, resourceGroupName, sessionPoolName, options),
     resourceLocationConfig: "location",
-    apiVersion: context.apiVersion ?? "2025-10-02-preview",
+    apiVersion: context.apiVersion ?? "2026-01-01",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -323,25 +205,29 @@ export function _updateSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       sessionPoolName: sessionPoolName,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-01-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).patch({
-    ...operationOptionsToRequestParameters(options),
-    contentType: "application/json",
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-    body: sessionPoolUpdatablePropertiesSerializer(sessionPoolEnvelope),
-  });
+  return context
+    .path(path)
+    .patch({
+      ...operationOptionsToRequestParameters(options),
+      contentType: "application/json",
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+      body: sessionPoolUpdatablePropertiesSerializer(sessionPoolEnvelope),
+    });
 }
 
 export async function _updateDeserialize(result: PathUncheckedResponse): Promise<SessionPool> {
   const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -363,7 +249,7 @@ export function update(
     getInitialResponse: () =>
       _updateSend(context, resourceGroupName, sessionPoolName, sessionPoolEnvelope, options),
     resourceLocationConfig: "azure-async-operation",
-    apiVersion: context.apiVersion ?? "2025-10-02-preview",
+    apiVersion: context.apiVersion ?? "2026-01-01",
   }) as PollerLike<OperationState<SessionPool>, SessionPool>;
 }
 
@@ -380,18 +266,20 @@ export function _createOrUpdateSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       sessionPoolName: sessionPoolName,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-01-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).put({
-    ...operationOptionsToRequestParameters(options),
-    contentType: "application/json",
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-    body: sessionPoolSerializer(sessionPoolEnvelope),
-  });
+  return context
+    .path(path)
+    .put({
+      ...operationOptionsToRequestParameters(options),
+      contentType: "application/json",
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+      body: sessionPoolSerializer(sessionPoolEnvelope),
+    });
 }
 
 export async function _createOrUpdateDeserialize(
@@ -400,7 +288,9 @@ export async function _createOrUpdateDeserialize(
   const expectedStatuses = ["200", "201", "202"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -428,7 +318,7 @@ export function createOrUpdate(
         options,
       ),
     resourceLocationConfig: "azure-async-operation",
-    apiVersion: context.apiVersion ?? "2025-10-02-preview",
+    apiVersion: context.apiVersion ?? "2026-01-01",
   }) as PollerLike<OperationState<SessionPool>, SessionPool>;
 }
 
@@ -444,23 +334,27 @@ export function _getSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       sessionPoolName: sessionPoolName,
-      "api%2Dversion": context.apiVersion ?? "2025-10-02-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-01-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _getDeserialize(result: PathUncheckedResponse): Promise<SessionPool> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
