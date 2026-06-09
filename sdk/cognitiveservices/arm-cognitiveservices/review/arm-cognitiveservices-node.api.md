@@ -4,17 +4,17 @@
 
 ```ts
 
-import type { AbortSignalLike } from '@azure/abort-controller';
-import type { CancelOnProgress } from '@azure/core-lro';
-import type { ClientOptions } from '@azure-rest/core-client';
+import { AbortSignalLike } from '@azure/abort-controller';
+import { CancelOnProgress } from '@azure/core-lro';
+import { ClientOptions } from '@azure-rest/core-client';
 import { isRestError } from '@azure/core-rest-pipeline';
-import type { OperationOptions } from '@azure-rest/core-client';
-import type { OperationState } from '@azure/core-lro';
-import type { PathUncheckedResponse } from '@azure-rest/core-client';
-import type { Pipeline } from '@azure/core-rest-pipeline';
-import type { PollerLike } from '@azure/core-lro';
+import { OperationOptions } from '@azure-rest/core-client';
+import { OperationState } from '@azure/core-lro';
+import { PathUncheckedResponse } from '@azure-rest/core-client';
+import { Pipeline } from '@azure/core-rest-pipeline';
+import { PollerLike } from '@azure/core-lro';
 import { RestError } from '@azure/core-rest-pipeline';
-import type { TokenCredential } from '@azure/core-auth';
+import { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface AADAuthTypeConnectionProperties extends ConnectionPropertiesV2 {
@@ -160,7 +160,6 @@ export interface AccountProperties {
     encryption?: Encryption;
     readonly endpoint?: string;
     readonly endpoints?: Record<string, string>;
-    foundryAutoUpgrade?: FoundryAutoUpgrade;
     readonly internalId?: string;
     readonly isMigrated?: boolean;
     locations?: MultiRegionSettings;
@@ -192,10 +191,6 @@ export interface AccountsCreateOptionalParams extends OperationOptions {
 // @public
 export interface AccountsDeleteOptionalParams extends OperationOptions {
     updateIntervalInMs?: number;
-}
-
-// @public
-export interface AccountsEvaluateDeploymentPoliciesOptionalParams extends OperationOptions {
 }
 
 // @public
@@ -254,7 +249,6 @@ export interface AccountsOperations {
     beginUpdateAndWait: (resourceGroupName: string, accountName: string, account: Account, options?: AccountsUpdateOptionalParams) => Promise<Account>;
     create: (resourceGroupName: string, accountName: string, account: Account, options?: AccountsCreateOptionalParams) => PollerLike<OperationState<Account>, Account>;
     delete: (resourceGroupName: string, accountName: string, options?: AccountsDeleteOptionalParams) => PollerLike<OperationState<void>, void>;
-    evaluateDeploymentPolicies: (resourceGroupName: string, accountName: string, body: EvaluateDeploymentPoliciesRequest, options?: AccountsEvaluateDeploymentPoliciesOptionalParams) => Promise<EvaluateDeploymentPoliciesResponse>;
     get: (resourceGroupName: string, accountName: string, options?: AccountsGetOptionalParams) => Promise<Account>;
     list: (options?: AccountsListOptionalParams) => PagedAsyncIterableIterator<Account>;
     listByResourceGroup: (resourceGroupName: string, options?: AccountsListByResourceGroupOptionalParams) => PagedAsyncIterableIterator<Account>;
@@ -638,13 +632,6 @@ export interface CheckSkuAvailabilityParameter {
     type: string;
 }
 
-// @public
-export interface ClusterComputeProperties extends ComputeProperties {
-    computeType: "Cluster";
-    pools: Pool[];
-    subnetArmId?: string;
-}
-
 // @public (undocumented)
 export class CognitiveServicesManagementClient {
     constructor(credential: TokenCredential, subscriptionId: string, options?: CognitiveServicesManagementClientOptionalParams);
@@ -658,16 +645,11 @@ export class CognitiveServicesManagementClient {
     checkSkuAvailability(location: string, skus: string[], typeParam: string, kind: string, options?: CheckSkuAvailabilityOptionalParams): Promise<SkuAvailabilityListResult>;
     readonly commitmentPlans: CommitmentPlansOperations;
     readonly commitmentTiers: CommitmentTiersOperations;
-    readonly computeOperations: ComputeOperationsOperations;
-    readonly computes: ComputesOperations;
     readonly defenderForAISettings: DefenderForAISettingsOperations;
     readonly deletedAccounts: DeletedAccountsOperations;
     readonly deployments: DeploymentsOperations;
     readonly encryptionScopes: EncryptionScopesOperations;
     readonly locationBasedModelCapacities: LocationBasedModelCapacitiesOperations;
-    readonly managedComputeCapacities: ManagedComputeCapacitiesOperations;
-    readonly managedComputeDeployments: ManagedComputeDeploymentsOperations;
-    readonly managedComputeUsagesOperationGroup: ManagedComputeUsagesOperationGroupOperations;
     readonly managedNetworkProvisions: ManagedNetworkProvisionsOperations;
     readonly managedNetworkSettings: ManagedNetworkSettingsOperations;
     readonly modelCapacities: ModelCapacitiesOperations;
@@ -695,7 +677,6 @@ export class CognitiveServicesManagementClient {
     readonly subscriptionRaiPolicy: SubscriptionRaiPolicyOperations;
     readonly testRaiExternalSafetyProvider: TestRaiExternalSafetyProviderOperations;
     readonly usages: UsagesOperations;
-    readonly workbenches: WorkbenchesOperations;
 }
 
 // @public
@@ -895,132 +876,6 @@ export interface CommitmentTiersOperations {
 }
 
 // @public
-export interface Compute extends ProxyResource {
-    readonly etag?: string;
-    identity?: Identity;
-    kind?: string;
-    location?: string;
-    properties: ComputePropertiesUnion;
-    tags?: Record<string, string>;
-}
-
-// @public
-export interface ComputeOperationsGetOptionalParams extends OperationOptions {
-}
-
-// @public
-export interface ComputeOperationsOperations {
-    get: (location: string, operationId: string, options?: ComputeOperationsGetOptionalParams) => Promise<ComputeOperationStatus>;
-}
-
-// @public
-export interface ComputeOperationStatus extends ProxyResource {
-    properties?: ComputeOperationStatusProperties;
-}
-
-// @public
-export interface ComputeOperationStatusProperties {
-    readonly endTime?: Date;
-    error?: ErrorDetail;
-    readonly startTime?: Date;
-    status?: ComputeOperationStatusType;
-}
-
-// @public
-export type ComputeOperationStatusType = string;
-
-// @public
-export interface ComputeProperties {
-    computeType: ComputeType;
-    readonly creationTime?: Date;
-    readonly errors?: ErrorDetail[];
-    readonly provisioningState?: ComputeProvisioningState;
-}
-
-// @public
-export type ComputePropertiesUnion = ClusterComputeProperties | ContainerInstanceComputeProperties | ComputeProperties;
-
-// @public
-export type ComputeProvisioningState = string;
-
-// @public
-export interface ComputesCreateOrUpdateOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface ComputesDeleteOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface ComputesGetOptionalParams extends OperationOptions {
-}
-
-// @public
-export interface ComputesListOptionalParams extends OperationOptions {
-}
-
-// @public
-export interface ComputesOperations {
-    // @deprecated (undocumented)
-    beginCreateOrUpdate: (resourceGroupName: string, accountName: string, computeName: string, resource: Compute, options?: ComputesCreateOrUpdateOptionalParams) => Promise<SimplePollerLike<OperationState<Compute>, Compute>>;
-    // @deprecated (undocumented)
-    beginCreateOrUpdateAndWait: (resourceGroupName: string, accountName: string, computeName: string, resource: Compute, options?: ComputesCreateOrUpdateOptionalParams) => Promise<Compute>;
-    // @deprecated (undocumented)
-    beginDelete: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesDeleteOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
-    // @deprecated (undocumented)
-    beginDeleteAndWait: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesDeleteOptionalParams) => Promise<void>;
-    // @deprecated (undocumented)
-    beginRestart: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesRestartOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
-    // @deprecated (undocumented)
-    beginRestartAndWait: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesRestartOptionalParams) => Promise<void>;
-    // @deprecated (undocumented)
-    beginStart: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesStartOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
-    // @deprecated (undocumented)
-    beginStartAndWait: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesStartOptionalParams) => Promise<void>;
-    // @deprecated (undocumented)
-    beginStop: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesStopOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
-    // @deprecated (undocumented)
-    beginStopAndWait: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesStopOptionalParams) => Promise<void>;
-    // @deprecated (undocumented)
-    beginUpdate: (resourceGroupName: string, accountName: string, computeName: string, properties: Compute, options?: ComputesUpdateOptionalParams) => Promise<SimplePollerLike<OperationState<Compute>, Compute>>;
-    // @deprecated (undocumented)
-    beginUpdateAndWait: (resourceGroupName: string, accountName: string, computeName: string, properties: Compute, options?: ComputesUpdateOptionalParams) => Promise<Compute>;
-    createOrUpdate: (resourceGroupName: string, accountName: string, computeName: string, resource: Compute, options?: ComputesCreateOrUpdateOptionalParams) => PollerLike<OperationState<Compute>, Compute>;
-    delete: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesDeleteOptionalParams) => PollerLike<OperationState<void>, void>;
-    get: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesGetOptionalParams) => Promise<Compute>;
-    list: (resourceGroupName: string, accountName: string, options?: ComputesListOptionalParams) => PagedAsyncIterableIterator<Compute>;
-    restart: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesRestartOptionalParams) => PollerLike<OperationState<void>, void>;
-    start: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesStartOptionalParams) => PollerLike<OperationState<void>, void>;
-    stop: (resourceGroupName: string, accountName: string, computeName: string, options?: ComputesStopOptionalParams) => PollerLike<OperationState<void>, void>;
-    update: (resourceGroupName: string, accountName: string, computeName: string, properties: Compute, options?: ComputesUpdateOptionalParams) => PollerLike<OperationState<Compute>, Compute>;
-}
-
-// @public
-export interface ComputesRestartOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface ComputesStartOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface ComputesStopOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface ComputesUpdateOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export type ComputeType = string;
-
-// @public
 export interface ConnectionAccessKey {
     // (undocumented)
     accessKeyId?: string;
@@ -1135,22 +990,6 @@ export interface ConnectionUsernamePassword {
     securityToken?: string;
     // (undocumented)
     username?: string;
-}
-
-// @public
-export interface ConnectivityEndpoints {
-    readonly publicIpAddress?: string;
-    readonly sshPort?: number;
-}
-
-// @public
-export interface ContainerInstanceComputeProperties extends ComputeProperties {
-    computeType: "ContainerInstance";
-    readonly connectivityEndpoints?: ConnectivityEndpoints;
-    idleTimeBeforeShutdown?: string;
-    imageLink: string;
-    sshSettings?: SshSettings;
-    targetClusterId: string;
 }
 
 // @public
@@ -1272,13 +1111,6 @@ export interface DeploymentModel {
 export type DeploymentModelVersionUpgradeOption = string;
 
 // @public
-export interface DeploymentPolicyEvaluationResult {
-    errorMessage?: string;
-    evaluationOutcome?: PolicyEvaluationOutcome;
-    nonCompliantAssignments?: PolicyAssignmentEvaluationDetails[];
-}
-
-// @public
 export interface DeploymentProperties {
     readonly callRateLimit?: CallRateLimit;
     readonly capabilities?: Record<string, string>;
@@ -1330,13 +1162,6 @@ export interface DeploymentsDeleteOptionalParams extends OperationOptions {
 
 // @public
 export interface DeploymentsGetOptionalParams extends OperationOptions {
-}
-
-// @public
-export interface DeploymentSizeCapacity {
-    readonly largestDeploymentCapacity?: number;
-    readonly modelInstanceAcceleratorCount?: number;
-    readonly totalAvailableCapacity?: number;
 }
 
 // @public
@@ -1474,40 +1299,7 @@ export interface ErrorResponse {
 }
 
 // @public
-export interface EvaluateDeploymentPoliciesDeployment {
-    name: string;
-    properties: EvaluateDeploymentPoliciesDeploymentProperties;
-}
-
-// @public
-export interface EvaluateDeploymentPoliciesDeploymentProperties {
-    model: DeploymentModel;
-    raiPolicyName?: string;
-}
-
-// @public
-export interface EvaluateDeploymentPoliciesRequest {
-    deployments: EvaluateDeploymentPoliciesDeployment[];
-}
-
-// @public
-export interface EvaluateDeploymentPoliciesResponse {
-    results?: Record<string, DeploymentPolicyEvaluationResult>;
-}
-
-// @public
 export type FirewallSku = string;
-
-// @public
-export interface FoundryAutoUpgrade {
-    mode?: FoundryAutoUpgradeMode;
-    plannedByMicrosoft?: boolean;
-    scheduledAt?: Date;
-    statusReason?: string;
-}
-
-// @public
-export type FoundryAutoUpgradeMode = string;
 
 // @public
 export interface FqdnOutboundRule extends OutboundRule {
@@ -1663,35 +1455,6 @@ export enum KnownCommitmentPlanProvisioningState {
     Failed = "Failed",
     Moving = "Moving",
     Succeeded = "Succeeded"
-}
-
-// @public
-export enum KnownComputeOperationStatusType {
-    Canceled = "Canceled",
-    Failed = "Failed",
-    InProgress = "InProgress",
-    Succeeded = "Succeeded"
-}
-
-// @public
-export enum KnownComputeProvisioningState {
-    Accepted = "Accepted",
-    Canceled = "Canceled",
-    Deleting = "Deleting",
-    Disabled = "Disabled",
-    Failed = "Failed",
-    Restarting = "Restarting",
-    Scaling = "Scaling",
-    Starting = "Starting",
-    Stopped = "Stopped",
-    Stopping = "Stopping",
-    Succeeded = "Succeeded"
-}
-
-// @public
-export enum KnownComputeType {
-    Cluster = "Cluster",
-    ContainerInstance = "ContainerInstance"
 }
 
 // @public
@@ -1934,12 +1697,6 @@ export enum KnownFirewallSku {
 }
 
 // @public
-export enum KnownFoundryAutoUpgradeMode {
-    Disabled = "Disabled",
-    Enabled = "Enabled"
-}
-
-// @public
 export enum KnownHostingModel {
     ConnectedContainer = "ConnectedContainer",
     DisconnectedContainer = "DisconnectedContainer",
@@ -2052,13 +1809,6 @@ export enum KnownOrigin {
 }
 
 // @public
-export enum KnownPolicyEvaluationOutcome {
-    Compliant = "Compliant",
-    Error = "Error",
-    NonCompliant = "NonCompliant"
-}
-
-// @public
 export enum KnownPrivateEndpointConnectionProvisioningState {
     Creating = "Creating",
     Deleting = "Deleting",
@@ -2089,14 +1839,6 @@ export enum KnownProvisioningState {
 export enum KnownPublicNetworkAccess {
     Disabled = "Disabled",
     Enabled = "Enabled"
-}
-
-// @public
-export enum KnownQuotaScopeType {
-    Classic = "Classic",
-    DataZone = "DataZone",
-    Global = "Global",
-    Regional = "Regional"
 }
 
 // @public
@@ -2241,17 +1983,9 @@ export enum KnownUpgradeAvailabilityStatus {
 
 // @public
 export enum KnownVersions {
-    V20251001Preview = "2025-10-01-preview",
     V20251201 = "2025-12-01",
-    V20260115Preview = "2026-01-15-preview",
     V20260301 = "2026-03-01",
-    V20260315Preview = "2026-03-15-preview"
-}
-
-// @public
-export enum KnownVmPriority {
-    LowPriority = "LowPriority",
-    Regular = "Regular"
+    V20260501 = "2026-05-01"
 }
 
 // @public
@@ -2266,139 +2000,6 @@ export interface LocationBasedModelCapacitiesOperations {
 // @public
 export interface ManagedAgentDeployment extends AgentDeploymentProperties {
     deploymentType: "Managed";
-}
-
-// @public
-export interface ManagedComputeCapacitiesListOptionalParams extends OperationOptions {
-    acceleratorType?: string;
-    deploymentId?: string;
-}
-
-// @public
-export interface ManagedComputeCapacitiesOperations {
-    list: (offer: string, options?: ManagedComputeCapacitiesListOptionalParams) => PagedAsyncIterableIterator<ManagedComputeCapacity>;
-}
-
-// @public
-export interface ManagedComputeCapacity extends ProxyResource {
-    properties?: ManagedComputeCapacityProperties;
-}
-
-// @public
-export interface ManagedComputeCapacityProperties {
-    readonly acceleratorType?: string;
-    readonly availableAccelerators?: number;
-    readonly deploymentSizeCapacities?: DeploymentSizeCapacity[];
-    readonly location?: string;
-}
-
-// @public
-export interface ManagedComputeDeployment extends ProxyResource {
-    readonly etag?: string;
-    properties?: ManagedComputeDeploymentProperties;
-    sku?: Sku;
-}
-
-// @public
-export interface ManagedComputeDeploymentInfo {
-    acceleratorCount?: number;
-    deploymentId?: string;
-    instanceCount?: number;
-    modelId?: string;
-    projectId?: string;
-}
-
-// @public
-export interface ManagedComputeDeploymentProperties {
-    readonly acceleratorsPerInstance?: number;
-    acceleratorType?: string;
-    computeId?: string;
-    deploymentTemplate?: string;
-    model: string;
-    priority?: string;
-    readonly provisioningDetails?: ManagedComputeDeploymentProvisioningDetails;
-    readonly provisioningState?: ProvisioningState;
-    readonly routes?: ManagedComputeDeploymentRoutes;
-    readonly totalAccelerators?: number;
-    versionUpgradeOption?: DeploymentModelVersionUpgradeOption;
-}
-
-// @public
-export interface ManagedComputeDeploymentProvisioningDetails {
-    lastOperationTimestamp?: Date;
-    message?: string;
-}
-
-// @public
-export interface ManagedComputeDeploymentRoutes {
-    chatCompletionsScoringPath?: string;
-    messagesApiScoringPath?: string;
-    swagger?: string;
-}
-
-// @public
-export interface ManagedComputeDeploymentsCreateOrUpdateOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface ManagedComputeDeploymentsDeleteOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface ManagedComputeDeploymentsGetOptionalParams extends OperationOptions {
-}
-
-// @public
-export interface ManagedComputeDeploymentsListOptionalParams extends OperationOptions {
-}
-
-// @public
-export interface ManagedComputeDeploymentsOperations {
-    // @deprecated (undocumented)
-    beginCreateOrUpdate: (resourceGroupName: string, accountName: string, deploymentName: string, resource: ManagedComputeDeployment, options?: ManagedComputeDeploymentsCreateOrUpdateOptionalParams) => Promise<SimplePollerLike<OperationState<ManagedComputeDeployment>, ManagedComputeDeployment>>;
-    // @deprecated (undocumented)
-    beginCreateOrUpdateAndWait: (resourceGroupName: string, accountName: string, deploymentName: string, resource: ManagedComputeDeployment, options?: ManagedComputeDeploymentsCreateOrUpdateOptionalParams) => Promise<ManagedComputeDeployment>;
-    // @deprecated (undocumented)
-    beginDelete: (resourceGroupName: string, accountName: string, deploymentName: string, options?: ManagedComputeDeploymentsDeleteOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
-    // @deprecated (undocumented)
-    beginDeleteAndWait: (resourceGroupName: string, accountName: string, deploymentName: string, options?: ManagedComputeDeploymentsDeleteOptionalParams) => Promise<void>;
-    // @deprecated (undocumented)
-    beginUpdate: (resourceGroupName: string, accountName: string, deploymentName: string, properties: PatchResourceSku, options?: ManagedComputeDeploymentsUpdateOptionalParams) => Promise<SimplePollerLike<OperationState<ManagedComputeDeployment>, ManagedComputeDeployment>>;
-    // @deprecated (undocumented)
-    beginUpdateAndWait: (resourceGroupName: string, accountName: string, deploymentName: string, properties: PatchResourceSku, options?: ManagedComputeDeploymentsUpdateOptionalParams) => Promise<ManagedComputeDeployment>;
-    createOrUpdate: (resourceGroupName: string, accountName: string, deploymentName: string, resource: ManagedComputeDeployment, options?: ManagedComputeDeploymentsCreateOrUpdateOptionalParams) => PollerLike<OperationState<ManagedComputeDeployment>, ManagedComputeDeployment>;
-    delete: (resourceGroupName: string, accountName: string, deploymentName: string, options?: ManagedComputeDeploymentsDeleteOptionalParams) => PollerLike<OperationState<void>, void>;
-    get: (resourceGroupName: string, accountName: string, deploymentName: string, options?: ManagedComputeDeploymentsGetOptionalParams) => Promise<ManagedComputeDeployment>;
-    list: (resourceGroupName: string, accountName: string, options?: ManagedComputeDeploymentsListOptionalParams) => PagedAsyncIterableIterator<ManagedComputeDeployment>;
-    update: (resourceGroupName: string, accountName: string, deploymentName: string, properties: PatchResourceSku, options?: ManagedComputeDeploymentsUpdateOptionalParams) => PollerLike<OperationState<ManagedComputeDeployment>, ManagedComputeDeployment>;
-}
-
-// @public
-export interface ManagedComputeDeploymentsUpdateOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface ManagedComputeUsage {
-    currentValue?: number;
-    deployments?: ManagedComputeDeploymentInfo[];
-    readonly id?: string;
-    limit?: number;
-    readonly name?: MetricName;
-    offerScope?: string;
-    readonly type?: string;
-    unit?: UnitType;
-}
-
-// @public
-export interface ManagedComputeUsagesOperationGroupListOptionalParams extends OperationOptions {
-}
-
-// @public
-export interface ManagedComputeUsagesOperationGroupOperations {
-    list: (location: string, options?: ManagedComputeUsagesOperationGroupListOptionalParams) => PagedAsyncIterableIterator<ManagedComputeUsage>;
 }
 
 // @public
@@ -2593,8 +2194,6 @@ export interface ModelSkuCapacityProperties {
     availableCapacity?: number;
     availableFinetuneCapacity?: number;
     model?: DeploymentModel;
-    scopeId?: string;
-    scopeType?: QuotaScopeType;
     // (undocumented)
     skuName?: string;
 }
@@ -2846,11 +2445,6 @@ export interface PATAuthTypeConnectionProperties extends ConnectionPropertiesV2 
 }
 
 // @public
-export interface PatchResourceSku {
-    sku?: Sku;
-}
-
-// @public
 export interface PatchResourceTags {
     tags?: Record<string, string>;
 }
@@ -2858,38 +2452,6 @@ export interface PatchResourceTags {
 // @public
 export interface PatchResourceTagsAndSku extends PatchResourceTags {
     sku?: Sku;
-}
-
-// @public
-export interface PolicyAssignmentEvaluationDetails {
-    assignmentId?: string;
-    effect?: string;
-    evaluationOutcome?: PolicyEvaluationOutcome;
-    expressionEvaluations?: PolicyExpressionEvaluationDetails[];
-    nonComplianceReason?: string;
-    policyDefinitionId?: string;
-    policySetDefinitionId?: string;
-}
-
-// @public
-export type PolicyEvaluationOutcome = string;
-
-// @public
-export interface PolicyExpressionEvaluationDetails {
-    expression?: string;
-    expressionKind?: string;
-    expressionValue?: string;
-    operator?: string;
-    result?: string;
-    targetValue?: string;
-}
-
-// @public
-export interface Pool {
-    instanceType: string;
-    name: string;
-    nodeCount: number;
-    vmPriority: VmPriority;
 }
 
 // @public
@@ -3182,9 +2744,6 @@ export interface QuotaLimit {
     // (undocumented)
     rules?: ThrottlingRule[];
 }
-
-// @public
-export type QuotaScopeType = string;
 
 // @public
 export interface QuotaTier extends ProxyResource {
@@ -3830,12 +3389,6 @@ export interface SkuResource {
 export type SkuTier = string;
 
 // @public
-export interface SshSettings {
-    adminEnabled?: boolean;
-    sshPublicKey?: string;
-}
-
-// @public
 export interface SubscriptionRaiPolicyCreateOrUpdateOptionalParams extends OperationOptions {
 }
 
@@ -3921,8 +3474,6 @@ export interface Usage {
     name?: MetricName;
     nextResetTime?: string;
     quotaPeriod?: string;
-    scopeId?: string;
-    scopeType?: QuotaScopeType;
     status?: QuotaUsageStatus;
     unit?: UnitType;
 }
@@ -3979,106 +3530,6 @@ export interface VirtualNetworkRule {
     id: string;
     ignoreMissingVnetServiceEndpoint?: boolean;
     state?: string;
-}
-
-// @public
-export type VmPriority = string;
-
-// @public
-export interface Workbench extends ProxyResource {
-    readonly etag?: string;
-    identity?: Identity;
-    location?: string;
-    properties: WorkbenchProperties;
-    tags?: Record<string, string>;
-}
-
-// @public
-export interface WorkbenchesCreateOrUpdateOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface WorkbenchesDeleteOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface WorkbenchesGetOptionalParams extends OperationOptions {
-}
-
-// @public
-export interface WorkbenchesListOptionalParams extends OperationOptions {
-}
-
-// @public
-export interface WorkbenchesOperations {
-    // @deprecated (undocumented)
-    beginCreateOrUpdate: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, resource: Workbench, options?: WorkbenchesCreateOrUpdateOptionalParams) => Promise<SimplePollerLike<OperationState<Workbench>, Workbench>>;
-    // @deprecated (undocumented)
-    beginCreateOrUpdateAndWait: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, resource: Workbench, options?: WorkbenchesCreateOrUpdateOptionalParams) => Promise<Workbench>;
-    // @deprecated (undocumented)
-    beginDelete: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesDeleteOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
-    // @deprecated (undocumented)
-    beginDeleteAndWait: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesDeleteOptionalParams) => Promise<void>;
-    // @deprecated (undocumented)
-    beginRestart: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesRestartOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
-    // @deprecated (undocumented)
-    beginRestartAndWait: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesRestartOptionalParams) => Promise<void>;
-    // @deprecated (undocumented)
-    beginStart: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesStartOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
-    // @deprecated (undocumented)
-    beginStartAndWait: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesStartOptionalParams) => Promise<void>;
-    // @deprecated (undocumented)
-    beginStop: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesStopOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
-    // @deprecated (undocumented)
-    beginStopAndWait: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesStopOptionalParams) => Promise<void>;
-    // @deprecated (undocumented)
-    beginUpdate: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, properties: Workbench, options?: WorkbenchesUpdateOptionalParams) => Promise<SimplePollerLike<OperationState<Workbench>, Workbench>>;
-    // @deprecated (undocumented)
-    beginUpdateAndWait: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, properties: Workbench, options?: WorkbenchesUpdateOptionalParams) => Promise<Workbench>;
-    createOrUpdate: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, resource: Workbench, options?: WorkbenchesCreateOrUpdateOptionalParams) => PollerLike<OperationState<Workbench>, Workbench>;
-    delete: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesDeleteOptionalParams) => PollerLike<OperationState<void>, void>;
-    get: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesGetOptionalParams) => Promise<Workbench>;
-    list: (resourceGroupName: string, accountName: string, projectName: string, options?: WorkbenchesListOptionalParams) => PagedAsyncIterableIterator<Workbench>;
-    restart: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesRestartOptionalParams) => PollerLike<OperationState<void>, void>;
-    start: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesStartOptionalParams) => PollerLike<OperationState<void>, void>;
-    stop: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, options?: WorkbenchesStopOptionalParams) => PollerLike<OperationState<void>, void>;
-    update: (resourceGroupName: string, accountName: string, projectName: string, workbenchName: string, properties: Workbench, options?: WorkbenchesUpdateOptionalParams) => PollerLike<OperationState<Workbench>, Workbench>;
-}
-
-// @public
-export interface WorkbenchesRestartOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface WorkbenchesStartOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface WorkbenchesStopOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface WorkbenchesUpdateOptionalParams extends OperationOptions {
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface WorkbenchProperties {
-    readonly connectivityEndpoints?: ConnectivityEndpoints;
-    readonly creationTime?: Date;
-    datasetId?: string;
-    readonly errors?: ErrorDetail[];
-    idleTimeBeforeShutdown?: string;
-    imageLink: string;
-    readonly provisioningState?: ComputeProvisioningState;
-    sshSettings?: SshSettings;
-    targetClusterId: string;
-    readonly webEndpoint?: string;
 }
 
 // (No @packageDocumentation comment for this package)

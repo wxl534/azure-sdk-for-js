@@ -2,20 +2,21 @@
 // Licensed under the MIT License.
 
 import { CloudHealthContext } from "../../api/cloudHealthContext.js";
-import { Relationship } from "../../models/models.js";
-import {
-  RelationshipsListByHealthModelOptionalParams,
-  RelationshipsDeleteOptionalParams,
-  RelationshipsCreateOrUpdateOptionalParams,
-  RelationshipsGetOptionalParams,
-} from "../../api/relationships/options.js";
 import {
   listByHealthModel,
   $delete,
   createOrUpdate,
   get,
 } from "../../api/relationships/operations.js";
+import {
+  RelationshipsListByHealthModelOptionalParams,
+  RelationshipsDeleteOptionalParams,
+  RelationshipsCreateOrUpdateOptionalParams,
+  RelationshipsGetOptionalParams,
+} from "../../api/relationships/options.js";
+import { Relationship } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
+import { PollerLike, OperationState } from "@azure/core-lro";
 
 /** Interface representing a Relationships operations. */
 export interface RelationshipsOperations {
@@ -26,17 +27,12 @@ export interface RelationshipsOperations {
     options?: RelationshipsListByHealthModelOptionalParams,
   ) => PagedAsyncIterableIterator<Relationship>;
   /** Delete a Relationship */
-  /**
-   *  @fixme delete is a reserved word that cannot be used as an operation name.
-   *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
-   *         to the operation to override the generated name.
-   */
   delete: (
     resourceGroupName: string,
     healthModelName: string,
     relationshipName: string,
     options?: RelationshipsDeleteOptionalParams,
-  ) => Promise<void>;
+  ) => PollerLike<OperationState<void>, void>;
   /** Create a Relationship */
   createOrUpdate: (
     resourceGroupName: string,
@@ -44,7 +40,7 @@ export interface RelationshipsOperations {
     relationshipName: string,
     resource: Relationship,
     options?: RelationshipsCreateOrUpdateOptionalParams,
-  ) => Promise<Relationship>;
+  ) => PollerLike<OperationState<Relationship>, Relationship>;
   /** Get a Relationship */
   get: (
     resourceGroupName: string,
