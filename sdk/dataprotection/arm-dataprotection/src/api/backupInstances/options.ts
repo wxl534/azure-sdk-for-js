@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { StopProtectionRequest, SuspendBackupRequest } from "../../models/models.js";
-import type { OperationOptions } from "@azure-rest/core-client";
+import {
+  ResumeProtectionRequest,
+  StopProtectionRequest,
+  SuspendBackupRequest,
+} from "../../models/models.js";
+import { OperationOptions } from "@azure-rest/core-client";
 
 /** Optional parameters. */
 export interface BackupInstancesValidateCrossRegionRestoreOptionalParams extends OperationOptions {
@@ -50,6 +54,8 @@ export interface BackupInstancesStopProtectionOptionalParams extends OperationOp
 export interface BackupInstancesResumeProtectionOptionalParams extends OperationOptions {
   /** Delay to wait until next poll, in milliseconds. */
   updateIntervalInMs?: number;
+  /** The content of the action request */
+  parameters?: ResumeProtectionRequest;
 }
 
 /** Optional parameters. */
