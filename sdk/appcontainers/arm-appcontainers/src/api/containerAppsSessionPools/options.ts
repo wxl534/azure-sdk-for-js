@@ -4,12 +4,6 @@
 import { OperationOptions } from "@azure-rest/core-client";
 
 /** Optional parameters. */
-export interface ContainerAppsSessionPoolsRotateMcpServerCredentialsOptionalParams extends OperationOptions {}
-
-/** Optional parameters. */
-export interface ContainerAppsSessionPoolsFetchMcpServerCredentialsOptionalParams extends OperationOptions {}
-
-/** Optional parameters. */
 export interface ContainerAppsSessionPoolsListBySubscriptionOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
