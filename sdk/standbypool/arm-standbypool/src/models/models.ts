@@ -218,6 +218,8 @@ export interface StandbyVirtualMachinePoolResourceProperties {
   elasticityProfile?: StandbyVirtualMachinePoolElasticityProfile;
   /** Specifies the desired state of virtual machines in the pool. */
   virtualMachineState: VirtualMachineState;
+  /** Specifies the distribution of virtual machine states in the pool when virtualMachineState is set to Mix. */
+  vmStateDistribution?: VmStateDistribution;
   /** Specifies the fully qualified resource ID of a virtual machine scale set the pool is attached to. */
   attachedVirtualMachineScaleSetId?: string;
   /** The status of the last operation. */
@@ -232,6 +234,9 @@ export function standbyVirtualMachinePoolResourcePropertiesSerializer(
       ? item["elasticityProfile"]
       : standbyVirtualMachinePoolElasticityProfileSerializer(item["elasticityProfile"]),
     virtualMachineState: item["virtualMachineState"],
+    vmStateDistribution: !item["vmStateDistribution"]
+      ? item["vmStateDistribution"]
+      : vmStateDistributionSerializer(item["vmStateDistribution"]),
     attachedVirtualMachineScaleSetId: item["attachedVirtualMachineScaleSetId"],
   };
 }
@@ -244,6 +249,9 @@ export function standbyVirtualMachinePoolResourcePropertiesDeserializer(
       ? item["elasticityProfile"]
       : standbyVirtualMachinePoolElasticityProfileDeserializer(item["elasticityProfile"]),
     virtualMachineState: item["virtualMachineState"],
+    vmStateDistribution: !item["vmStateDistribution"]
+      ? item["vmStateDistribution"]
+      : vmStateDistributionDeserializer(item["vmStateDistribution"]),
     attachedVirtualMachineScaleSetId: item["attachedVirtualMachineScaleSetId"],
     provisioningState: item["provisioningState"],
   };
@@ -311,6 +319,8 @@ export enum KnownVirtualMachineState {
   Deallocated = "Deallocated",
   /** The virtual machine has released the lease on the underlying hardware and is powered off. Memory contents of the VM are stored in the OS disk.  When started again, applications and processes that were previously running in your VM resume from the state prior to hibernation. */
   Hibernated = "Hibernated",
+  /** The pool contains a mix of virtual machines in different states, as defined by the vmStateDistribution property. */
+  Mix = "Mix",
 }
 
 /**
@@ -320,9 +330,36 @@ export enum KnownVirtualMachineState {
  * ### Known values supported by the service
  * **Running**: The virtual machine is up and running. \
  * **Deallocated**: The virtual machine has released the lease on the underlying hardware and is powered off. \
- * **Hibernated**: The virtual machine has released the lease on the underlying hardware and is powered off. Memory contents of the VM are stored in the OS disk.  When started again, applications and processes that were previously running in your VM resume from the state prior to hibernation.
+ * **Hibernated**: The virtual machine has released the lease on the underlying hardware and is powered off. Memory contents of the VM are stored in the OS disk.  When started again, applications and processes that were previously running in your VM resume from the state prior to hibernation. \
+ * **Mix**: The pool contains a mix of virtual machines in different states, as defined by the vmStateDistribution property.
  */
 export type VirtualMachineState = string;
+
+/** Specifies the distribution of virtual machine states in the pool. */
+export interface VmStateDistribution {
+  /** Specifies the percentage of virtual machines in the Running state in the standby pool. */
+  runningPercent?: number;
+  /** Specifies the percentage of virtual machines in the Deallocated state in the standby pool. */
+  deallocatedPercent?: number;
+  /** Specifies the percentage of virtual machines in the Hibernated state in the standby pool. */
+  hibernatedPercent?: number;
+}
+
+export function vmStateDistributionSerializer(item: VmStateDistribution): any {
+  return {
+    runningPercent: item["runningPercent"],
+    deallocatedPercent: item["deallocatedPercent"],
+    hibernatedPercent: item["hibernatedPercent"],
+  };
+}
+
+export function vmStateDistributionDeserializer(item: any): VmStateDistribution {
+  return {
+    runningPercent: item["runningPercent"],
+    deallocatedPercent: item["deallocatedPercent"],
+    hibernatedPercent: item["hibernatedPercent"],
+  };
+}
 
 /** Provisioning state */
 export enum KnownProvisioningState {
@@ -387,8 +424,8 @@ export interface Resource {
   readonly systemData?: SystemData;
 }
 
-export function resourceSerializer(item: Resource): any {
-  return item;
+export function resourceSerializer(_item: Resource): any {
+  return {};
 }
 
 export function resourceDeserializer(item: any): Resource {
@@ -480,6 +517,8 @@ export interface StandbyVirtualMachinePoolResourceUpdateProperties {
   elasticityProfile?: StandbyVirtualMachinePoolElasticityProfile;
   /** Specifies the desired state of virtual machines in the pool. */
   virtualMachineState?: VirtualMachineState;
+  /** Specifies the distribution of virtual machine states in the pool when virtualMachineState is set to Mix. */
+  vmStateDistribution?: VmStateDistribution;
   /** Specifies the fully qualified resource ID of a virtual machine scale set the pool is attached to. */
   attachedVirtualMachineScaleSetId?: string;
 }
@@ -492,6 +531,9 @@ export function standbyVirtualMachinePoolResourceUpdatePropertiesSerializer(
       ? item["elasticityProfile"]
       : standbyVirtualMachinePoolElasticityProfileSerializer(item["elasticityProfile"]),
     virtualMachineState: item["virtualMachineState"],
+    vmStateDistribution: !item["vmStateDistribution"]
+      ? item["vmStateDistribution"]
+      : vmStateDistributionSerializer(item["vmStateDistribution"]),
     attachedVirtualMachineScaleSetId: item["attachedVirtualMachineScaleSetId"],
   };
 }
@@ -1307,5 +1349,7 @@ export enum KnownVersions {
   /** API Version 2025-03-01. */
   _20250301 = "2025-03-01",
   /** API Version 2025-10-01. */
-  _20251001 = "2025-10-01",
+  V20251001 = "2025-10-01",
+  /** API Version 2026-04-01. */
+  V20260401 = "2026-04-01",
 }

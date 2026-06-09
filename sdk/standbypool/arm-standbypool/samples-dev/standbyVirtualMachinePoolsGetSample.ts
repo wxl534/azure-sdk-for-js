@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get a StandbyVirtualMachinePoolResource
  *
  * @summary get a StandbyVirtualMachinePoolResource
- * x-ms-original-file: 2025-10-01/StandbyVirtualMachinePools_Get.json
+ * x-ms-original-file: 2026-04-01/StandbyVirtualMachinePools_Get.json
  */
 async function standbyVirtualMachinePoolsGet(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -18,8 +18,23 @@ async function standbyVirtualMachinePoolsGet(): Promise<void> {
   console.log(result);
 }
 
+/**
+ * This sample demonstrates how to get a StandbyVirtualMachinePoolResource
+ *
+ * @summary get a StandbyVirtualMachinePoolResource
+ * x-ms-original-file: 2026-04-01/StandbyVirtualMachinePools_Get_MixState.json
+ */
+async function standbyVirtualMachinePoolsGetMixState(): Promise<void> {
+  const credential = new DefaultAzureCredential();
+  const subscriptionId = "00000000-0000-0000-0000-000000000009";
+  const client = new StandbyPoolManagementClient(credential, subscriptionId);
+  const result = await client.standbyVirtualMachinePools.get("rgstandbypool", "pool");
+  console.log(result);
+}
+
 async function main(): Promise<void> {
   await standbyVirtualMachinePoolsGet();
+  await standbyVirtualMachinePoolsGetMixState();
 }
 
 main().catch(console.error);

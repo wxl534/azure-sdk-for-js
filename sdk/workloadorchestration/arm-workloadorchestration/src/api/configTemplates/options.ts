@@ -25,6 +25,18 @@ export interface ConfigTemplatesCreateVersionOptionalParams extends OperationOpt
 }
 
 /** Optional parameters. */
+export interface ConfigTemplatesUnLinkFromHierarchiesOptionalParams extends OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+}
+
+/** Optional parameters. */
+export interface ConfigTemplatesLinkToHierarchiesOptionalParams extends OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+}
+
+/** Optional parameters. */
 export interface ConfigTemplatesUpdateOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
