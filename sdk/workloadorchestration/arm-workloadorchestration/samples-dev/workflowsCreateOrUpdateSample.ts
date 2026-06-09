@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update a Workflow resource
  *
  * @summary create or update a Workflow resource
- * x-ms-original-file: 2025-06-01/Workflows_CreateOrUpdate_MaximumSet_Gen.json
+ * x-ms-original-file: 2025-08-01/Workflows_CreateOrUpdate_MaximumSet_Gen.json
  */
 async function workflowsCreateOrUpdateMaximumSet(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -18,10 +18,7 @@ async function workflowsCreateOrUpdateMaximumSet(): Promise<void> {
     "rgconfigurationmanager",
     "testname",
     "testname",
-    {
-      properties: {},
-      extendedLocation: { name: "szjrwimeqyiue", type: "EdgeZone" },
-    },
+    { properties: {}, extendedLocation: { name: "szjrwimeqyiue", type: "EdgeZone" } },
   );
   console.log(result);
 }
