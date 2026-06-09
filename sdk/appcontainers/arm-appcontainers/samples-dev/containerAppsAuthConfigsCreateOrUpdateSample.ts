@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update the AuthConfig for a Container App.
  *
  * @summary create or update the AuthConfig for a Container App.
- * x-ms-original-file: 2025-10-02-preview/AuthConfigs_BlobStorageTokenStore_ClientId_CreateOrUpdate.json
+ * x-ms-original-file: 2026-01-01/AuthConfigs_BlobStorageTokenStore_ClientId_CreateOrUpdate.json
  */
 async function createOrUpdateContainerAppAuthConfigWithMsiClientIDBlobStorageTokenStore(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -23,14 +23,7 @@ async function createOrUpdateContainerAppAuthConfigWithMsiClientIDBlobStorageTok
     identityProviders: {
       facebook: { registration: { appId: "123", appSecretSettingName: "facebook-secret" } },
     },
-    login: {
-      tokenStore: {
-        azureBlobStorage: {
-          blobContainerUri: "https://test.blob.core.windows.net/container1",
-          clientId: "00000000-0000-0000-0000-000000000000",
-        },
-      },
-    },
+    login: { tokenStore: { azureBlobStorage: { sasUrlSettingName: "sasUrlSettingName1" } } },
     platform: { enabled: true },
   });
   console.log(result);
@@ -40,7 +33,7 @@ async function createOrUpdateContainerAppAuthConfigWithMsiClientIDBlobStorageTok
  * This sample demonstrates how to create or update the AuthConfig for a Container App.
  *
  * @summary create or update the AuthConfig for a Container App.
- * x-ms-original-file: 2025-10-02-preview/AuthConfigs_BlobStorageTokenStore_CreateOrUpdate.json
+ * x-ms-original-file: 2026-01-01/AuthConfigs_BlobStorageTokenStore_CreateOrUpdate.json
  */
 async function createOrUpdateContainerAppAuthConfigWithMsiManagedIdentityResourceIdBlobStorageTokenStore(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -55,15 +48,7 @@ async function createOrUpdateContainerAppAuthConfigWithMsiManagedIdentityResourc
     identityProviders: {
       facebook: { registration: { appId: "123", appSecretSettingName: "facebook-secret" } },
     },
-    login: {
-      tokenStore: {
-        azureBlobStorage: {
-          blobContainerUri: "https://test.blob.core.windows.net/container1",
-          managedIdentityResourceId:
-            "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/identity1",
-        },
-      },
-    },
+    login: { tokenStore: { azureBlobStorage: { sasUrlSettingName: "sasUrlSettingName1" } } },
     platform: { enabled: true },
   });
   console.log(result);
@@ -73,7 +58,7 @@ async function createOrUpdateContainerAppAuthConfigWithMsiManagedIdentityResourc
  * This sample demonstrates how to create or update the AuthConfig for a Container App.
  *
  * @summary create or update the AuthConfig for a Container App.
- * x-ms-original-file: 2025-10-02-preview/AuthConfigs_CreateOrUpdate.json
+ * x-ms-original-file: 2026-01-01/AuthConfigs_CreateOrUpdate.json
  */
 async function createOrUpdateContainerAppAuthConfig(): Promise<void> {
   const credential = new DefaultAzureCredential();
