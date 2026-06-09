@@ -1,17 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { OnlineExperimentationClient } from "@azure/arm-onlineexperimentation";
+import { DefaultAzureCredential } from "@azure/identity";
+
 /**
  * This sample demonstrates how to patch an online experimentation workspace.
  *
  * @summary patch an online experimentation workspace.
- * x-ms-original-file: 2025-05-31-preview/OnlineExperimentationWorkspaces_Update.json
+ * x-ms-original-file: 2025-08-01-preview/OnlineExperimentationWorkspaces_Update.json
  */
-
-import { OnlineExperimentationClient } from "@azure/arm-onlineexperimentation";
-import { DefaultAzureCredential } from "@azure/identity";
-
-async function updateAnOnlineExperimentationWorkspace(): Promise<void> {
+async function updateAnOnlineExperimentWorkspace(): Promise<void> {
   const credential = new DefaultAzureCredential();
   const subscriptionId = "fa5fc227-a624-475e-b696-cdd604c735bc";
   const client = new OnlineExperimentationClient(credential, subscriptionId);
@@ -34,7 +33,23 @@ async function updateAnOnlineExperimentationWorkspace(): Promise<void> {
  * This sample demonstrates how to patch an online experimentation workspace.
  *
  * @summary patch an online experimentation workspace.
- * x-ms-original-file: 2025-05-31-preview/OnlineExperimentationWorkspaces_UpdateWithEncryption.json
+ * x-ms-original-file: 2025-08-01-preview/OnlineExperimentationWorkspaces_UpdatePublicNetworkAccess.json
+ */
+async function updateAnOnlineExperimentationWorkspaceWithPublicNetworkAccess(): Promise<void> {
+  const credential = new DefaultAzureCredential();
+  const subscriptionId = "fa5fc227-a624-475e-b696-cdd604c735bc";
+  const client = new OnlineExperimentationClient(credential, subscriptionId);
+  const result = await client.onlineExperimentationWorkspaces.update("res9871", "expworkspace3", {
+    properties: { publicNetworkAccess: "Enabled" },
+  });
+  console.log(result);
+}
+
+/**
+ * This sample demonstrates how to patch an online experimentation workspace.
+ *
+ * @summary patch an online experimentation workspace.
+ * x-ms-original-file: 2025-08-01-preview/OnlineExperimentationWorkspaces_UpdateWithEncryption.json
  */
 async function updateAnOnlineExperimentationWorkspaceWithCustomerManagedEncryptionKey(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -72,7 +87,8 @@ async function updateAnOnlineExperimentationWorkspaceWithCustomerManagedEncrypti
 }
 
 async function main(): Promise<void> {
-  await updateAnOnlineExperimentationWorkspace();
+  await updateAnOnlineExperimentWorkspace();
+  await updateAnOnlineExperimentationWorkspaceWithPublicNetworkAccess();
   await updateAnOnlineExperimentationWorkspaceWithCustomerManagedEncryptionKey();
 }
 
