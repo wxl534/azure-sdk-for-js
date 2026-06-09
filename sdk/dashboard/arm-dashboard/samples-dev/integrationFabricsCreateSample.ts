@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create a IntegrationFabric
  *
  * @summary create a IntegrationFabric
- * x-ms-original-file: 2025-08-01/IntegrationFabrics_Create.json
+ * x-ms-original-file: 2025-09-01-preview/IntegrationFabrics_Create.json
  */
 async function integrationFabricsCreate(): Promise<void> {
   const credential = new DefaultAzureCredential();

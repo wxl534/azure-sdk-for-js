@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to a synchronous resource action.
  *
  * @summary a synchronous resource action.
- * x-ms-original-file: 2025-08-01/Grafana_FetchAvailablePlugins.json
+ * x-ms-original-file: 2025-09-01-preview/Grafana_FetchAvailablePlugins.json
  */
 async function grafanaFetchAvailablePlugins(): Promise<void> {
   const credential = new DefaultAzureCredential();

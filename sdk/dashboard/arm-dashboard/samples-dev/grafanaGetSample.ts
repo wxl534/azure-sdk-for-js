@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get the properties of a specific workspace for Grafana resource.
  *
  * @summary get the properties of a specific workspace for Grafana resource.
- * x-ms-original-file: 2025-08-01/Grafana_Get.json
+ * x-ms-original-file: 2025-09-01-preview/Grafana_Get.json
  */
 async function grafanaGet(): Promise<void> {
   const credential = new DefaultAzureCredential();

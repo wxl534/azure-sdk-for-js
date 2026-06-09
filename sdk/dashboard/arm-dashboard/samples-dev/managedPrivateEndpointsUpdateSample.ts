@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update a managed private endpoint for an existing grafana resource.
  *
  * @summary update a managed private endpoint for an existing grafana resource.
- * x-ms-original-file: 2025-08-01/ManagedPrivateEndpoints_Patch.json
+ * x-ms-original-file: 2025-09-01-preview/ManagedPrivateEndpoints_Patch.json
  */
 async function managedPrivateEndpointsPatch(): Promise<void> {
   const credential = new DefaultAzureCredential();

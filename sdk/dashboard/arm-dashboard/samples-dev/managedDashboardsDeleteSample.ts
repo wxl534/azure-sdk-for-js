@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to delete a dashboard for Grafana resource.
  *
  * @summary delete a dashboard for Grafana resource.
- * x-ms-original-file: 2025-08-01/Dashboard_Delete.json
+ * x-ms-original-file: 2025-09-01-preview/Dashboard_Delete.json
  */
 async function dashboardDelete(): Promise<void> {
   const credential = new DefaultAzureCredential();

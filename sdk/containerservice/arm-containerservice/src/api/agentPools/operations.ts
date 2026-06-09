@@ -1,41 +1,46 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { ContainerServiceContext as Client } from "../index.js";
-import type {
-  AgentPool,
-  _AgentPoolListResult,
-  AgentPoolDeleteMachinesParameter,
-  AgentPoolAvailableVersions,
-  AgentPoolUpgradeProfile,
-} from "../../models/models.js";
+import { ContainerServiceContext as Client } from "../index.js";
 import {
+  AgentPool,
   agentPoolSerializer,
   agentPoolDeserializer,
   errorResponseDeserializer,
+  _AgentPoolListResult,
   _agentPoolListResultDeserializer,
+  AgentPoolDeleteMachinesParameter,
   agentPoolDeleteMachinesParameterSerializer,
+  AgentPoolAvailableVersions,
   agentPoolAvailableVersionsDeserializer,
+  AgentPoolUpgradeProfile,
   agentPoolUpgradeProfileDeserializer,
 } from "../../models/models.js";
-import type { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
-import { buildPagedAsyncIterator } from "../../static-helpers/pagingHelpers.js";
+import {
+  PagedAsyncIterableIterator,
+  buildPagedAsyncIterator,
+} from "../../static-helpers/pagingHelpers.js";
 import { getLongRunningPoller } from "../../static-helpers/pollingHelpers.js";
 import { expandUrlTemplate } from "../../static-helpers/urlTemplate.js";
-import type {
+import {
   AgentPoolsGetUpgradeProfileOptionalParams,
   AgentPoolsGetAvailableAgentPoolVersionsOptionalParams,
   AgentPoolsUpgradeNodeImageVersionOptionalParams,
   AgentPoolsDeleteMachinesOptionalParams,
+  AgentPoolsCompleteUpgradeOptionalParams,
   AgentPoolsAbortLatestOperationOptionalParams,
   AgentPoolsListOptionalParams,
   AgentPoolsDeleteOptionalParams,
   AgentPoolsCreateOrUpdateOptionalParams,
   AgentPoolsGetOptionalParams,
 } from "./options.js";
-import type { StreamableMethod, PathUncheckedResponse } from "@azure-rest/core-client";
-import { createRestError, operationOptionsToRequestParameters } from "@azure-rest/core-client";
-import type { PollerLike, OperationState } from "@azure/core-lro";
+import {
+  StreamableMethod,
+  PathUncheckedResponse,
+  createRestError,
+  operationOptionsToRequestParameters,
+} from "@azure-rest/core-client";
+import { PollerLike, OperationState } from "@azure/core-lro";
 
 export function _getUpgradeProfileSend(
   context: Client,
@@ -51,16 +56,18 @@ export function _getUpgradeProfileSend(
       resourceGroupName: resourceGroupName,
       resourceName: resourceName,
       agentPoolName: agentPoolName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01",
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _getUpgradeProfileDeserialize(
@@ -109,16 +116,18 @@ export function _getAvailableAgentPoolVersionsSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       resourceName: resourceName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01",
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _getAvailableAgentPoolVersionsDeserialize(
@@ -167,16 +176,18 @@ export function _upgradeNodeImageVersionSend(
       resourceGroupName: resourceGroupName,
       resourceName: resourceName,
       agentPoolName: agentPoolName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01",
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).post({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .post({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _upgradeNodeImageVersionDeserialize(
@@ -215,7 +226,7 @@ export function upgradeNodeImageVersion(
         options,
       ),
     resourceLocationConfig: "location",
-    apiVersion: context.apiVersion ?? "2026-04-01",
+    apiVersion: context.apiVersion ?? "2026-04-02-preview",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -234,17 +245,19 @@ export function _deleteMachinesSend(
       resourceGroupName: resourceGroupName,
       resourceName: resourceName,
       agentPoolName: agentPoolName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01",
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).post({
-    ...operationOptionsToRequestParameters(options),
-    contentType: "application/json",
-    body: agentPoolDeleteMachinesParameterSerializer(machines),
-  });
+  return context
+    .path(path)
+    .post({
+      ...operationOptionsToRequestParameters(options),
+      contentType: "application/json",
+      body: agentPoolDeleteMachinesParameterSerializer(machines),
+    });
 }
 
 export async function _deleteMachinesDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -283,7 +296,62 @@ export function deleteMachines(
         options,
       ),
     resourceLocationConfig: "azure-async-operation",
-    apiVersion: context.apiVersion ?? "2026-04-01",
+    apiVersion: context.apiVersion ?? "2026-04-02-preview",
+  }) as PollerLike<OperationState<void>, void>;
+}
+
+export function _completeUpgradeSend(
+  context: Client,
+  resourceGroupName: string,
+  resourceName: string,
+  agentPoolName: string,
+  options: AgentPoolsCompleteUpgradeOptionalParams = { requestOptions: {} },
+): StreamableMethod {
+  const path = expandUrlTemplate(
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}/completeUpgrade{?api%2Dversion}",
+    {
+      subscriptionId: context.subscriptionId,
+      resourceGroupName: resourceGroupName,
+      resourceName: resourceName,
+      agentPoolName: agentPoolName,
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
+    },
+    {
+      allowReserved: options?.requestOptions?.skipUrlEncoding,
+    },
+  );
+  return context.path(path).post({ ...operationOptionsToRequestParameters(options) });
+}
+
+export async function _completeUpgradeDeserialize(result: PathUncheckedResponse): Promise<void> {
+  const expectedStatuses = ["202", "204", "200", "201"];
+  if (!expectedStatuses.includes(result.status)) {
+    const error = createRestError(result);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
+
+    throw error;
+  }
+
+  return;
+}
+
+/** Completes the upgrade operation for the specified agent pool. */
+export function completeUpgrade(
+  context: Client,
+  resourceGroupName: string,
+  resourceName: string,
+  agentPoolName: string,
+  options: AgentPoolsCompleteUpgradeOptionalParams = { requestOptions: {} },
+): PollerLike<OperationState<void>, void> {
+  return getLongRunningPoller(context, _completeUpgradeDeserialize, ["202", "204", "200", "201"], {
+    updateIntervalInMs: options?.updateIntervalInMs,
+    abortSignal: options?.abortSignal,
+    getInitialResponse: () =>
+      _completeUpgradeSend(context, resourceGroupName, resourceName, agentPoolName, options),
+    resourceLocationConfig: "location",
+    apiVersion: context.apiVersion ?? "2026-04-02-preview",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -301,7 +369,7 @@ export function _abortLatestOperationSend(
       resourceGroupName: resourceGroupName,
       resourceName: resourceName,
       agentPoolName: agentPoolName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01",
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -344,7 +412,7 @@ export function abortLatestOperation(
       getInitialResponse: () =>
         _abortLatestOperationSend(context, resourceGroupName, resourceName, agentPoolName, options),
       resourceLocationConfig: "location",
-      apiVersion: context.apiVersion ?? "2026-04-01",
+      apiVersion: context.apiVersion ?? "2026-04-02-preview",
     },
   ) as PollerLike<OperationState<void>, void>;
 }
@@ -361,16 +429,18 @@ export function _listSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       resourceName: resourceName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01",
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _listDeserialize(
@@ -401,7 +471,11 @@ export function list(
     () => _listSend(context, resourceGroupName, resourceName, options),
     _listDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2026-04-01" },
+    {
+      itemName: "value",
+      nextLinkName: "nextLink",
+      apiVersion: context.apiVersion ?? "2026-04-02-preview",
+    },
   );
 }
 
@@ -419,20 +493,22 @@ export function _$deleteSend(
       resourceGroupName: resourceGroupName,
       resourceName: resourceName,
       agentPoolName: agentPoolName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01",
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
       "ignore%2Dpod%2Ddisruption%2Dbudget": options?.ignorePodDisruptionBudget,
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).delete({
-    ...operationOptionsToRequestParameters(options),
-    headers: {
-      ...(options?.ifMatch !== undefined ? { "if-match": options?.ifMatch } : {}),
-      ...options.requestOptions?.headers,
-    },
-  });
+  return context
+    .path(path)
+    .delete({
+      ...operationOptionsToRequestParameters(options),
+      headers: {
+        ...(options?.ifMatch !== undefined ? { "if-match": options?.ifMatch } : {}),
+        ...options.requestOptions?.headers,
+      },
+    });
 }
 
 export async function _$deleteDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -463,7 +539,7 @@ export function $delete(
     getInitialResponse: () =>
       _$deleteSend(context, resourceGroupName, resourceName, agentPoolName, options),
     resourceLocationConfig: "azure-async-operation",
-    apiVersion: context.apiVersion ?? "2026-04-01",
+    apiVersion: context.apiVersion ?? "2026-04-02-preview",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -482,23 +558,25 @@ export function _createOrUpdateSend(
       resourceGroupName: resourceGroupName,
       resourceName: resourceName,
       agentPoolName: agentPoolName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01",
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).put({
-    ...operationOptionsToRequestParameters(options),
-    contentType: "application/json",
-    headers: {
-      ...(options?.ifMatch !== undefined ? { "if-match": options?.ifMatch } : {}),
-      ...(options?.ifNoneMatch !== undefined ? { "if-none-match": options?.ifNoneMatch } : {}),
-      accept: "application/json",
-      ...options.requestOptions?.headers,
-    },
-    body: agentPoolSerializer(parameters),
-  });
+  return context
+    .path(path)
+    .put({
+      ...operationOptionsToRequestParameters(options),
+      contentType: "application/json",
+      headers: {
+        ...(options?.ifMatch !== undefined ? { "if-match": options?.ifMatch } : {}),
+        ...(options?.ifNoneMatch !== undefined ? { "if-none-match": options?.ifNoneMatch } : {}),
+        accept: "application/json",
+        ...options.requestOptions?.headers,
+      },
+      body: agentPoolSerializer(parameters),
+    });
 }
 
 export async function _createOrUpdateDeserialize(
@@ -539,7 +617,7 @@ export function createOrUpdate(
         options,
       ),
     resourceLocationConfig: "azure-async-operation",
-    apiVersion: context.apiVersion ?? "2026-04-01",
+    apiVersion: context.apiVersion ?? "2026-04-02-preview",
   }) as PollerLike<OperationState<AgentPool>, AgentPool>;
 }
 
@@ -557,16 +635,18 @@ export function _getSend(
       resourceGroupName: resourceGroupName,
       resourceName: resourceName,
       agentPoolName: agentPoolName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01",
+      "api%2Dversion": context.apiVersion ?? "2026-04-02-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context.path(path).get({
-    ...operationOptionsToRequestParameters(options),
-    headers: { accept: "application/json", ...options.requestOptions?.headers },
-  });
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
 }
 
 export async function _getDeserialize(result: PathUncheckedResponse): Promise<AgentPool> {

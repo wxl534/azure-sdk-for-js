@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to retrieve enterprise add-on details information
  *
  * @summary retrieve enterprise add-on details information
- * x-ms-original-file: 2025-08-01/EnterpriseDetails_Post.json
+ * x-ms-original-file: 2025-09-01-preview/EnterpriseDetails_Post.json
  */
 async function enterpriseDetailsPost(): Promise<void> {
   const credential = new DefaultAzureCredential();

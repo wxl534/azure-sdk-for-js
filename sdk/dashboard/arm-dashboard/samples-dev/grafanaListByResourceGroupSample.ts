@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to list all resources of workspaces for Grafana under the specified resource group.
  *
  * @summary list all resources of workspaces for Grafana under the specified resource group.
- * x-ms-original-file: 2025-08-01/Grafana_ListByResourceGroup.json
+ * x-ms-original-file: 2025-09-01-preview/Grafana_ListByResourceGroup.json
  */
 async function grafanaListByResourceGroup(): Promise<void> {
   const credential = new DefaultAzureCredential();

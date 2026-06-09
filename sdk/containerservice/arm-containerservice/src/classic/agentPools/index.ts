@@ -1,39 +1,40 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { ContainerServiceContext } from "../../api/containerServiceContext.js";
+import { ContainerServiceContext } from "../../api/containerServiceContext.js";
 import {
   getUpgradeProfile,
   getAvailableAgentPoolVersions,
   upgradeNodeImageVersion,
   deleteMachines,
+  completeUpgrade,
   abortLatestOperation,
   list,
   $delete,
   createOrUpdate,
   get,
 } from "../../api/agentPools/operations.js";
-import type {
+import {
   AgentPoolsGetUpgradeProfileOptionalParams,
   AgentPoolsGetAvailableAgentPoolVersionsOptionalParams,
   AgentPoolsUpgradeNodeImageVersionOptionalParams,
   AgentPoolsDeleteMachinesOptionalParams,
+  AgentPoolsCompleteUpgradeOptionalParams,
   AgentPoolsAbortLatestOperationOptionalParams,
   AgentPoolsListOptionalParams,
   AgentPoolsDeleteOptionalParams,
   AgentPoolsCreateOrUpdateOptionalParams,
   AgentPoolsGetOptionalParams,
 } from "../../api/agentPools/options.js";
-import type {
+import {
   AgentPool,
   AgentPoolDeleteMachinesParameter,
   AgentPoolAvailableVersions,
   AgentPoolUpgradeProfile,
 } from "../../models/models.js";
-import type { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
-import type { SimplePollerLike } from "../../static-helpers/simplePollerHelpers.js";
-import { getSimplePoller } from "../../static-helpers/simplePollerHelpers.js";
-import type { PollerLike, OperationState } from "@azure/core-lro";
+import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
+import { SimplePollerLike, getSimplePoller } from "../../static-helpers/simplePollerHelpers.js";
+import { PollerLike, OperationState } from "@azure/core-lro";
 
 /** Interface representing a AgentPools operations. */
 export interface AgentPoolsOperations {
@@ -94,6 +95,27 @@ export interface AgentPoolsOperations {
     agentPoolName: string,
     machines: AgentPoolDeleteMachinesParameter,
     options?: AgentPoolsDeleteMachinesOptionalParams,
+  ) => Promise<void>;
+  /** Completes the upgrade operation for the specified agent pool. */
+  completeUpgrade: (
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    options?: AgentPoolsCompleteUpgradeOptionalParams,
+  ) => PollerLike<OperationState<void>, void>;
+  /** @deprecated use completeUpgrade instead */
+  beginCompleteUpgrade: (
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    options?: AgentPoolsCompleteUpgradeOptionalParams,
+  ) => Promise<SimplePollerLike<OperationState<void>, void>>;
+  /** @deprecated use completeUpgrade instead */
+  beginCompleteUpgradeAndWait: (
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    options?: AgentPoolsCompleteUpgradeOptionalParams,
   ) => Promise<void>;
   /** Aborts the currently running operation on the agent pool. The Agent Pool will be moved to a Canceling state and eventually to a Canceled state when cancellation finishes. If the operation completes before cancellation can take place, a 409 error code is returned. */
   abortLatestOperation: (
@@ -263,6 +285,42 @@ function _getAgentPools(context: ContainerServiceContext) {
         resourceName,
         agentPoolName,
         machines,
+        options,
+      );
+    },
+    completeUpgrade: (
+      resourceGroupName: string,
+      resourceName: string,
+      agentPoolName: string,
+      options?: AgentPoolsCompleteUpgradeOptionalParams,
+    ) => completeUpgrade(context, resourceGroupName, resourceName, agentPoolName, options),
+    beginCompleteUpgrade: async (
+      resourceGroupName: string,
+      resourceName: string,
+      agentPoolName: string,
+      options?: AgentPoolsCompleteUpgradeOptionalParams,
+    ) => {
+      const poller = completeUpgrade(
+        context,
+        resourceGroupName,
+        resourceName,
+        agentPoolName,
+        options,
+      );
+      await poller.submitted();
+      return getSimplePoller(poller);
+    },
+    beginCompleteUpgradeAndWait: async (
+      resourceGroupName: string,
+      resourceName: string,
+      agentPoolName: string,
+      options?: AgentPoolsCompleteUpgradeOptionalParams,
+    ) => {
+      return await completeUpgrade(
+        context,
+        resourceGroupName,
+        resourceName,
+        agentPoolName,
         options,
       );
     },

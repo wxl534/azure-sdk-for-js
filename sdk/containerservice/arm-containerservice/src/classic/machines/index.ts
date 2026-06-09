@@ -1,14 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { ContainerServiceContext } from "../../api/containerServiceContext.js";
-import { list, get } from "../../api/machines/operations.js";
-import type {
+import { ContainerServiceContext } from "../../api/containerServiceContext.js";
+import { list, createOrUpdate, get } from "../../api/machines/operations.js";
+import {
   MachinesListOptionalParams,
+  MachinesCreateOrUpdateOptionalParams,
   MachinesGetOptionalParams,
 } from "../../api/machines/options.js";
-import type { Machine } from "../../models/models.js";
-import type { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
+import { Machine } from "../../models/models.js";
+import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
+import { SimplePollerLike, getSimplePoller } from "../../static-helpers/simplePollerHelpers.js";
+import { PollerLike, OperationState } from "@azure/core-lro";
 
 /** Interface representing a Machines operations. */
 export interface MachinesOperations {
@@ -19,6 +22,33 @@ export interface MachinesOperations {
     agentPoolName: string,
     options?: MachinesListOptionalParams,
   ) => PagedAsyncIterableIterator<Machine>;
+  /** Creates or updates a machine in the specified agent pool. */
+  createOrUpdate: (
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    machineName: string,
+    parameters: Machine,
+    options?: MachinesCreateOrUpdateOptionalParams,
+  ) => PollerLike<OperationState<Machine>, Machine>;
+  /** @deprecated use createOrUpdate instead */
+  beginCreateOrUpdate: (
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    machineName: string,
+    parameters: Machine,
+    options?: MachinesCreateOrUpdateOptionalParams,
+  ) => Promise<SimplePollerLike<OperationState<Machine>, Machine>>;
+  /** @deprecated use createOrUpdate instead */
+  beginCreateOrUpdateAndWait: (
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    machineName: string,
+    parameters: Machine,
+    options?: MachinesCreateOrUpdateOptionalParams,
+  ) => Promise<Machine>;
   /** Get a specific machine in the specified agent pool. */
   get: (
     resourceGroupName: string,
@@ -37,6 +67,61 @@ function _getMachines(context: ContainerServiceContext) {
       agentPoolName: string,
       options?: MachinesListOptionalParams,
     ) => list(context, resourceGroupName, resourceName, agentPoolName, options),
+    createOrUpdate: (
+      resourceGroupName: string,
+      resourceName: string,
+      agentPoolName: string,
+      machineName: string,
+      parameters: Machine,
+      options?: MachinesCreateOrUpdateOptionalParams,
+    ) =>
+      createOrUpdate(
+        context,
+        resourceGroupName,
+        resourceName,
+        agentPoolName,
+        machineName,
+        parameters,
+        options,
+      ),
+    beginCreateOrUpdate: async (
+      resourceGroupName: string,
+      resourceName: string,
+      agentPoolName: string,
+      machineName: string,
+      parameters: Machine,
+      options?: MachinesCreateOrUpdateOptionalParams,
+    ) => {
+      const poller = createOrUpdate(
+        context,
+        resourceGroupName,
+        resourceName,
+        agentPoolName,
+        machineName,
+        parameters,
+        options,
+      );
+      await poller.submitted();
+      return getSimplePoller(poller);
+    },
+    beginCreateOrUpdateAndWait: async (
+      resourceGroupName: string,
+      resourceName: string,
+      agentPoolName: string,
+      machineName: string,
+      parameters: Machine,
+      options?: MachinesCreateOrUpdateOptionalParams,
+    ) => {
+      return await createOrUpdate(
+        context,
+        resourceGroupName,
+        resourceName,
+        agentPoolName,
+        machineName,
+        parameters,
+        options,
+      );
+    },
     get: (
       resourceGroupName: string,
       resourceName: string,
