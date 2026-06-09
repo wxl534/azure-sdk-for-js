@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update a Elastic San.
  *
  * @summary update a Elastic San.
- * x-ms-original-file: 2025-09-01/ElasticSans_Update_MaximumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/ElasticSans_Update_MaximumSet_Gen.json
  */
 async function elasticSansUpdateMaximumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -37,7 +37,7 @@ async function elasticSansUpdateMaximumSetGen(): Promise<void> {
  * This sample demonstrates how to update a Elastic San.
  *
  * @summary update a Elastic San.
- * x-ms-original-file: 2025-09-01/ElasticSans_Update_MinimumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/ElasticSans_Update_MinimumSet_Gen.json
  */
 async function elasticSansUpdateMinimumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();

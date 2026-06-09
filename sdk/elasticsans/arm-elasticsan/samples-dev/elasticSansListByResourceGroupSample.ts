@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to gets a list of ElasticSan in a resource group.
  *
  * @summary gets a list of ElasticSan in a resource group.
- * x-ms-original-file: 2025-09-01/ElasticSans_ListByResourceGroup_MaximumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/ElasticSans_ListByResourceGroup_MaximumSet_Gen.json
  */
 async function elasticSansListByResourceGroupMaximumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -26,7 +26,7 @@ async function elasticSansListByResourceGroupMaximumSetGen(): Promise<void> {
  * This sample demonstrates how to gets a list of ElasticSan in a resource group.
  *
  * @summary gets a list of ElasticSan in a resource group.
- * x-ms-original-file: 2025-09-01/ElasticSans_ListByResourceGroup_MinimumSet_Gen.json
+ * x-ms-original-file: 2026-04-01-preview/ElasticSans_ListByResourceGroup_MinimumSet_Gen.json
  */
 async function elasticSansListByResourceGroupMinimumSetGen(): Promise<void> {
   const credential = new DefaultAzureCredential();
