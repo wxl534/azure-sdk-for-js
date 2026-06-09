@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to operation to add disks(s) to the replication protected item.
  *
  * @summary operation to add disks(s) to the replication protected item.
- * x-ms-original-file: 2025-08-01/ReplicationProtectedItems_AddDisks.json
+ * x-ms-original-file: 2026-02-01/ReplicationProtectedItems_AddDisks.json
  */
 async function addDiskSForProtection(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -24,13 +24,18 @@ async function addDiskSForProtection(): Promise<void> {
       properties: {
         providerSpecificDetails: {
           instanceType: "A2A",
-          vmDisks: [
+          vmManagedDisks: [
             {
-              diskUri: "https://vmstorage.blob.core.windows.net/vhds/datadisk1.vhd",
+              diskId:
+                "/subscriptions/c183865e-6077-46f2-a3b1-deb0f4f4650a/resourcegroups/primaryResource/providers/Microsoft.Compute/disks/datadisk2",
               primaryStagingAzureStorageAccountId:
                 "/subscriptions/c183865e-6077-46f2-a3b1-deb0f4f4650a/resourcegroups/primaryResource/providers/Microsoft.Storage/storageAccounts/vmcachestorage",
-              recoveryAzureStorageAccountId:
-                "/subscriptions/c183865e-6077-46f2-a3b1-deb0f4f4650a/resourcegroups/recoveryResource/providers/Microsoft.Storage/storageAccounts/recoverystorage",
+              recoveryResourceGroupId:
+                "/subscriptions/c183865e-6077-46f2-a3b1-deb0f4f4650a/resourcegroups/recoveryResource",
+              recoveryNetworkAccessPolicy: "AllowPrivate",
+              recoveryDiskAccessId:
+                "/subscriptions/c183865e-6077-46f2-a3b1-deb0f4f4650a/resourcegroups/recoveryResource/providers/Microsoft.Compute/diskAccesses/recoveryDiskAccess",
+              recoveryPublicNetworkAccess: "Disabled",
             },
           ],
         },

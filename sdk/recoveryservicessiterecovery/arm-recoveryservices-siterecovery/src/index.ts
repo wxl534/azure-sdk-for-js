@@ -37,6 +37,8 @@ export type {
   A2AUnprotectedDiskDetails,
   AutoProtectionOfDataDisk,
   A2AProtectedManagedDiskDetails,
+  DiskNetworkAccessPolicy,
+  DiskPublicNetworkAccess,
   VMNicDetails,
   IPConfigDetails,
   AzureToAzureVmSyncedConfigDetails,
@@ -680,6 +682,8 @@ export {
   KnownExtendedLocationType,
   KnownMultiVmGroupCreateOption,
   KnownAutoProtectionOfDataDisk,
+  KnownDiskNetworkAccessPolicy,
+  KnownDiskPublicNetworkAccess,
   KnownVmEncryptionType,
   KnownChurnOptionSelected,
   KnownLinuxLicenseType,
@@ -975,3 +979,4 @@ export type {
 export type { PageSettings, ContinuablePage, PagedAsyncIterableIterator };
 export { AzureClouds };
 export type { AzureSupportedClouds };
+export { RestError, isRestError } from "@azure/core-rest-pipeline";

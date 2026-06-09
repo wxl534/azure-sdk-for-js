@@ -1,8 +1,8 @@
 {
   "apiVersions": {
-    "Microsoft.RecoveryServices": "2025-08-01"
+    "Microsoft.RecoveryServices": "2026-02-01"
   },
-  "emitterVersion": "0.52.3",
+  "emitterVersion": "0.54.0-alpha.20260608.1",
   "crossLanguageDefinitions": {
     "CrossLanguagePackageId": "Microsoft.RecoveryServices",
     "CrossLanguageDefinitionId": {
@@ -578,6 +578,8 @@
       "@azure/arm-recoveryservices-siterecovery!KnownExtendedLocationType:enum": "Microsoft.RecoveryServices.ExtendedLocationType",
       "@azure/arm-recoveryservices-siterecovery!KnownMultiVmGroupCreateOption:enum": "Microsoft.RecoveryServices.MultiVmGroupCreateOption",
       "@azure/arm-recoveryservices-siterecovery!KnownAutoProtectionOfDataDisk:enum": "Microsoft.RecoveryServices.AutoProtectionOfDataDisk",
+      "@azure/arm-recoveryservices-siterecovery!KnownDiskNetworkAccessPolicy:enum": "Microsoft.RecoveryServices.DiskNetworkAccessPolicy",
+      "@azure/arm-recoveryservices-siterecovery!KnownDiskPublicNetworkAccess:enum": "Microsoft.RecoveryServices.DiskPublicNetworkAccess",
       "@azure/arm-recoveryservices-siterecovery!KnownVmEncryptionType:enum": "Microsoft.RecoveryServices.VmEncryptionType",
       "@azure/arm-recoveryservices-siterecovery!KnownChurnOptionSelected:enum": "Microsoft.RecoveryServices.ChurnOptionSelected",
       "@azure/arm-recoveryservices-siterecovery!KnownLinuxLicenseType:enum": "Microsoft.RecoveryServices.LinuxLicenseType",
