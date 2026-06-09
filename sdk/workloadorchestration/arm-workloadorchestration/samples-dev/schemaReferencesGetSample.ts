@@ -8,18 +8,17 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get a Schema Reference Resource
  *
  * @summary get a Schema Reference Resource
- * x-ms-original-file: 2025-06-01/SchemaReferences_Get_MaximumSet_Gen.json
+ * x-ms-original-file: 2025-08-01/SchemaReferences_Get_MaximumSet_Gen.json
  */
-async function schemaReferencesGetMaximumSet(): Promise<void> {
+async function schemaReferencesGetMaximumSetGeneratedByMaximumSetRule(): Promise<void> {
   const credential = new DefaultAzureCredential();
-  const subscriptionId = "00000000-0000-0000-0000-00000000000";
-  const client = new WorkloadOrchestrationManagementClient(credential, subscriptionId);
-  const result = await client.schemaReferences.get("jdvtghygpz", "testname");
+  const client = new WorkloadOrchestrationManagementClient(credential);
+  const result = await client.schemaReferences.get("gt", "default");
   console.log(result);
 }
 
 async function main(): Promise<void> {
-  await schemaReferencesGetMaximumSet();
+  await schemaReferencesGetMaximumSetGeneratedByMaximumSetRule();
 }
 
 main().catch(console.error);

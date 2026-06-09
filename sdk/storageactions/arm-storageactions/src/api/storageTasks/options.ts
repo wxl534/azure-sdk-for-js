@@ -7,6 +7,12 @@ import { OperationOptions } from "@azure-rest/core-client";
 export interface StorageTasksPreviewActionsOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
+export interface StorageTasksStopAllAssignmentsOptionalParams extends OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+}
+
+/** Optional parameters. */
 export interface StorageTasksListBySubscriptionOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */

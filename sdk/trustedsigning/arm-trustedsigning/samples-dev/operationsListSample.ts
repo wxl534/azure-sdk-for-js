@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { CodeSigningClient } from "@azure/arm-trustedsigning";
+import { CodeSigningClient } from "@azure/arm-artifactsigning";
 import { DefaultAzureCredential } from "@azure/identity";
 
 /**
  * This sample demonstrates how to list the operations for the provider
  *
  * @summary list the operations for the provider
- * x-ms-original-file: 2025-10-13/Operations_List.json
+ * x-ms-original-file: 2026-05-15-preview/Operations_List.json
  */
-async function listTrustedSigningAccountOperations(): Promise<void> {
+async function listArtifactSigningAccountOperations(): Promise<void> {
   const credential = new DefaultAzureCredential();
-  const subscriptionId = "00000000-0000-0000-0000-00000000000";
+  const subscriptionId = "00000000-0000-0000-0000-000000000000";
   const client = new CodeSigningClient(credential, subscriptionId);
   const resArray = new Array();
   for await (const item of client.operations.list()) {
@@ -23,7 +23,7 @@ async function listTrustedSigningAccountOperations(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  await listTrustedSigningAccountOperations();
+  await listArtifactSigningAccountOperations();
 }
 
 main().catch(console.error);
